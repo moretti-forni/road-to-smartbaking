@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 export default function Redirect() {
   const navigate = useNavigate();
   useEffect(() => {
@@ -7,9 +7,9 @@ export default function Redirect() {
   }, [navigate]);
   return (
     <main className="error-page">
-      <a className="button primary" href="/it">
+      <Link className="button primary" to="/it">
         #RoadToSmartBaking →
-      </a>
+      </Link>
     </main>
   );
 }

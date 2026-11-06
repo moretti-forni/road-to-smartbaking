@@ -1,6 +1,7 @@
 import { reactRouter } from '@react-router/dev/vite';
 import { defineConfig } from 'vite';
 export default defineConfig({
+  base: process.env.VITE_BASE_PATH ?? '/',
   plugins: [reactRouter()],
   server: { watch: { ignored: ['**/ios/**', '**/android/**'] } },
   resolve: { dedupe: ['react', 'react-dom'] },
