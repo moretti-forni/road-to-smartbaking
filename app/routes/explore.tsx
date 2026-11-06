@@ -29,7 +29,8 @@ export function meta() {
     { title: 'Esplora · RoadToSmartBaking' },
     {
       name: 'description',
-      content: 'Luoghi, persone e cultura della cottura. Scopri il mondo RoadToSmartBaking.',
+      content:
+        'Professionisti, luoghi e prodotti lievitati. Scopri la cottura perfetta con Moretti Forni.',
     },
   ];
 }

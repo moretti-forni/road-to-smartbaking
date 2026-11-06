@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation, useParams } from 'react-router';
 import { ArrowUpRight, Heart, MapPinned, Menu, Newspaper, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useSaved } from './providers';
+import { ListingRequestButton } from './listing-request';
 
 export function Brand({ footer = false }: { footer?: boolean }) {
   return (
@@ -44,6 +45,7 @@ export function Header() {
               {t('saved')}
               {ids.length > 0 && <span className="saved-count">{ids.length}</span>}
             </NavLink>
+            <ListingRequestButton />
           </nav>
           <div className="header-tools">
             <span className="powered">
@@ -82,9 +84,12 @@ export function Footer() {
           <p>{t('footerSmall')}</p>
         </div>
         <p className="footer-message">{t('footer')}</p>
-        <a href="https://morettiforni.com" target="_blank" rel="noreferrer">
-          Moretti Forni <ArrowUpRight size={17} />
-        </a>
+        <div className="footer-actions">
+          <ListingRequestButton variant="footer" />
+          <a href="https://morettiforni.com" target="_blank" rel="noreferrer">
+            Moretti Forni <ArrowUpRight size={17} />
+          </a>
+        </div>
       </div>
       <div className="container footer-bottom">
         <span>

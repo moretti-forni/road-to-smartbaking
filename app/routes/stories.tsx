@@ -10,7 +10,8 @@ export function meta() {
     { title: 'Storie · RoadToSmartBaking' },
     {
       name: 'description',
-      content: 'Persone, luoghi e passione. Le storie del journal Moretti Forni.',
+      content:
+        'Professionisti, prodotti lievitati e cottura perfetta. Le storie dal mondo Moretti Forni.',
     },
   ];
 }
