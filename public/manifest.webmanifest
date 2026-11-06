@@ -1,0 +1,17 @@
+{
+  "id": "/",
+  "name": "RoadToSmartBaking",
+  "short_name": "SmartBaking",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#F7F4EE",
+  "theme_color": "#F7F4EE",
+  "icons": [
+    {
+      "src": "/moretti-symbol.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

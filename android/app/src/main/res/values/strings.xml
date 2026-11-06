@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">RoadToSmartBaking</string>
+    <string name="title_activity_main">RoadToSmartBaking</string>
+    <string name="package_name">com.morettiforni.roadtosmartbaking</string>
+    <string name="custom_url_scheme">com.morettiforni.roadtosmartbaking</string>
+</resources>

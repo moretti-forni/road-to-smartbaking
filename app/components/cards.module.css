@@ -1,0 +1,347 @@
+.card {
+  position: relative;
+  border: 1px solid #4a4942;
+  border-radius: 16px;
+  background: #292927;
+  color: #f8f4eb;
+  overflow: hidden;
+  box-shadow: 0 12px 30px rgba(32, 32, 30, 0.1);
+  transition:
+    transform 0.22s,
+    border-color 0.22s;
+  min-width: 0;
+}
+.cardLink {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+}
+.cardLink:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: -3px;
+}
+.card:hover {
+  transform: translateY(-4px);
+  border-color: #8b877d;
+}
+.selected {
+  border-color: var(--red);
+}
+.imageWrap {
+  position: relative;
+  aspect-ratio: 1.22;
+  overflow: hidden;
+  background: #e6e0d7;
+}
+.imageWrap img,
+.storyImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.5s;
+}
+.card:hover .imageWrap img,
+.story:hover img {
+  transform: scale(1.035);
+}
+.imageTag {
+  position: absolute;
+  left: 16px;
+  bottom: 14px;
+  padding: 5px 9px;
+  color: white;
+  background: rgba(32, 32, 30, 0.8);
+  border-radius: 4px;
+  font-size: 10px;
+  letter-spacing: 0.07em;
+  text-transform: none;
+}
+.body {
+  position: relative;
+  min-height: 156px;
+  padding: 21px 22px 18px;
+}
+.metadata {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 11px;
+  color: #bcb7ad;
+  margin: 0 0 11px;
+}
+.metadata > span:first-child {
+  color: var(--red);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+}
+.metadata > span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.body h3 {
+  font-family: var(--display);
+  max-width: calc(100% - 118px);
+  font-size: 28px;
+  margin: 0;
+  font-weight: 400;
+}
+.location {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  max-width: calc(100% - 145px);
+  margin-top: 13px;
+  padding: 0;
+  color: #d5d0c7;
+  background: transparent;
+  font-size: 12px;
+}
+.locationDetails {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+.locationText {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.distance {
+  color: #aaa59b;
+  font-size: 11px;
+  line-height: 1;
+}
+.location > svg {
+  flex: 0 0 auto;
+  color: var(--red);
+}
+.ovenModels {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  bottom: auto;
+  margin: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 5px;
+  max-width: 65%;
+  min-width: 0;
+  flex-wrap: wrap;
+  transform: translateY(-50%);
+}
+.ovenModel,
+.ovenFallback {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 90px;
+  height: 90px;
+  background: #363530;
+}
+.ovenModel {
+  border-color: transparent;
+  align-self: flex-end;
+  width: 100px;
+  height: 42px;
+  min-height: 42px;
+  place-items: end center;
+  overflow: visible;
+  background: transparent;
+  box-shadow: none;
+}
+.ovenDetail {
+  display: none;
+}
+.ovenLogo {
+  display: block;
+  width: 100px;
+  height: 42px;
+  object-fit: contain;
+}
+.ovenFallback {
+  align-self: flex-end;
+  height: 100px;
+  min-height: 100px;
+  padding: 10px;
+  overflow: hidden;
+  color: #3b3934;
+  background: transparent;
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.3;
+  text-align: center;
+}
+.story {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #4a4942;
+  border-radius: 16px;
+  background: #292927;
+  color: #f8f4eb;
+  box-shadow: 0 12px 30px rgba(32, 32, 30, 0.1);
+  transition:
+    transform 0.22s,
+    border-color 0.22s;
+}
+.story:hover {
+  transform: translateY(-4px);
+  border-color: #8b877d;
+}
+.storyImage {
+  display: block;
+  position: relative;
+  aspect-ratio: 1.55;
+  overflow: hidden;
+  border-radius: 0;
+  margin-bottom: 0;
+}
+.storyBody {
+  min-width: 0;
+  padding: 20px 22px 23px;
+}
+.storyArrow {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  background: var(--white);
+  border-radius: 50%;
+  color: var(--red);
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+}
+.story h3 {
+  font-family: var(--display);
+  font-size: 27px;
+  line-height: 1.23;
+  font-weight: 400;
+  margin: 12px 0;
+}
+.story h3 a:hover {
+  color: var(--red);
+}
+.story .metadata {
+  color: #bcb7ad;
+}
+.story p {
+  font-size: 13px;
+  line-height: 1.75;
+  color: #c3beb4;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.story .metadata {
+  font-size: 10px;
+}
+@media (max-width: 760px) {
+  .ovenModels {
+    top: 50%;
+    bottom: auto;
+    transform: translateY(-50%);
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: flex-end;
+  }
+  .ovenDetail {
+    display: none;
+  }
+  .ovenLogo {
+    display: block;
+    width: 82px;
+    height: 34px;
+    object-fit: contain;
+  }
+  .ovenModel {
+    width: 82px;
+    height: 34px;
+    min-height: 34px;
+  }
+  .story {
+    display: grid;
+    grid-template-columns: 126px minmax(0, 1fr);
+    min-height: 132px;
+    border-radius: 12px;
+  }
+  .storyImage {
+    grid-column: 1;
+    grid-row: 1;
+    min-height: 132px;
+    aspect-ratio: auto;
+  }
+  .storyImage img {
+    object-position: center;
+  }
+  .storyArrow {
+    display: none;
+  }
+  .storyBody {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+    padding: 16px 48px 16px 16px;
+  }
+  .story .metadata {
+    justify-content: flex-start;
+    gap: 8px;
+    margin-bottom: 7px;
+    font-size: 10px;
+  }
+  .story h3 {
+    display: -webkit-box;
+    margin: 0;
+    overflow: hidden;
+    font-size: 21px;
+    line-height: 1.08;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  .story p {
+    display: none;
+  }
+  .story > :global(.save-button) {
+    top: 8px;
+    right: 8px;
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+  }
+  .location,
+  .discover {
+    font-size: 14px;
+  }
+  .metadata,
+  .story .metadata {
+    font-size: 12px;
+  }
+  .story p {
+    font-size: 14px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .imageWrap img,
+  .storyImage img {
+    transition: none;
+  }
+  .card:hover,
+  .card:hover .imageWrap img,
+  .story:hover img {
+    transform: none;
+  }
+}

@@ -1,0 +1,303 @@
+{
+  "FICO": {
+    "lat": 1.3105013,
+    "lng": 103.9462366,
+    "displayName": "1300, East Coast Parkway, Bayshore, Bedok South, Bedok, East Region, Singapore, 468964, Singapore",
+    "query": "1300 East Coast Parkway, Singapore 468964",
+    "precision": "address"
+  },
+  "Sorellina": {
+    "lat": 39.9667237,
+    "lng": -75.1600903,
+    "displayName": "Divine Lorraine Hotel, 699, North Broad Street, North Philadelphia, Philadelphia, Philadelphia County, Pennsylvania, 19122, United States",
+    "query": "699 N Broad St, Philadelphia, PA 19123, United States",
+    "precision": "address"
+  },
+  "Vinarte": {
+    "lat": 40.3631001,
+    "lng": 15.0002008,
+    "displayName": "Via San Marco, Agropoli, Salerno, Campania, 84043, Italia",
+    "query": "Lungomare San Marco 96, 84043 Agropoli SA, Italy",
+    "precision": "address"
+  },
+  "90 Seconds": {
+    "lat": 22.5431,
+    "lng": 114.0579,
+    "displayName": "Shenzhen, Guangdong, China",
+    "query": "90 Seconds, Shenzhen",
+    "precision": "place-fallback"
+  },
+  "'A Puteca": {
+    "lat": 43.7706433,
+    "lng": 11.2719903,
+    "displayName": "Ostria A' Puteca, Via Vincenzo Gioberti, Bellariva, Quartiere 2, Firenze, Toscana, 50132, Italia",
+    "query": "'A Puteca, Firenze",
+    "precision": "place"
+  },
+  "Brunda": {
+    "lat": 40.6398528,
+    "lng": 17.9432,
+    "displayName": "Pizzeria Brunda, 8, Piazza Dante, Centro, Brindisi, Puglia, 72100, Italia",
+    "query": "Piazza Dante 8, 72100 Brindisi BR, Italy",
+    "precision": "address"
+  },
+  "CapVin": {
+    "lat": 52.3676,
+    "lng": 4.9041,
+    "displayName": "Amsterdam, Netherlands",
+    "query": "CapVin, Amsterdam",
+    "precision": "place-fallback"
+  },
+  "Carlo Fiamma": {
+    "lat": 40.634,
+    "lng": 14.6027,
+    "displayName": "Amalfi, Campania, Italy",
+    "query": "Carlo Fiamma, Amalfi",
+    "precision": "place-fallback"
+  },
+  "Pizzeria Cavalese": {
+    "lat": -6.1452232,
+    "lng": 106.876873,
+    "displayName": "pizzeria cavalese, Jalan Danau Sunter Selatan, RW 16, Sunter Agung, Tanjung Priok, Jakarta Utara, Daerah Khusus Ibukota Jakarta, 14350, Indonesia",
+    "query": "Pizzeria Cavalese, Jakarta",
+    "precision": "place"
+  },
+  "Desdott": {
+    "lat": 45.4595891,
+    "lng": 9.181337,
+    "displayName": "Berberè, 1, Corso di Porta Ticinese, Duomo, Cerchia dei Navigli, Municipio 1, Milano, Rodano, Milano, Lombardia, 20123, Italia",
+    "query": "Corso di Porta Ticinese 1, 20123 Milano MI, Italy",
+    "precision": "address"
+  },
+  "Elysium": {
+    "lat": 41.8953167,
+    "lng": 12.4750734,
+    "displayName": "Via del Monte della Farina, Sant'Eustachio, Municipio Roma I, Roma, Roma Capitale, Lazio, 00186, Italia",
+    "query": "Via del Monte della Farina 23, 00186 Roma RM, Italy",
+    "precision": "address"
+  },
+  "Mamma Pizza": {
+    "lat": 28.1481507,
+    "lng": -15.4306564,
+    "displayName": "2, Calle Ferreras, Puerto, Santa Catalina-Canteras, Las Palmas de Gran Canaria, Las Palmas, Canarias, 35009, España",
+    "query": "Calle Ferreras 2, 35008 Las Palmas de Gran Canaria, Spain",
+    "precision": "address"
+  },
+  "Pizza dei Signori": {
+    "lat": 45.5480413,
+    "lng": 11.5463961,
+    "displayName": "Contra' delle Morette, Barche, Centro storico, Vicenza, Veneto, 36100, Italia",
+    "query": "Contrà delle Morette 5a, Vicenza VI, Italy",
+    "precision": "address"
+  },
+  "nNea Pizza": {
+    "lat": 52.3694421,
+    "lng": 4.8703926,
+    "displayName": "nNea Pizza, 92, Bilderdijkstraat, Kinkerstraat, Oud-West, West, Amsterdam, Noord-Holland, Nederland, 1053 KX, Nederland",
+    "query": "nNea Pizza, Amsterdam",
+    "precision": "place"
+  },
+  "Paglià": {
+    "lat": 42.8422,
+    "lng": 13.7396,
+    "displayName": "Pagliare del Tronto, Marche, Italy",
+    "query": "Paglià, Pagliare del Tronto",
+    "precision": "place-fallback"
+  },
+  "Sileo": {
+    "lat": 44.3409761,
+    "lng": 8.0603641,
+    "displayName": "Pizzeria Sileo, SS28, Nucetto, Cuneo, Piemonte, 12071, Italia",
+    "query": "Sileo, Nucetto",
+    "precision": "place"
+  },
+  "The Italian Cousins": {
+    "lat": 59.3415477,
+    "lng": 18.0449762,
+    "displayName": "78, Odengatan, Atlasområdet, Vasastaden, Norra innerstadens stadsdelsområde, Stockholm, Stockholms kommun, Stockholms län, 113 22, Sverige",
+    "query": "Odengatan 78, 113 22 Stockholm, Sweden",
+    "precision": "address"
+  },
+  "Triticum": {
+    "lat": 46.0110211,
+    "lng": 8.9543209,
+    "displayName": "27, Viale Stefano Franscini, Molino Nuovo, Lugano, Circolo di Lugano ovest, Distretto di Lugano, Ticino, 6900, Schweiz / Suisse / Svizzera / Svizra",
+    "query": "Viale Stefano Franscini 27, 6900 Lugano, Switzerland",
+    "precision": "address"
+  },
+  "Valerio Barralis Patisserie": {
+    "lat": 45.4661336,
+    "lng": 8.8636293,
+    "displayName": "Corso Europa, Ponte Vecchio, Magenta, Milano, Lombardia, 20013, Italia",
+    "query": "Corso Europa 78/80, 20013 Magenta MI, Italy",
+    "precision": "address"
+  },
+  "Café Grensen": {
+    "lat": 59.9135826,
+    "lng": 10.7435747,
+    "displayName": "Grensen 8, Tullin, Kvadraturen, Sentrum, Oslo, 0159, Norge",
+    "query": "Grensen 8, 0159 Oslo, Norway",
+    "precision": "address"
+  },
+  "Campana": {
+    "lat": 39.5964,
+    "lng": 16.5189,
+    "displayName": "Corigliano Calabro, Calabria, Italy",
+    "query": "Campana, Corigliano Calabro",
+    "precision": "place-fallback"
+  },
+  "Casa Tobago": {
+    "lat": 45.4479309,
+    "lng": 9.2103969,
+    "displayName": "Viale Umbria, Porta Romana, Municipio 4, Milano, Rodano, Milano, Lombardia, 20135, Italia",
+    "query": "Viale Umbria 120, 20135 Milano MI, Italy",
+    "precision": "address"
+  },
+  "Cheesefarm": {
+    "lat": 41.6935166,
+    "lng": 44.8015352,
+    "displayName": "თავისუფლების მოედანი, მთაწმინდა, სოლოლაკი, მთაწმინდის რაიონი, თბილისი, საქართველო",
+    "query": "7 Liberty Square, Tbilisi, Georgia",
+    "precision": "address"
+  },
+  "Impasto": {
+    "lat": 40.6868608,
+    "lng": -73.9664537,
+    "displayName": "Impasto, 373, Waverly Avenue, Clinton Hill, Brooklyn, Kings County, New York, 11238, United States",
+    "query": "373 Waverly Ave, Brooklyn, NY 11238, United States",
+    "precision": "address"
+  },
+  "Maiori Pizzeria": {
+    "lat": -26.4836,
+    "lng": 153.0707,
+    "displayName": "Peregian Springs, Queensland, Australia",
+    "query": "Maiori Pizzeria, Australia's Sunshine Coast",
+    "precision": "place-fallback"
+  },
+  "Ultra Milano": {
+    "lat": 45.4542958,
+    "lng": 9.2063109,
+    "displayName": "Via Pier Lombardo, Porta Romana, Municipio 4, Milano, Rodano, Milano, Lombardia, 20135, Italia",
+    "query": "Via Pier Lombardo 1, 20135 Milano MI, Italy",
+    "precision": "address"
+  },
+  "Zia": {
+    "lat": 41.8868681,
+    "lng": 12.4682418,
+    "displayName": "Zia Restaurant, 45, Via Goffredo Mameli, Trastevere, Municipio Roma I, Roma, Roma Capitale, Lazio, 00153, Italia",
+    "query": "Via Goffredo Mameli 45, 00153 Roma RM, Italy",
+    "precision": "address"
+  },
+  "22K Pizza": {
+    "lat": 48.3131518,
+    "lng": 14.2991375,
+    "displayName": "Haus Falk, 3, Peter-Behrens-Platz, Tabakfabrik, Lustenau, Kaplanhof, Linz, Oberösterreich, 4020, Österreich",
+    "query": "Peter-Behrens-Platz 3, 4020 Linz, Austria",
+    "precision": "address"
+  },
+  "Bedin": {
+    "lat": 44.4052438,
+    "lng": 8.9356529,
+    "displayName": "Piazza Dante, Sant'Andrea, Portoria, Centro Est, Genova, Liguria, 16128, Italia",
+    "query": "Piazza Dante, Genova GE, Italy",
+    "precision": "address"
+  },
+  "Azzurra": {
+    "lat": 36.724,
+    "lng": 27.685,
+    "displayName": "Eski Datça, Muğla, Türkiye",
+    "query": "Azzurra, Eski Datça",
+    "precision": "place-fallback"
+  },
+  "Bella Napoli Pizzeria": {
+    "lat": 56.9536382,
+    "lng": 24.1214278,
+    "displayName": "14, Tērbatas iela, Centrs, Centra apkaime, Rīga, LV-1011, Latvija",
+    "query": "Tērbatas iela 14, Riga, Latvia",
+    "precision": "address"
+  },
+  "Bianca Sicilian Trattoria": {
+    "lat": 34.0415776,
+    "lng": -118.2360657,
+    "displayName": "1200, East 5th Street, Arts District, Downtown, Los Angeles, Los Angeles County, California, 90013, United States",
+    "query": "1200 E 5th St, Los Angeles, CA 90013, United States",
+    "precision": "address"
+  },
+  "Casa Cinquanta": {
+    "lat": 41.9123227,
+    "lng": 12.4986734,
+    "displayName": "Via Velletri, Salario, Municipio Roma II, Roma, Roma Capitale, Lazio, 00198, Italia",
+    "query": "Via Velletri 22, 00198 Roma RM, Italy",
+    "precision": "address"
+  },
+  "DeRoma": {
+    "lat": 41.9025169,
+    "lng": 12.4826544,
+    "displayName": "DEROMA, 27, Via Poli, Trevi, Municipio Roma I, Roma, Roma Capitale, Lazio, 00187, Italia",
+    "query": "Via Poli 27",
+    "precision": "address"
+  },
+  "Glory Pop": {
+    "lat": 45.4703772,
+    "lng": 9.1511393,
+    "displayName": "14, Via Correggio, La Maddalena, De Angeli - Monte Rosa, Municipio 7, Milano, Lombardia, 20149, Italia",
+    "query": "Via Correggio 14",
+    "precision": "address"
+  },
+  "Imperfetto": {
+    "lat": 48.8791955,
+    "lng": 2.2414931,
+    "displayName": "Imperfetto, 14, Boulevard Richard Wallace, Esplanade Sud, Puteaux, Nanterre, Hauts-de-Seine, Île-de-France, France métropolitaine, 92800, France",
+    "query": "14 Boulevard Richard Wallace, 92800 Puteaux, France",
+    "precision": "address"
+  },
+  "L'Industrie Pizzeria": {
+    "lat": 40.7116097,
+    "lng": -73.9578261,
+    "displayName": "254, South 2nd Street, Williamsburg, Brooklyn, Kings County, New York, 11211, United States",
+    "query": "254 S 2nd St, Brooklyn, NY 11211, United States",
+    "precision": "address"
+  },
+  "Panificio San Giuseppe": {
+    "lat": 37.5653836,
+    "lng": 15.0037617,
+    "displayName": "44, Via Armando Diaz, Villaggio Sant'Antonio, Camporotondo Etneo, Catania, Sicilia, 95058, Italia",
+    "query": "Via Armando Diaz 44, 95123 Catania CT, Italy",
+    "precision": "address"
+  },
+  "Romanaccia": {
+    "lat": 34.0988977,
+    "lng": -118.3294161,
+    "displayName": "1550, North Cahuenga Boulevard, Hollywood, Los Angeles, Los Angeles County, California, 90028, United States",
+    "query": "1550 N Cahuenga Blvd, Hollywood, CA 90028, United States",
+    "precision": "address"
+  },
+  "Saccharum": {
+    "lat": 38.0436082,
+    "lng": 13.557654,
+    "displayName": "Via Marina della Bruca 1, Sperone, Altavilla Milicia, Palermo, Sicilia, 90010, Italia",
+    "query": "Via Marina della Bruca 1, 90010 Altavilla Milicia PA, Italy",
+    "precision": "address"
+  },
+  "Salentu": {
+    "lat": 50.138178,
+    "lng": 8.446809,
+    "displayName": "32, Altkönigstraße, Neue Stadtmitte, Kelkheim-Mitte, Kelkheim (Taunus), Main-Taunus-Kreis, Hessen, 65779, Deutschland",
+    "query": "Altkönigstraße 32, 65779 Kelkheim (Taunus), Germany",
+    "precision": "address"
+  },
+  "Trizza Pizza": {
+    "lat": 45.2397423,
+    "lng": 19.8379034,
+    "displayName": "21b, Народног фронта, МЗ Лиман 3, Лиман, Нови Сад, Град Нови Сад, Јужнобачки управни округ, Војводина, 21102, Србија",
+    "query": "Narodnog Fronta 21B, Novi Sad, Serbia",
+    "precision": "address"
+  },
+  "Zio Rigo": {
+    "lat": 54.7006092,
+    "lng": 25.2724424,
+    "displayName": "1, Šatrijos g., Šnipiškės, Šnipiškių seniūnija, Vilnius, Vilniaus miesto savivaldybė, Vilniaus apskritis, 09306, Lietuva",
+    "query": "Šatrijos g. 1, LT-09300 Vilnius, Lithuania",
+    "precision": "address"
+  }
+}

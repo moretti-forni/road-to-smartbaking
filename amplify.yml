@@ -1,0 +1,21 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - nvm install 22
+        - nvm use 22
+        - npm ci --include=dev
+    build:
+      commands:
+        - npm run lint
+        - npm run typecheck
+        - npm run test
+        - npm run build
+  artifacts:
+    baseDirectory: build/client
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - .npm/**/*

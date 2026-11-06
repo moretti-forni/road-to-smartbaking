@@ -1,0 +1,69 @@
+{
+  "name": "road-to-smart-baking-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "content:index": "node scripts/sync-story-index.mjs",
+    "prebuild": "npm run content:index",
+    "postbuild": "node scripts/check-static.mjs",
+    "dev": "react-router dev --host 127.0.0.1 --port 5173",
+    "build": "react-router build",
+    "preview": "vite preview --host 127.0.0.1 --port 4173 --outDir build/client",
+    "lint": "eslint .",
+    "typecheck": "react-router typegen && tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "format": "prettier --write app tests scripts *.ts *.json *.js",
+    "format:check": "prettier --check app tests scripts *.ts *.json *.js",
+    "mobile:sync": "npm run build && cap sync",
+    "mobile:ios": "npm run mobile:sync && cap run ios",
+    "mobile:android": "npm run mobile:sync && cap run android",
+    "capacitor:copy:after": "node scripts/prepare-native-entry.mjs"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.6.0",
+    "@capacitor/core": "^8.6.0",
+    "@capacitor/ios": "^8.6.0",
+    "@react-router/node": "^7.18.5",
+    "@tanstack/react-query": "^5.90.0",
+    "axios": "^1.13.0",
+    "i18next": "^25.6.0",
+    "isbot": "^5",
+    "leaflet": "^1.9.4",
+    "lucide-react": "^0.468.0",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "react-i18next": "^16.3.0",
+    "react-leaflet": "^5.0.0",
+    "react-router": "7.18.5",
+    "zod": "^4.1.0"
+  },
+  "overrides": {
+    "minimatch": "^11.0.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.6.0",
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.56.0",
+    "@react-router/dev": "7.18.5",
+    "@testing-library/jest-dom": "^6.9.0",
+    "@testing-library/react": "^16.3.0",
+    "@types/leaflet": "^1.9.20",
+    "@types/node": "^22.19.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "eslint": "^10.14.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^16.5.0",
+    "jsdom": "^26.1.0",
+    "prettier": "^3.6.0",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.72.1",
+    "vite": "^6.4.5",
+    "vitest": "^4.1.12"
+  }
+}

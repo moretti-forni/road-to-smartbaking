@@ -1,0 +1,8 @@
+build
+.react-router
+node_modules
+assets
+public
+app/data/stories.snapshot.json
+ios/
+android/
