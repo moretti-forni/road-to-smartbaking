@@ -321,6 +321,23 @@ hr {
   text-align: center;
   border-radius: 50%;
 }
+.listing-request-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 12px;
+  border: 1px solid #716f67;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--white);
+  font-size: 11px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+.listing-request-nav:hover {
+  border-color: var(--red);
+  color: var(--white);
+}
 .header-tools {
   display: flex;
   align-items: center;
@@ -927,12 +944,32 @@ hr {
   color: #aaa69e;
   margin-top: 15px;
 }
-.footer-main > a {
+.footer-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 18px;
+}
+.footer-actions > a {
   display: flex;
   align-items: center;
   gap: 8px;
   font-size: 11px;
   color: #d5d0c7;
+}
+.listing-request-footer {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--white);
+  font-size: 12px;
+  font-weight: 650;
+}
+.listing-request-footer svg {
+  color: var(--red);
 }
 .footer-message {
   font-family: var(--display);
@@ -948,6 +985,137 @@ hr {
   justify-content: space-between;
   font-size: 9px;
   color: #aaa69e;
+}
+.listing-modal-backdrop {
+  position: fixed;
+  z-index: 1200;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 28px;
+  overflow-y: auto;
+  background: #10100fc2;
+  backdrop-filter: blur(6px);
+}
+.listing-modal {
+  position: relative;
+  width: min(100%, 760px);
+  max-height: calc(100dvh - 56px);
+  overflow-y: auto;
+  padding: 45px;
+  border: 1px solid #4a4942;
+  border-radius: 16px;
+  background: var(--graphite);
+  color: var(--white);
+  box-shadow: 0 26px 80px #10100f80;
+}
+.listing-modal-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid #5b5a54;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--white);
+}
+.listing-modal-close:hover {
+  border-color: var(--red);
+  color: var(--red);
+}
+.listing-modal-intro {
+  max-width: 560px;
+  margin-bottom: 34px;
+}
+.listing-modal-intro h2,
+.listing-success h2 {
+  margin-top: 12px;
+  font-size: clamp(34px, 4vw, 48px);
+  line-height: 1.02;
+}
+.listing-modal-intro > p,
+.listing-success > p {
+  margin-top: 16px;
+  color: #c3beb4;
+  font-size: 14px;
+  line-height: 1.75;
+}
+.listing-form {
+  display: grid;
+  gap: 19px;
+}
+.listing-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 19px;
+}
+.listing-form label {
+  display: grid;
+  gap: 8px;
+  color: #e9e3d8;
+  font-size: 11px;
+  font-weight: 650;
+}
+.listing-form input,
+.listing-form select,
+.listing-form textarea {
+  width: 100%;
+  min-height: 46px;
+  padding: 11px 13px;
+  border: 1px solid #5b5a54;
+  border-radius: 5px;
+  background: #30302d;
+  color: var(--white);
+  font-size: 14px;
+  font-weight: 400;
+}
+.listing-form textarea {
+  min-height: 84px;
+  resize: vertical;
+}
+.listing-form input:focus,
+.listing-form select:focus,
+.listing-form textarea:focus {
+  border-color: var(--red);
+}
+.listing-form-footer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  padding-top: 5px;
+}
+.listing-form-footer > p {
+  max-width: 420px;
+  color: #aaa69e;
+  font-size: 11px;
+  line-height: 1.65;
+}
+.listing-form-footer .button {
+  flex: 0 0 auto;
+}
+.listing-success {
+  display: grid;
+  max-width: 470px;
+  min-height: 430px;
+  align-content: center;
+  justify-items: start;
+}
+.listing-success-icon {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  margin-bottom: 25px;
+  border-radius: 50%;
+  background: var(--red);
+  color: var(--white);
+}
+.listing-success .button {
+  margin-top: 28px;
 }
 .stories-intro {
   padding-top: 52px;
@@ -1836,8 +2004,13 @@ hr {
     margin-top: 28px;
     max-width: 310px;
   }
-  .footer-main > a {
+  .footer-actions {
     margin-top: 25px;
+  }
+  .footer-actions > a {
+    font-size: 14px;
+  }
+  .listing-request-footer {
     font-size: 14px;
   }
   .footer-main > div > p {
@@ -2136,6 +2309,40 @@ hr {
   }
   .site-footer {
     padding-bottom: 26px;
+  }
+  .listing-modal-backdrop {
+    align-items: end;
+    padding: 12px;
+  }
+  .listing-modal {
+    max-height: calc(100dvh - 24px);
+    padding: 42px 22px 28px;
+    border-radius: 16px;
+  }
+  .listing-modal-intro {
+    margin-bottom: 27px;
+  }
+  .listing-modal-intro h2,
+  .listing-success h2 {
+    font-size: 35px;
+  }
+  .listing-modal-intro > p,
+  .listing-success > p {
+    font-size: 14px;
+  }
+  .listing-form-grid {
+    grid-template-columns: 1fr;
+    gap: 17px;
+  }
+  .listing-form-footer {
+    display: grid;
+    align-items: stretch;
+  }
+  .listing-form-footer .button {
+    width: 100%;
+  }
+  .listing-success {
+    min-height: 390px;
   }
   .mobile-tab-bar {
     position: fixed;

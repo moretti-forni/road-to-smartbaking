@@ -20,9 +20,15 @@ export function clientLoader({ params, serverLoader }: Route.ClientLoaderArgs) {
   return Capacitor.isNativePlatform() ? loadRestaurant(params) : serverLoader();
 }
 export function meta({ data }: Route.MetaArgs) {
+  const restaurant = data?.restaurant;
+  const description = restaurant
+    ? data.locale === 'en'
+      ? `${restaurant.name} is part of the #RoadToSmartBaking world by Moretti Forni.`
+      : `${restaurant.name} fa parte del mondo #RoadToSmartBaking di Moretti Forni.`
+    : '';
   return [
-    { title: `${data?.restaurant.name ?? 'Locale non trovato'} · RoadToSmartBaking` },
-    { name: 'description', content: data?.restaurant.description[data.locale] ?? '' },
+    { title: `${restaurant?.name ?? 'Locale non trovato'} · RoadToSmartBaking` },
+    { name: 'description', content: description },
   ];
 }
 export default function RestaurantDetail({ loaderData }: Route.ComponentProps) {
@@ -104,7 +110,7 @@ export default function RestaurantDetail({ loaderData }: Route.ComponentProps) {
         <div className="venue-story">
           <span className="eyebrow">{t('original')}</span>
           <h2>{t('restaurantAbout')}</h2>
-          <p>{restaurant.description[locale].replace('RoadToSmartBaking', '#RoadToSmartBaking')}</p>
+          <p>{t('restaurantJourney', { name: restaurant.name, city: restaurant.city })}</p>
           <div className="oven-panel">
             <div className="oven-panel-copy">
               <Flame size={28} />
