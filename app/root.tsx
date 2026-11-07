@@ -10,6 +10,7 @@ import {
 } from 'react-router';
 import type { ReactNode } from 'react';
 import './styles/global.css';
+import { publicPath } from './utils/public-path';
 
 export function Layout({ children }: { children: ReactNode }) {
   const location = useLocation();
@@ -21,8 +22,8 @@ export function Layout({ children }: { children: ReactNode }) {
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta name="theme-color" content="#20201E" />
         <meta name="robots" content="noindex,nofollow" />
-        <link rel="icon" href="/moretti-symbol.svg" type="image/svg+xml" />
-        <link rel="manifest" href="/manifest.webmanifest" />
+        <link rel="icon" href={publicPath('/moretti-symbol.svg')} type="image/svg+xml" />
+        <link rel="manifest" href={publicPath('/manifest.webmanifest')} />
         <Meta />
         <Links />
       </head>
@@ -49,7 +50,7 @@ export function ErrorBoundary() {
         <em>nuova scoperta.</em>
       </h1>
       <p>Questa pagina non è disponibile. / This page is not available.</p>
-      <a className="button primary" href="/it">
+      <a className="button primary" href={publicPath('/it')}>
         Esplora / Explore →
       </a>
     </main>

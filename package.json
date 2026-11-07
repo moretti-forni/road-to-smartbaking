@@ -12,6 +12,7 @@
     "postbuild": "node scripts/check-static.mjs",
     "dev": "react-router dev --host 127.0.0.1 --port 5173",
     "build": "react-router build",
+    "pages:prepare": "node scripts/prepare-pages.mjs",
     "preview": "vite preview --host 127.0.0.1 --port 4173 --outDir build/client",
     "lint": "eslint .",
     "typecheck": "react-router typegen && tsc --noEmit",

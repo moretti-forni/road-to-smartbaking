@@ -3,11 +3,13 @@ import { readFile } from 'node:fs/promises';
 const snapshot = JSON.parse(
   await readFile(new URL('../app/data/stories.snapshot.json', import.meta.url), 'utf8'),
 );
+const basePath = process.env.VITE_BASE_PATH?.replace(/^\/+|\/+$/g, '');
+const buildPrefix = basePath ? `${basePath}/` : '';
 let checked = 0;
 for (const locale of ['it', 'en']) {
   for (const story of snapshot.stories) {
     const path = new URL(
-      `../build/client/${locale}/stories/${story.slug}/index.html`,
+      `../build/client/${buildPrefix}${locale}/stories/${story.slug}/index.html`,
       import.meta.url,
     );
     const html = await readFile(path, 'utf8');

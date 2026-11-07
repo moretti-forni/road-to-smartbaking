@@ -4,11 +4,12 @@ import { ArrowUpRight, Heart, MapPinned, Menu, Newspaper, X } from 'lucide-react
 import { useTranslation } from 'react-i18next';
 import { useSaved } from './providers';
 import { ListingRequestButton } from './listing-request';
+import { publicPath } from '../utils/public-path';
 
 export function Brand({ footer = false }: { footer?: boolean }) {
   return (
     <span className={`brand ${footer ? 'brand-footer' : ''}`}>
-      <img src="/moretti-symbol.svg" alt="" width="34" height="34" />
+      <img src={publicPath('/moretti-symbol.svg')} alt="" width="34" height="34" />
       <span className="brand-name">
         <strong>#RoadToSmartBaking</strong>
       </span>
