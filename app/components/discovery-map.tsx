@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   CircleMarker,
   MapContainer,
@@ -10,10 +10,11 @@ import {
 } from 'react-leaflet';
 import { ArrowUpRight, MapPin } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Link, useParams } from 'react-router';
+import { useParams } from 'react-router';
 import type { Restaurant } from '../data/restaurants';
 import { resolveOvens } from '../data/ovens';
 import type { Bounds } from '../services/discovery';
+import { publicPath } from '../utils/public-path';
 import 'leaflet/dist/leaflet.css';
 
 interface Props {
@@ -39,6 +40,7 @@ function ScrollWheelZoom({ enabled }: { enabled: boolean }) {
 
 function MapEvents({ onBounds, focus, userLocation }: Props) {
   const map = useMap();
+  const lastBounds = useRef<Bounds | undefined>(undefined);
   useEffect(() => {
     if (focus)
       map.flyTo([focus.lat, focus.lng], focus.zoom ?? 11, { animate: true, duration: 0.7 });
@@ -50,12 +52,25 @@ function MapEvents({ onBounds, focus, userLocation }: Props) {
   useMapEvents({
     moveend() {
       const bounds = map.getBounds();
-      onBounds({
+      const nextBounds = {
         south: bounds.getSouth(),
         west: bounds.getWest(),
         north: bounds.getNorth(),
         east: bounds.getEast(),
-      });
+      };
+      const previousBounds = lastBounds.current;
+      const hasChanged =
+        !previousBounds ||
+        Object.keys(nextBounds).some(
+          (key) =>
+            Math.abs(nextBounds[key as keyof Bounds] - previousBounds[key as keyof Bounds]) >
+            0.0001,
+        );
+
+      if (hasChanged) {
+        lastBounds.current = nextBounds;
+        onBounds(nextBounds);
+      }
     },
   });
   return null;
@@ -127,7 +142,7 @@ export default function DiscoveryMap(props: Props) {
               eventHandlers={{ click: () => props.onSelect(restaurant.id) }}
             >
               <Tooltip direction="top">{restaurant.name}</Tooltip>
-              <Popup className="map-place-popup" closeButton={false} autoPanPadding={[28, 28]}>
+              <Popup className="map-place-popup" closeButton={false} autoPan={false}>
                 <article className="map-place-card">
                   <img src={restaurant.image} alt="" width="320" height="180" />
                   <div className="map-place-card-body">
@@ -154,10 +169,13 @@ export default function DiscoveryMap(props: Props) {
                         {t('directions')}
                         <ArrowUpRight size={15} aria-hidden="true" />
                       </a>
-                      <Link to={`/${locale}/restaurants/${restaurant.id}`}>
+                      <a
+                        href={publicPath(`/${locale}/restaurants/${restaurant.id}`)}
+                        onClick={(event) => event.stopPropagation()}
+                      >
                         {t('view')}
                         <ArrowUpRight size={15} aria-hidden="true" />
-                      </Link>
+                      </a>
                     </div>
                   </div>
                 </article>
