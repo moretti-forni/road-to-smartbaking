@@ -2,7 +2,7 @@ import { Link, useParams } from 'react-router';
 import { ArrowUpRight, Clock3, Heart, MapPin } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { imageUrl, storyCategory, type StorySummary } from '../data/story-index';
-import type { Restaurant } from '../data/restaurants';
+import { shopImage, type Restaurant } from '../data/restaurants';
 import { resolveOvens } from '../data/ovens';
 import { useSaved } from './providers';
 import styles from './cards.module.css';
@@ -50,7 +50,7 @@ export function RestaurantCard({
       />
       <div className={styles.imageWrap}>
         <img
-          src={restaurant.image}
+          src={shopImage(restaurant.image, 'cards')}
           alt={`${restaurant.name} · #RoadToSmartBaking`}
           loading="lazy"
           width="600"
