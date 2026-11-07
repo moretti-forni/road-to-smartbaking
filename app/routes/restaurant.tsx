@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router';
 import { ArrowLeft, ArrowUpRight, MapPin, Navigation, Flame } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { Route } from './+types/restaurant';
-import { publishedRestaurants as restaurants } from '../data/restaurants';
+import { publishedRestaurants as restaurants, shopImage } from '../data/restaurants';
 import { resolveOvens } from '../data/ovens';
 import { RestaurantCard, SaveButton } from '../components/cards';
 import { ShareButton } from '../components/share';
@@ -66,7 +66,7 @@ export default function RestaurantDetail({ loaderData }: Route.ComponentProps) {
       </section>
       <figure className="container venue-hero">
         <img
-          src={restaurant.image}
+          src={shopImage(restaurant.image, 'heroes')}
           alt={`${restaurant.name} · #RoadToSmartBaking`}
           width="1170"
           height="650"

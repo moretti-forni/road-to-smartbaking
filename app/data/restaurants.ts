@@ -21,6 +21,14 @@ export const restaurantSchema = z.object({
 
 export type Restaurant = z.infer<typeof restaurantSchema>;
 
+export function shopImage(image: string, variant: 'cards' | 'heroes') {
+  const filename = image
+    .split('/')
+    .pop()
+    ?.replace(/\.[^.]+$/, '');
+  return filename ? publicPath(`/shops-webp/${variant}/${filename}.webp`) : image;
+}
+
 export const restaurants: Restaurant[] = z
   .array(restaurantSchema)
   .parse([

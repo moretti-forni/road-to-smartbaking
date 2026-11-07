@@ -11,7 +11,7 @@ import {
 import { ArrowUpRight, MapPin } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
-import type { Restaurant } from '../data/restaurants';
+import { shopImage, type Restaurant } from '../data/restaurants';
 import { resolveOvens } from '../data/ovens';
 import type { Bounds } from '../services/discovery';
 import { publicPath } from '../utils/public-path';
@@ -144,7 +144,7 @@ export default function DiscoveryMap(props: Props) {
               <Tooltip direction="top">{restaurant.name}</Tooltip>
               <Popup className="map-place-popup" closeButton={false} autoPan={false}>
                 <article className="map-place-card">
-                  <img src={restaurant.image} alt="" width="320" height="180" />
+                  <img src={shopImage(restaurant.image, 'cards')} alt="" width="320" height="180" />
                   <div className="map-place-card-body">
                     <span className="map-place-card-type">{t(restaurant.kind)}</span>
                     <div className="map-place-card-heading">
