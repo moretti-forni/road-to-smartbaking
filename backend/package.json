@@ -1,0 +1,19 @@
+{
+  "name": "roadtosmartbaking-backend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.mjs",
+    "seed:frontend": "node --import tsx --env-file-if-exists=.env seed-frontend.mjs"
+  },
+  "engines": {
+    "node": ">=20.19"
+  },
+  "dependencies": {
+    "pg": "^8.23.0",
+    "zod": "^4.6.6"
+  },
+  "devDependencies": {
+    "tsx": "^4.23.15"
+  }
+}

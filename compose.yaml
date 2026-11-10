@@ -1,0 +1,23 @@
+name: roadtosmartbaking
+
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: rtsm
+      POSTGRES_USER: rtsm
+      POSTGRES_PASSWORD: ${RTSM_DB_PASSWORD:-rtsm_local_only}
+    ports:
+      - "127.0.0.1:${RTSM_DB_PORT:-5433}:5432"
+    volumes:
+      - rtsm_postgres:/var/lib/postgresql/data
+      - ./db/001-initial-schema.sql:/docker-entrypoint-initdb.d/001-initial-schema.sql:ro
+      - ./db/002-frontend-import-metadata.sql:/docker-entrypoint-initdb.d/002-frontend-import-metadata.sql:ro
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "rtsm", "-d", "rtsm"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+volumes:
+  rtsm_postgres:
