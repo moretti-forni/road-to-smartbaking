@@ -49,13 +49,18 @@ export function RestaurantCard({
         aria-label={restaurant.name}
       />
       <div className={styles.imageWrap}>
-        <img
-          src={shopImage(restaurant.image, 'cards')}
-          alt={`${restaurant.name} · #RoadToSmartBaking`}
-          loading="lazy"
-          width="600"
-          height="400"
-        />
+        {restaurant.image && (
+          <img
+            src={shopImage(restaurant.image, 'cards')}
+            alt={
+              restaurant.imageAlt?.[locale === 'en' ? 'en' : 'it'] ??
+              `${restaurant.name} · #RoadToSmartBaking`
+            }
+            loading="lazy"
+            width="600"
+            height="400"
+          />
+        )}
         <span className={styles.imageTag}>#RoadToSmartBaking</span>
         <SaveButton id={restaurant.id} label={restaurant.name} />
       </div>
@@ -64,7 +69,7 @@ export function RestaurantCard({
           <span>{t(restaurant.kind)}</span>
         </div>
         <h3>{restaurant.name}</h3>
-        <OvenModels oven={restaurant.oven} />
+        {restaurant.oven && <OvenModels oven={restaurant.oven} />}
         <a
           className={styles.location}
           href={restaurant.mapsUrl}
@@ -123,7 +128,9 @@ export function StoryCard({ story }: { story: StorySummary }) {
         tabIndex={-1}
         aria-hidden="true"
       >
-        <img src={imageUrl(story.cover.image)} alt="" loading="lazy" width="600" height="400" />
+        {story.cover.image && (
+          <img src={imageUrl(story.cover.image)} alt="" loading="lazy" width="600" height="400" />
+        )}
         <span className={styles.storyArrow}>
           <ArrowUpRight size={22} />
         </span>
@@ -132,15 +139,17 @@ export function StoryCard({ story }: { story: StorySummary }) {
       <div className={styles.storyBody}>
         <div className={styles.metadata}>
           <span>{t(storyCategory(story))}</span>
-          <span>
-            <Clock3 size={13} />
-            {story.readMinutes} {t('read')}
-          </span>
+          {story.readMinutes > 0 && (
+            <span>
+              <Clock3 size={13} />
+              {story.readMinutes} {t('read')}
+            </span>
+          )}
         </div>
-        <h3 lang="it">
+        <h3 lang={story.language}>
           <Link to={`/${locale}/stories/${story.slug}`}>{story.title}</Link>
         </h3>
-        <p lang="it">{story.summary}</p>
+        <p lang={story.language}>{story.summary}</p>
       </div>
     </article>
   );

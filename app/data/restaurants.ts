@@ -6,8 +6,10 @@ export const restaurantSchema = z.object({
   name: z.string(),
   city: z.string(),
   address: z.string(),
-  kind: z.enum(['pizza', 'bakery', 'hotel']),
+  kind: z.enum(['pizza', 'bakery', 'hotel', 'other']),
   image: z.string(),
+  imageAlt: z.object({ it: z.string().nullable(), en: z.string().nullable() }).optional(),
+  website: z.string().url().optional(),
   lat: z.number().min(-90).max(90),
   lng: z.number().min(-180).max(180),
   oven: z.string(),
@@ -22,6 +24,7 @@ export const restaurantSchema = z.object({
 export type Restaurant = z.infer<typeof restaurantSchema>;
 
 export function shopImage(image: string, variant: 'cards' | 'heroes') {
+  if (!image.startsWith('/shops/')) return image.startsWith('/') ? publicPath(image) : image;
   const filename = image
     .split('/')
     .pop()

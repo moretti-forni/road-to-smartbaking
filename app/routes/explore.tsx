@@ -8,13 +8,12 @@ import {
   type FormEvent,
   type KeyboardEvent,
 } from 'react';
-import { useParams, useSearchParams } from 'react-router';
-import { useQuery } from '@tanstack/react-query';
+import { useSearchParams } from 'react-router';
 import { ArrowDown, LocateFixed, MapPin, Navigation, Search, Store, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { RestaurantCard } from '../components/cards';
 import {
-  discoverRestaurants,
+  filterRestaurants,
   distanceKm,
   getDiscoverySuggestions,
   parseQuery,
@@ -22,8 +21,10 @@ import {
   type DiscoverySuggestion,
 } from '../services/discovery';
 
+import { useShops } from '../services/catalog';
+
 const DiscoveryMap = lazy(() => import('../components/discovery-map'));
-const venueKinds = ['all', 'pizza', 'bakery', 'hotel'] as const;
+const venueKinds = ['all', 'pizza', 'bakery', 'hotel', 'other'] as const;
 export function meta() {
   return [
     { title: 'Esplora · RoadToSmartBaking' },
@@ -36,7 +37,6 @@ export function meta() {
 }
 export default function Explore() {
   const { t } = useTranslation();
-  const { locale } = useParams();
   const [params, setParams] = useSearchParams();
   const query = parseQuery(params);
   const [hydrated, setHydrated] = useState(false);
@@ -54,11 +54,12 @@ export default function Explore() {
     zoom?: number;
   }>();
   const hasTriedInitialLocation = useRef(false);
-  const suggestions = useMemo(() => getDiscoverySuggestions(searchValue), [searchValue]);
-  const result = useQuery({
-    queryKey: ['restaurants', locale, query],
-    queryFn: ({ signal }) => discoverRestaurants(query, signal),
-  });
+  const result = useShops();
+  const records = result.data ? filterRestaurants(result.data, query) : [];
+  const suggestions = useMemo(
+    () => getDiscoverySuggestions(searchValue, 8, result.data ?? []),
+    [searchValue, result.data],
+  );
   useEffect(() => setHydrated(true), []);
   useEffect(() => setSearchValue(query.search || query.city || ''), [query.city, query.search]);
   useEffect(() => {
@@ -276,12 +277,12 @@ export default function Explore() {
           <div className="map-label">
             <span className="live-dot" />
             {t('map')}
-            <span>{t('mapCoverage', { count: result.data?.length ?? 0 })}</span>
+            <span>{t('mapCoverage', { count: records.length })}</span>
           </div>
           {hydrated ? (
             <Suspense fallback={<div className="map-placeholder">{t('loadingMap')}</div>}>
               <DiscoveryMap
-                records={result.data ?? []}
+                records={records}
                 selected={selected}
                 onSelect={selectVenue}
                 onBounds={setDraftBounds}
@@ -315,7 +316,7 @@ export default function Explore() {
               <h2>
                 {t('locations')}
                 <span className="result-count" aria-live="polite">
-                  {result.data?.length ?? '—'}
+                  {result.data ? records.length : '—'}
                 </span>
               </h2>
               <p>{t('locationsIntro')}</p>
@@ -376,9 +377,9 @@ export default function Explore() {
                 {t('retry')}
               </button>
             </div>
-          ) : result.data.length ? (
+          ) : records.length ? (
             <div className="card-grid" aria-label={t('locations')}>
-              {result.data.map((restaurant) => (
+              {records.map((restaurant) => (
                 <RestaurantCard
                   key={restaurant.id}
                   restaurant={restaurant}

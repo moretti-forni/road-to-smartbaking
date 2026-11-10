@@ -11,7 +11,40 @@ npm ci --include=dev
 npm run dev
 ```
 
-Open `http://127.0.0.1:5173/it` or `/en`. The root links/redirects to Italian. No backend credentials are required. `npm run build` creates pre-rendered output under `build/client`; `npm run preview` serves it locally.
+Open `http://127.0.0.1:5173/it` or `/en`. The root links/redirects to Italian. The development server proxies `/api/v1` to the local backend on port 3001. Start PostgreSQL and the backend before opening the consumer pages. `npm run build` creates pre-rendered output under `build/client`; `npm run preview` serves it locally.
+
+## Local PostgreSQL
+
+With Docker running, start the database from this directory.
+
+```sh
+docker compose up -d --wait db
+docker compose exec db psql -U rtsm -d rtsm -c '\dt rtsm_*'
+```
+
+For a local SQL client, use host `127.0.0.1`, port `5433`, database and
+user `rtsm`, and the local-only password `rtsm_local_only`. Set
+`RTSM_DB_PORT` or `RTSM_DB_PASSWORD` in `.env` before the first start to
+override these defaults. Changing the Compose password after initialization does
+not change the existing database role's password.
+
+A fresh database starts empty. To load the current frontend catalog for local
+testing, see [Import the frontend catalog locally](backend/README.md#import-the-frontend-catalog-locally). `rtsm_shop` stores approved venues, including their
+publication and suspension timestamps. `rtsm_story` stores language variants
+and structured content blocks. `rtsm_requests` stores private submissions and
+links approved requests to the associated shop. A request approval and its shop
+write should happen in one transaction. API writers should maintain `updated_at`
+on edits.
+
+`docker compose down` stops the service and preserves its named volume.
+`db/001-initial-schema.sql` runs only when initializing an empty volume. Apply
+later schema changes as separate migrations to preserve existing data.
+
+Start the [local backend](backend/README.md) in another terminal with
+`npm --prefix backend start`. Explore, Stories, Saved, and listing requests
+use the public API in development. Open `/admin` and enter the staff token from
+`backend/.env` to edit shops and stories, review listing requests, and control
+consumer visibility.
 
 ## Mobile development
 
@@ -41,13 +74,20 @@ For release, confirm the bundle ID and signing accounts, replace the scaffold ic
 
 ## Data and release boundaries
 
-**This is a local working frontend preview, not a production service.** Six restaurants, oven assignments and coordinates are demonstration data. Editorial images do not depict the sample venues. No opening hours, phone numbers or verified-address claims are invented. Directions remain disabled until verified destinations are connected.
+The development catalog comes from PostgreSQL. Shops retain their source map
+notes and approximate pins. Stories retain their original language and dates.
+The English interface uses published English versions where available and
+otherwise displays the Italian version. Approval timestamps on seeded
+records are for local testing.
 
-The 63 Italian articles/images come from the mobile project's imported Moretti archive. The English interface labels Italian editorial content; translations are not fabricated. Publication/image rights still need review.
+For a live production build, set `VITE_PUBLIC_API_BASE_URL` to the API's
+`/api/v1` URL and configure the host to serve `__spa-fallback.html` for
+dynamic consumer detail routes. These routes fetch current published data at
+runtime, including after a venue or story has been withdrawn. Builds without
+the variable use the bundled, pre-rendered demo catalog. For a demo-only
+development run, explicitly set `VITE_PUBLIC_API_BASE_URL=`.
 
-Discovery uses the fixture repository in `app/services/discovery.ts`. `app/services/http.ts` prepares a public Axios boundary, but **no live restaurant API is wired**. Setting `VITE_PUBLIC_API_BASE_URL` alone does not enable a live mode. Do not connect the hub's private endpoints or credentials.
-
-The map defaults to OpenStreetMap for local evaluation. Set `VITE_CARTO_BASEMAP_KEY` to use CARTO Voyager for a cleaner, familiar road-map style, or supply an approved `VITE_MAP_TILE_URL`. Production needs an approved tile/geocoding provider, visible attribution and usage-policy review. Search filters sample records; live address autocomplete, clustering and production pagination are future integration work.
+The map defaults to OpenStreetMap for local evaluation. Set `VITE_CARTO_BASEMAP_KEY` to use CARTO Voyager for a cleaner, familiar road-map style, or supply an approved `VITE_MAP_TILE_URL`. Production needs an approved tile/geocoding provider, visible attribution and usage-policy review. Search filters the loaded catalog; live address autocomplete, clustering and production pagination are future integration work.
 
 Preview pages are intentionally `noindex,nofollow`. Before launch: connect verified data, implement publication/rebuild/CDN withdrawal handling, approve legal text and imagery, configure canonical/social metadata, and verify real HTTP 404 behaviour on the host. No deployment or AWS resources are created here.
 

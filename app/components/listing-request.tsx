@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Check, Plus, Send, X } from 'lucide-react';
+import { publicHttp, usesPublicApi } from '../services/http';
 import { useTranslation } from 'react-i18next';
 
 type ListingRequestButtonProps = {
@@ -10,9 +11,16 @@ export function ListingRequestButton({ variant = 'nav' }: ListingRequestButtonPr
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const [receipt, setReceipt] = useState('');
+  const sendingRef = useRef(false);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   function close() {
+    if (sendingRef.current) return;
+    setFailed(false);
+    setReceipt('');
     setOpen(false);
     setSubmitted(false);
   }
@@ -22,7 +30,9 @@ export function ListingRequestButton({ variant = 'nav' }: ListingRequestButtonPr
 
     const previousOverflow = document.body.style.overflow;
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
+      if (event.key === 'Escape' && !sendingRef.current) {
+        setFailed(false);
+        setReceipt('');
         setOpen(false);
         setSubmitted(false);
       }
@@ -38,9 +48,30 @@ export function ListingRequestButton({ variant = 'nav' }: ListingRequestButtonPr
     };
   }, [open]);
 
-  function submit(event: FormEvent<HTMLFormElement>) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSubmitted(true);
+    if (sendingRef.current) return;
+    if (!usesPublicApi) {
+      setSubmitted(true);
+      return;
+    }
+    const fields = Object.fromEntries(new FormData(event.currentTarget));
+    sendingRef.current = true;
+    setSending(true);
+    setFailed(false);
+    try {
+      const { data } = await publicHttp.post<{ id: string }>('/requests', {
+        ...fields,
+        website: fields.website || undefined,
+      });
+      setReceipt(data.id);
+      setSubmitted(true);
+    } catch {
+      setFailed(true);
+    } finally {
+      sendingRef.current = false;
+      setSending(false);
+    }
   }
 
   return (
@@ -85,7 +116,9 @@ export function ListingRequestButton({ variant = 'nav' }: ListingRequestButtonPr
                 </span>
                 <span className="eyebrow brand-tag">#RoadToSmartBaking</span>
                 <h2>{t('listingRequestThanksTitle')}</h2>
-                <p>{t('listingRequestThanksBody')}</p>
+                <p>
+                  {receipt ? t('listingReceived', { id: receipt }) : t('listingRequestThanksBody')}
+                </p>
                 <button type="button" className="button primary" onClick={close}>
                   {t('close')}
                 </button>
@@ -169,10 +202,11 @@ export function ListingRequestButton({ variant = 'nav' }: ListingRequestButtonPr
                   </label>
 
                   <div className="listing-form-footer">
-                    <p>{t('listingPreviewNote')}</p>
-                    <button type="submit" className="button primary">
+                    <p>{t(usesPublicApi ? 'listingLiveNote' : 'listingPreviewNote')}</p>
+                    {failed && <p role="alert">{t('listingSendError')}</p>}
+                    <button type="submit" className="button primary" disabled={sending}>
                       <Send size={16} aria-hidden="true" />
-                      {t('listingSubmit')}
+                      {t(sending ? 'loadingContent' : 'listingSubmit')}
                     </button>
                   </div>
                 </form>

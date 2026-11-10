@@ -1,7 +1,6 @@
 import type { Config } from '@react-router/dev/config';
 import { stories } from './app/data/content';
 import { publishedRestaurants as restaurants } from './app/data/restaurants';
-
 const basePath = process.env.VITE_BASE_PATH?.replace(/\/$/, '') || '/';
 
 export default {
@@ -9,6 +8,7 @@ export default {
   ssr: false,
   prerender: [
     '/',
+    '/admin',
     ...['it', 'en'].flatMap((locale) => [
       `/${locale}`,
       `/${locale}/stories`,

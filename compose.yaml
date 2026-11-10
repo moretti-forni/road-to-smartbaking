@@ -13,6 +13,7 @@ services:
       - rtsm_postgres:/var/lib/postgresql/data
       - ./db/001-initial-schema.sql:/docker-entrypoint-initdb.d/001-initial-schema.sql:ro
       - ./db/002-frontend-import-metadata.sql:/docker-entrypoint-initdb.d/002-frontend-import-metadata.sql:ro
+      - ./db/003-content-drafts.sql:/docker-entrypoint-initdb.d/003-content-drafts.sql:ro
     healthcheck:
       test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "rtsm", "-d", "rtsm"]
       interval: 5s

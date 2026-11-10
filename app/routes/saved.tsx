@@ -3,8 +3,7 @@ import { Heart, ArrowUpRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useSaved } from '../components/providers';
 import { RestaurantCard, StoryCard } from '../components/cards';
-import { publishedRestaurants as restaurants } from '../data/restaurants';
-import { storyIndex as stories } from '../data/story-index';
+import { useShops, useStories } from '../services/catalog';
 export function meta() {
   return [{ title: 'Salvati · RoadToSmartBaking' }];
 }
@@ -12,8 +11,14 @@ export default function Saved() {
   const { ids, ready, clear } = useSaved();
   const { t } = useTranslation();
   const { locale } = useParams();
-  const records = restaurants.filter((restaurant) => ids.includes(restaurant.id));
-  const savedStories = stories.filter((story) => ids.includes(`story:${story.slug}`));
+  const needsShops = ids.some((id) => !id.startsWith('story:'));
+  const needsStories = ids.some((id) => id.startsWith('story:'));
+  const shops = useShops(needsShops);
+  const stories = useStories(locale, needsStories);
+  const loading = (needsShops && shops.isPending) || (needsStories && stories.isPending);
+  const failed = (needsShops && shops.isError) || (needsStories && stories.isError);
+  const records = (shops.data ?? []).filter((restaurant) => ids.includes(restaurant.id));
+  const savedStories = (stories.data ?? []).filter((story) => ids.includes(`story:${story.slug}`));
   const savedCount = records.length + savedStories.length;
   return (
     <main id="main" className="container saved-page">
@@ -29,8 +34,20 @@ export default function Saved() {
         </h1>
         <p>{t('savedIntro')}</p>
       </section>
-      {!ready ? (
+      {!ready || loading ? (
         <div className="skeleton-card" aria-busy="true" />
+      ) : failed ? (
+        <p className="notice" role="alert">
+          {t('contentError')}{' '}
+          <button
+            onClick={() => {
+              if (needsShops) void shops.refetch();
+              if (needsStories) void stories.refetch();
+            }}
+          >
+            {t('retry')}
+          </button>
+        </p>
       ) : (
         <>
           {savedCount < ids.length && <p className="notice">{t('unavailableSaved')}</p>}

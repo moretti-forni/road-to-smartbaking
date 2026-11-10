@@ -1,4 +1,5 @@
 import { timingSafeEqual } from 'node:crypto';
+import * as drafts from './drafts.mjs';
 import * as data from './data.mjs';
 import * as schema from './validation.mjs';
 
@@ -44,6 +45,55 @@ export async function handleApi(db, { method, url, authorization, readBody }, st
         status: 201,
         body: await data.submitRequest(db, schema.requestInput.parse(await readBody())),
       };
+    case 'GET api/v1/admin/drafts':
+      return { body: { items: await drafts.listDrafts(db, schema.pageInput.parse(query)) } };
+    case 'GET api/v1/admin/story-drafts/:value': {
+      const slug = schema.shopKey.parse(parts[4]);
+      const versions = await drafts.storyEditorVersions(db, slug);
+      return { body: found(versions.length ? { versions } : undefined) };
+    }
+    case 'PUT api/v1/admin/story-drafts/:value': {
+      const slug = schema.shopKey.parse(parts[4]);
+      const input = schema.storyDraftBatch.parse(await readBody());
+      const entries = ['it', 'en'].flatMap((language) => {
+        const draft = input[language];
+        return draft
+          ? [{ ...draft, kind: 'story', slug, language, newRecord: input.newRecord }]
+          : [];
+      });
+      const saved = await drafts.saveStoryDrafts(db, entries);
+      if (!saved)
+        throw new ApiError(
+          409,
+          'The slug is already in use or a draft changed. Reload the story before saving.',
+        );
+      return { body: saved };
+    }
+    case 'GET api/v1/admin/drafts/:value/:value/:value':
+    case 'PUT api/v1/admin/drafts/:value/:value/:value':
+    case 'POST api/v1/admin/drafts/:value/:value/:value': {
+      const key = schema.draftKey.parse({ kind: parts[4], slug: parts[5], language: parts[6] });
+      if (method === 'GET') return { body: found(await drafts.readDraft(db, key)) };
+      if (method === 'POST') {
+        const revision = schema.requestKey.parse((await readBody())?.revision);
+        const published = await drafts.publishDraft(db, key, revision);
+        if (!published)
+          throw new ApiError(409, 'The saved draft changed. Reload it before publishing.');
+        return { body: published };
+      }
+      const input = schema.draftInput.parse(await readBody());
+      const payload =
+        key.kind === 'shop'
+          ? schema.shopInput.parse({ ...input.payload, slug: key.slug })
+          : schema.storyInput.parse(input.payload);
+      const saved = await drafts.saveDraft(db, { ...key, ...input, payload });
+      if (!saved)
+        throw new ApiError(
+          409,
+          'The slug is already in use or the draft changed. Reload the record before saving.',
+        );
+      return { body: saved };
+    }
     case 'GET api/v1/admin/requests':
       return { body: { items: await data.listRequests(db, schema.pageInput.parse(query)) } };
     case 'GET api/v1/admin/requests/:value':
@@ -63,7 +113,7 @@ export async function handleApi(db, { method, url, authorization, readBody }, st
           await data.approveRequest(
             db,
             schema.requestKey.parse(parts[4]),
-            schema.shopInput.parse(await readBody()),
+            schema.approvalInput.parse(await readBody()),
           ),
         ),
       };
@@ -74,6 +124,13 @@ export async function handleApi(db, { method, url, authorization, readBody }, st
         status: 201,
         body: await data.createShop(db, schema.shopInput.parse(await readBody())),
       };
+    case 'PUT api/v1/admin/shops/:value': {
+      const slug = schema.shopKey.parse(parts[4]);
+      const shop = schema.shopInput
+        .required({ visible: true })
+        .parse({ ...(await readBody()), slug });
+      return { body: found(await data.updateShop(db, shop)) };
+    }
     case 'POST api/v1/admin/shops/:value/:value': {
       const slug = schema.shopKey.parse(parts[4]);
       if (parts[5] === 'publish') return { body: found(await data.publishShop(db, slug)) };
@@ -81,8 +138,24 @@ export async function handleApi(db, { method, url, authorization, readBody }, st
         return { body: found(await data.suspendShop(db, slug), 'Published shop not found') };
       break;
     }
+    case 'GET api/v1/admin/story-groups/:value':
+      return { body: found(await data.getStaffStoryGroup(db, schema.shopKey.parse(parts[4]))) };
+    case 'POST api/v1/admin/story-groups': {
+      const group = schema.storyGroupInput.parse(await readBody());
+      const saved = await data.saveStoryGroup(db, group, true);
+      if (!saved) throw new ApiError(409, 'A story with that slug already exists');
+      return { status: 201, body: saved };
+    }
+    case 'PUT api/v1/admin/story-groups/:value': {
+      const group = schema.storyGroupInput.parse({ ...(await readBody()), slug: parts[4] });
+      return { body: found(await data.saveStoryGroup(db, group, false)) };
+    }
     case 'GET api/v1/admin/stories':
       return { body: { items: await data.listStaffStories(db, schema.storyQuery.parse(query)) } };
+    case 'POST api/v1/admin/stories': {
+      const story = schema.newStoryInput.parse(await readBody());
+      return { status: 201, body: await data.saveStory(db, story, story, true) };
+    }
     case 'GET api/v1/admin/stories/:value/:value':
       return {
         body: found(

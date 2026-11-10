@@ -1,4 +1,6 @@
 import { Capacitor } from '@capacitor/core';
+import { usesPublicApi } from '../services/http';
+import { fetchShop, useShops } from '../services/catalog';
 import { Link, useParams } from 'react-router';
 import { ArrowLeft, ArrowUpRight, MapPin, Navigation, Flame } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -14,11 +16,19 @@ function loadRestaurant(params: Route.LoaderArgs['params']) {
   return { restaurant, locale: params.locale === 'en' ? ('en' as const) : ('it' as const) };
 }
 export function loader({ params }: Route.LoaderArgs) {
-  return loadRestaurant(params);
+  return usesPublicApi ? null : loadRestaurant(params);
 }
-export function clientLoader({ params, serverLoader }: Route.ClientLoaderArgs) {
+export async function clientLoader({ params, request, serverLoader }: Route.ClientLoaderArgs) {
+  if (usesPublicApi) {
+    if (!params.slug) throw new Response('Not found', { status: 404 });
+    return {
+      restaurant: await fetchShop(params.slug, request.signal),
+      locale: params.locale === 'en' ? ('en' as const) : ('it' as const),
+    };
+  }
   return Capacitor.isNativePlatform() ? loadRestaurant(params) : serverLoader();
 }
+clientLoader.hydrate = true as const;
 export function meta({ data }: Route.MetaArgs) {
   const restaurant = data?.restaurant;
   const description = restaurant
@@ -32,9 +42,26 @@ export function meta({ data }: Route.MetaArgs) {
   ];
 }
 export default function RestaurantDetail({ loaderData }: Route.ComponentProps) {
-  const { restaurant } = loaderData;
-  const locale = useParams().locale === 'en' ? 'en' : 'it';
+  return loaderData ? <Detail restaurant={loaderData.restaurant} /> : <LoadingDetail />;
+}
+
+function LoadingDetail() {
   const { t } = useTranslation();
+  return (
+    <main id="main" className="container notice" role="status">
+      {t('loadingContent')}
+    </main>
+  );
+}
+
+function Detail({
+  restaurant,
+}: Pick<NonNullable<Route.ComponentProps['loaderData']>, 'restaurant'>) {
+  const locale = useParams().locale === 'en' ? 'en' : 'it';
+  const descriptionLanguage = locale === 'en' && !restaurant.description.en ? 'it' : locale;
+  const description = restaurant.description[descriptionLanguage];
+  const { t } = useTranslation();
+  const { data: related = [] } = useShops();
   const ovenModels = resolveOvens(restaurant.oven);
   const ovenUrl = ovenModels.find((model) => model.productUrl)?.productUrl;
   return (
@@ -64,15 +91,17 @@ export default function RestaurantDetail({ loaderData }: Route.ComponentProps) {
           </div>
         </div>
       </section>
-      <figure className="container venue-hero">
-        <img
-          src={shopImage(restaurant.image, 'heroes')}
-          alt={`${restaurant.name} · #RoadToSmartBaking`}
-          width="1170"
-          height="650"
-          fetchPriority="high"
-        />
-      </figure>
+      {restaurant.image && (
+        <figure className="container venue-hero">
+          <img
+            src={shopImage(restaurant.image, 'heroes')}
+            alt={restaurant.imageAlt?.[locale] ?? `${restaurant.name} · #RoadToSmartBaking`}
+            width="1170"
+            height="650"
+            fetchPriority="high"
+          />
+        </figure>
+      )}
       <div className="container">
         <aside className="visit-panel">
           <div className="visit-intro">
@@ -97,6 +126,11 @@ export default function RestaurantDetail({ loaderData }: Route.ComponentProps) {
                 <Navigation size={16} />
                 {t('directions')}
               </a>
+              {restaurant.website && (
+                <a className="text-link" href={restaurant.website} target="_blank" rel="noreferrer">
+                  {t('website')} <ArrowUpRight size={16} />
+                </a>
+              )}
               {restaurant.locationNote && <p className="small-note">{restaurant.locationNote}</p>}
               {restaurant.coordinatePrecision === 'place-fallback' && (
                 <p className="small-note">{t('approximatePin')}</p>
@@ -110,34 +144,42 @@ export default function RestaurantDetail({ loaderData }: Route.ComponentProps) {
         <div className="venue-story">
           <span className="eyebrow">{t('original')}</span>
           <h2>{t('restaurantAbout')}</h2>
-          <p>{t('restaurantJourney', { name: restaurant.name, city: restaurant.city })}</p>
-          <div className="oven-panel">
-            <div className="oven-panel-copy">
-              <Flame size={28} />
-              <span className="eyebrow">{t('oven')}</span>
-              <h3>{restaurant.oven}</h3>
-              <p>{t('ovenText')}</p>
-              {ovenUrl && (
-                <a className="text-link" href={ovenUrl} target="_blank" rel="noreferrer">
-                  {t('exploreOven')}
-                  <ArrowUpRight size={16} />
-                </a>
-              )}
+          <p lang={description ? descriptionLanguage : locale}>
+            {description ||
+              t('restaurantJourney', { name: restaurant.name, city: restaurant.city })}
+          </p>
+          {description && descriptionLanguage !== locale && (
+            <p className="small-note">IT · {t('originalItalian')}</p>
+          )}
+          {restaurant.oven && (
+            <div className="oven-panel">
+              <div className="oven-panel-copy">
+                <Flame size={28} />
+                <span className="eyebrow">{t('oven')}</span>
+                <h3>{restaurant.oven}</h3>
+                <p>{t('ovenText')}</p>
+                {ovenUrl && (
+                  <a className="text-link" href={ovenUrl} target="_blank" rel="noreferrer">
+                    {t('exploreOven')}
+                    <ArrowUpRight size={16} />
+                  </a>
+                )}
+              </div>
+              <div className="oven-visuals" aria-label={restaurant.oven}>
+                {ovenModels.map((model, index) =>
+                  model.image ? (
+                    <span className="oven-visual" key={`${model.name}-${index}`}>
+                      <img src={model.image} alt={`${model.name} · Moretti Forni`} />
+                    </span>
+                  ) : (
+                    <span className="oven-visual-fallback" key={`${model.name}-${index}`}>
+                      {model.name}
+                    </span>
+                  ),
+                )}
+              </div>
             </div>
-            <div className="oven-visuals" aria-label={restaurant.oven}>
-              {ovenModels.map((model, index) =>
-                model.image ? (
-                  <span className="oven-visual" key={`${model.name}-${index}`}>
-                    <img src={model.image} alt={`${model.name} · Moretti Forni`} />
-                  </span>
-                ) : (
-                  <span className="oven-visual-fallback" key={`${model.name}-${index}`}>
-                    {model.name}
-                  </span>
-                ),
-              )}
-            </div>
-          </div>
+          )}
         </div>
       </div>
       <section className="journal-strip">
@@ -154,7 +196,7 @@ export default function RestaurantDetail({ loaderData }: Route.ComponentProps) {
             </Link>
           </div>
           <div className="card-grid">
-            {restaurants
+            {related
               .filter((item) => item.id !== restaurant.id)
               .slice(0, 3)
               .map((item) => (

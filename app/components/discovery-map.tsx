@@ -15,6 +15,7 @@ import { shopImage, type Restaurant } from '../data/restaurants';
 import { resolveOvens } from '../data/ovens';
 import type { Bounds } from '../services/discovery';
 import { publicPath } from '../utils/public-path';
+import { mapTiles } from '../services/map-tiles';
 import 'leaflet/dist/leaflet.css';
 
 interface Props {
@@ -81,19 +82,7 @@ export default function DiscoveryMap(props: Props) {
   const [tileError, setTileError] = useState(false);
   const [tileAttempt, setTileAttempt] = useState(0);
   const [isScrollZoomEnabled, setIsScrollZoomEnabled] = useState(false);
-  const customTileUrl = import.meta.env.VITE_MAP_TILE_URL;
-  const cartoKey = import.meta.env.VITE_CARTO_BASEMAP_KEY;
-  const usesCartoBasemap = !customTileUrl && Boolean(cartoKey);
-  const tileUrl =
-    customTileUrl ||
-    (cartoKey
-      ? `https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=${cartoKey}`
-      : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
-  const attribution =
-    import.meta.env.VITE_MAP_ATTRIBUTION ||
-    (usesCartoBasemap
-      ? '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
-      : '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>');
+  const { url: tileUrl, attribution } = mapTiles();
   return (
     <div className="map-inner" onClick={() => setIsScrollZoomEnabled(true)}>
       <MapContainer
@@ -144,7 +133,14 @@ export default function DiscoveryMap(props: Props) {
               <Tooltip direction="top">{restaurant.name}</Tooltip>
               <Popup className="map-place-popup" closeButton={false} autoPan={false}>
                 <article className="map-place-card">
-                  <img src={shopImage(restaurant.image, 'cards')} alt="" width="320" height="180" />
+                  {restaurant.image && (
+                    <img
+                      src={shopImage(restaurant.image, 'cards')}
+                      alt=""
+                      width="320"
+                      height="180"
+                    />
+                  )}
                   <div className="map-place-card-body">
                     <span className="map-place-card-type">{t(restaurant.kind)}</span>
                     <div className="map-place-card-heading">

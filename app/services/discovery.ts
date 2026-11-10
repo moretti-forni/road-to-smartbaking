@@ -44,12 +44,16 @@ function matchesSearch(value: string, search: string) {
   const haystack = normaliseSearch(value);
   return !terms.length || terms.every((term) => haystack.includes(term));
 }
-export function getDiscoverySuggestions(value: string, limit = 8): DiscoverySuggestion[] {
+export function getDiscoverySuggestions(
+  value: string,
+  limit = 8,
+  records = restaurants,
+): DiscoverySuggestion[] {
   const search = normaliseSearch(value);
   if (search.length < 2) return [];
 
   const places = new Map<string, Restaurant[]>();
-  restaurants.forEach((restaurant) => {
+  records.forEach((restaurant) => {
     const records = places.get(restaurant.city) ?? [];
     records.push(restaurant);
     places.set(restaurant.city, records);
@@ -77,7 +81,7 @@ export function getDiscoverySuggestions(value: string, limit = 8): DiscoverySugg
         ),
       };
     });
-  const restaurantSuggestions = restaurants
+  const restaurantSuggestions = records
     .filter((restaurant) =>
       matchesSearch(`${restaurant.name} ${restaurant.city} ${restaurant.address}`, search),
     )
@@ -121,7 +125,7 @@ export function parseQuery(params: URLSearchParams): DiscoveryQuery {
   return {
     search: params.get('q')?.trim() ?? '',
     city: params.get('city')?.trim() || undefined,
-    kind: ['pizza', 'bakery', 'hotel'].includes(params.get('kind') ?? '')
+    kind: ['pizza', 'bakery', 'hotel', 'other'].includes(params.get('kind') ?? '')
       ? params.get('kind')!
       : 'all',
     bounds: validBounds

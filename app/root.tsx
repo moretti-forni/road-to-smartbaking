@@ -14,7 +14,7 @@ import { publicPath } from './utils/public-path';
 
 export function Layout({ children }: { children: ReactNode }) {
   const location = useLocation();
-  const locale = location.pathname.split('/')[1] === 'en' ? 'en' : 'it';
+  const locale = ['en', 'admin'].includes(location.pathname.split('/')[1]) ? 'en' : 'it';
   return (
     <html lang={locale}>
       <head>

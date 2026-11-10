@@ -1,9 +1,11 @@
 import { Capacitor } from '@capacitor/core';
+import { usesPublicApi } from '../services/http';
+import { fetchStory, useStories } from '../services/catalog';
 import { Link, useParams } from 'react-router';
 import { ArrowLeft, ArrowUpRight, Clock3, BookOpen } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { Route } from './+types/story';
-import { storyIndex, imageUrl, formatDate, storyCategory } from '../data/story-index';
+import { imageUrl, formatDate, storyCategory } from '../data/story-index';
 import { StoryCard } from '../components/cards';
 import { ShareButton } from '../components/share';
 
@@ -14,11 +16,19 @@ async function loadStory(params: Route.LoaderArgs['params']) {
   return { story, locale: params.locale };
 }
 export function loader({ params }: Route.LoaderArgs) {
-  return loadStory(params);
+  return usesPublicApi ? null : loadStory(params);
 }
-export function clientLoader({ params, serverLoader }: Route.ClientLoaderArgs) {
+export async function clientLoader({ params, request, serverLoader }: Route.ClientLoaderArgs) {
+  if (usesPublicApi) {
+    if (!params.slug) throw new Response('Not found', { status: 404 });
+    return {
+      story: await fetchStory(params.slug, params.locale, request.signal),
+      locale: params.locale,
+    };
+  }
   return Capacitor.isNativePlatform() ? loadStory(params) : serverLoader();
 }
+clientLoader.hydrate = true as const;
 export function meta({ data }: Route.MetaArgs) {
   if (!data) return [{ title: 'Storia non trovata · RoadToSmartBaking' }];
   return [
@@ -30,10 +40,23 @@ export function meta({ data }: Route.MetaArgs) {
   ];
 }
 export default function StoryDetail({ loaderData }: Route.ComponentProps) {
-  const { story } = loaderData;
+  return loaderData ? <Detail story={loaderData.story} /> : <LoadingDetail />;
+}
+
+function LoadingDetail() {
+  const { t } = useTranslation();
+  return (
+    <main id="main" className="container notice" role="status">
+      {t('loadingContent')}
+    </main>
+  );
+}
+
+function Detail({ story }: Pick<NonNullable<Route.ComponentProps['loaderData']>, 'story'>) {
   const { locale = 'it' } = useParams();
   const { t } = useTranslation();
-  const related = storyIndex.filter((item) => item.slug !== story.slug).slice(0, 3);
+  const { data: stories = [] } = useStories(locale);
+  const related = stories.filter((item) => item.slug !== story.slug).slice(0, 3);
   const date = formatDate(story.publishedAt, locale ?? 'it');
   return (
     <main id="main">
@@ -47,8 +70,8 @@ export default function StoryDetail({ loaderData }: Route.ComponentProps) {
             <span className="small-line" />
             {t(storyCategory(story))}
           </div>
-          <h1 lang="it">{story.title}</h1>
-          <p className="article-deck" lang="it">
+          <h1 lang={story.language}>{story.title}</h1>
+          <p className="article-deck" lang={story.language}>
             {story.summary}
           </p>
           <div className="article-metadata">
@@ -59,35 +82,43 @@ export default function StoryDetail({ loaderData }: Route.ComponentProps) {
               Moretti Forni<span className="metadata-sub">{t('editorial')}</span>
             </span>
             {date && <span className="date">{date}</span>}
-            <span className="read-time">
-              <Clock3 size={14} />
-              {story.readMinutes} {t('read')}
-            </span>
+            {story.readMinutes > 0 && (
+              <span className="read-time">
+                <Clock3 size={14} />
+                {story.readMinutes} {t('read')}
+              </span>
+            )}
             <ShareButton title={story.title} />
           </div>
-          {locale === 'en' && <p className="editorial-language">IT · {t('originalItalian')}</p>}
+          {locale === 'en' && story.language === 'it' && (
+            <p className="editorial-language">IT · {t('originalItalian')}</p>
+          )}
         </header>
-        <figure className="container article-hero">
-          <img
-            src={imageUrl(story.cover.image)}
-            alt={story.cover.alt}
-            width="1170"
-            height="650"
-            fetchPriority="high"
-          />
-          <figcaption>© Moretti Forni · #RoadToSmartBaking</figcaption>
-        </figure>
+        {story.cover.image && (
+          <figure className="container article-hero">
+            <img
+              src={imageUrl(story.cover.image)}
+              alt={story.cover.alt}
+              width="1170"
+              height="650"
+              fetchPriority="high"
+            />
+            <figcaption>© Moretti Forni · #RoadToSmartBaking</figcaption>
+          </figure>
+        )}
         <div className="container article-layout">
           <aside className="article-aside">
             <span className="eyebrow brand-tag">#RoadToSmartBaking</span>
             <span className="aside-line" />
             <p>{t('footerSmall')}</p>
-            <a className="text-link" href={story.sourceUrl} target="_blank" rel="noreferrer">
-              {t('source')}
-              <ArrowUpRight size={15} />
-            </a>
+            {story.sourceUrl && (
+              <a className="text-link" href={story.sourceUrl} target="_blank" rel="noreferrer">
+                {t('source')}
+                <ArrowUpRight size={15} />
+              </a>
+            )}
           </aside>
-          <div className="article-body" lang="it">
+          <div className="article-body" lang={story.language}>
             {story.blocks.map((block, index) =>
               block.type === 'heading' ? (
                 <h2 key={index}>{block.text}</h2>
