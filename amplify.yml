@@ -13,7 +13,7 @@ frontend:
         - npm run test
         - npm run build
   artifacts:
-    baseDirectory: build/client
+    baseDirectory: .next
     files:
       - '**/*'
   cache:

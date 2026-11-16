@@ -4,11 +4,11 @@ import {
   filterRestaurants,
   getDiscoverySuggestions,
   parseQuery,
-} from '../app/services/discovery';
-import { restaurants } from '../app/data/restaurants';
-import { stories, imageUrl, storyCategory } from '../app/data/content';
-import { readSaved } from '../app/components/providers';
-import { resources } from '../app/i18n';
+} from '../src/services/discovery';
+import { restaurants } from '../src/data/restaurants';
+import { stories, imageUrl, storyCategory } from '../src/data/content';
+import { readSaved } from '../src/components/providers';
+import { resources } from '../src/i18n';
 import { existsSync } from 'node:fs';
 
 describe('discovery query and filtering', () => {

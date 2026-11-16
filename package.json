@@ -9,21 +9,22 @@
   "scripts": {
     "content:index": "node scripts/sync-story-index.mjs",
     "prebuild": "npm run content:index",
-    "postbuild": "node scripts/check-static.mjs",
-    "dev": "react-router dev --host 127.0.0.1 --port 5173",
-    "build": "react-router build",
-    "pages:prepare": "node scripts/prepare-pages.mjs",
-    "preview": "vite preview --host 127.0.0.1 --port 4173 --outDir build/client",
+    "dev": "next dev --hostname 127.0.0.1 --port 5173",
+    "build": "next build",
+    "preview": "npm start",
     "lint": "eslint .",
-    "typecheck": "react-router typegen && tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "format": "prettier --write app tests scripts *.ts *.json *.js",
-    "format:check": "prettier --check app tests scripts *.ts *.json *.js",
-    "mobile:sync": "npm run build && cap sync",
+    "format": "prettier --write src mobile-source tests scripts *.ts *.json *.js",
+    "format:check": "prettier --check src mobile-source tests scripts *.ts *.json *.js",
+    "mobile:sync": "npm run mobile:build && cap sync",
     "mobile:ios": "npm run mobile:sync && cap run ios",
     "mobile:android": "npm run mobile:sync && cap run android",
-    "capacitor:copy:after": "node scripts/prepare-native-entry.mjs"
+    "capacitor:copy:after": "node scripts/prepare-native-entry.mjs",
+    "start": "next start --hostname 127.0.0.1 --port 5173",
+    "mobile:build": "node --env-file-if-exists=.env.local scripts/build-mobile.mjs",
+    "db:seed": "node --import tsx --env-file-if-exists=.env.local scripts/seed-frontend.mjs --local-demo"
   },
   "dependencies": {
     "@capacitor/android": "^8.6.0",
@@ -36,11 +37,14 @@
     "isbot": "^5",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.468.0",
+    "next": "^16.4.6",
+    "pg": "^8.23.1",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "react-i18next": "^16.3.0",
     "react-leaflet": "^5.0.0",
     "react-router": "7.18.5",
+    "server-only": "^0.0.1",
     "zod": "^4.1.0"
   },
   "overrides": {
@@ -55,6 +59,7 @@
     "@testing-library/react": "^16.3.0",
     "@types/leaflet": "^1.9.20",
     "@types/node": "^22.19.0",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "eslint": "^10.14.0",
@@ -65,6 +70,7 @@
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.72.1",
     "vite": "^6.4.5",
-    "vitest": "^4.1.12"
+    "vitest": "^4.1.12",
+    "tsx": "^4.23.15"
   }
 }
