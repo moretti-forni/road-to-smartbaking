@@ -36,6 +36,7 @@ import {
 import { statuses, Visibility } from '../components/admin/fields';
 import { ShopEditor } from '../components/admin/shop-editor';
 import { LoadStoryEditor, StoryEditor, type StoryGroup } from '../components/admin/story-editor';
+import { VenueReports } from '../components/admin/venue-reports';
 import { Dashboard } from '../components/admin/dashboard';
 import { RequestEditor } from '../components/admin/request-editor';
 import styles from './admin.module.css';
@@ -319,7 +320,7 @@ function Studio({ token, onSignOut }: { token: string; onSignOut: () => void }) 
     <div className={styles.shell}>
       <aside className={styles.rail}>
         <div className={styles.brand}>
-          <img src={publicPath('/moretti-symbol.svg')} alt="" width="34" height="34" />
+          <img src={publicPath('/moretti-arch.svg')} alt="" width="34" height="34" />
           <div>
             RoadToSmartBaking<small>Marketing Studio</small>
           </div>
@@ -382,24 +383,27 @@ function Studio({ token, onSignOut }: { token: string; onSignOut: () => void }) 
               </button>
             </div>
           ) : dashboardQueries.every((query) => query.isSuccess) ? (
-            <Dashboard
-              shops={
-                shops.data?.flatMap((record) =>
-                  record.kind === 'shops' ? [record.data.liveShop ?? record.data] : [],
-                ) ?? []
-              }
-              stories={
-                stories.data?.flatMap((record) =>
-                  record.kind === 'stories' ? [record.data] : [],
-                ) ?? []
-              }
-              requests={
-                requests.data?.flatMap((record) =>
-                  record.kind === 'requests' ? [record.data] : [],
-                ) ?? []
-              }
-              onOpen={navigate}
-            />
+            <>
+              <VenueReports token={token} />
+              <Dashboard
+                shops={
+                  shops.data?.flatMap((record) =>
+                    record.kind === 'shops' ? [record.data.liveShop ?? record.data] : [],
+                  ) ?? []
+                }
+                stories={
+                  stories.data?.flatMap((record) =>
+                    record.kind === 'stories' ? [record.data] : [],
+                  ) ?? []
+                }
+                requests={
+                  requests.data?.flatMap((record) =>
+                    record.kind === 'requests' ? [record.data] : [],
+                  ) ?? []
+                }
+                onOpen={navigate}
+              />
+            </>
           ) : (
             <p className={styles.panel} role="status">
               Loading dashboard…

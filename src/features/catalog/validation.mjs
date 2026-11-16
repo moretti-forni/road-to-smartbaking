@@ -15,7 +15,7 @@ const slug = z
   .string()
   .max(120)
   .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
-const category = z.enum(['pizza', 'bakery', 'hotel', 'other']);
+const category = z.enum(['pizza', 'restaurant', 'qsr', 'bakery', 'hotel', 'other']);
 const location = {
   category,
   address: text(300),
@@ -26,6 +26,7 @@ const location = {
 
 export const requestInput = z.object({
   ...location,
+  category: category.exclude(['other']),
   businessName: text(160),
   oven: text(120),
   contactName: text(160),
@@ -122,3 +123,9 @@ export const storyDraftBatch = z
     newRecord: z.boolean(),
   })
   .refine(({ it, en }) => it || en, 'Add at least one language version');
+
+export const reportInput = z.object({
+  shop: slug,
+  reason: z.enum(['incorrect', 'closed', 'inappropriate', 'other']),
+  details: text(2000),
+});

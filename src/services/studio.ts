@@ -2,7 +2,7 @@ import { isAxiosError } from 'axios';
 import { publicHttp } from './http';
 
 export type Language = 'it' | 'en';
-export type Category = 'pizza' | 'bakery' | 'hotel' | 'other';
+export type Category = 'pizza' | 'restaurant' | 'qsr' | 'bakery' | 'hotel' | 'other';
 export type Shop = {
   id: string;
   slug: string;

@@ -12,6 +12,19 @@ import { resources } from '../src/i18n';
 import { existsSync } from 'node:fs';
 
 describe('discovery query and filtering', () => {
+  it('combines selected categories with OR and ignores unsupported categories', () => {
+    const query = parseQuery(new URLSearchParams('kind=pizza,bakery,unknown'));
+    const result = filterRestaurants(restaurants, query);
+    expect(query.kind).toBe('pizza,bakery');
+    expect(result.length).toBeGreaterThan(0);
+    expect(result.every(({ kind }) => kind === 'pizza' || kind === 'bakery')).toBe(true);
+    expect(result.some(({ kind }) => kind === 'pizza')).toBe(true);
+    expect(result.some(({ kind }) => kind === 'bakery')).toBe(true);
+    expect(parseQuery(new URLSearchParams('kind=other')).kind).toBe('all');
+    expect(filterRestaurants(restaurants, parseQuery(new URLSearchParams()))).toHaveLength(
+      restaurants.length,
+    );
+  });
   it('rejects malformed bounds and coordinates', () => {
     expect(
       parseQuery(new URLSearchParams('bounds=nan,1,2,3&lat=100&lng=1&sort=distance')),

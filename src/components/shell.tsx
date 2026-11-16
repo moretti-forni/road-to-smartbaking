@@ -14,7 +14,7 @@ import { publicPath } from '../utils/public-path';
 export function Brand({ footer = false }: { footer?: boolean }) {
   return (
     <span className={`brand ${footer ? 'brand-footer' : ''}`}>
-      <img src={publicPath('/moretti-symbol.svg')} alt="" width="34" height="34" />
+      <img src={publicPath('/moretti-arch-transparent.svg')} alt="" width="34" height="34" />
       <span className="brand-name">
         <strong>#RoadToSmartBaking</strong>
       </span>

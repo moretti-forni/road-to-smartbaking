@@ -653,21 +653,26 @@ hr {
   line-height: 1.35;
   pointer-events: none;
 }
-.map-place-popup .leaflet-popup-content-wrapper {
+.discovery-map .leaflet-popup-content-wrapper {
   overflow: hidden;
   border-radius: 10px;
   background: #292927;
+  color: #f8f4eb;
   box-shadow: 0 12px 30px #20201e2e;
 }
-.map-place-popup .leaflet-popup-content {
+.discovery-map .leaflet-popup-content {
   width: min(280px, calc(100vw - 64px)) !important;
   margin: 0;
 }
-.map-place-popup .leaflet-popup-tip {
+.discovery-map .leaflet-popup-tip {
   background: #292927;
 }
-.map-place-popup .leaflet-popup-close-button {
+.discovery-map .leaflet-popup-close-button {
   color: #f8f4eb !important;
+}
+.discovery-map .map-place-card {
+  background: #292927;
+  color: #f8f4eb;
 }
 .map-place-card img {
   display: block;
@@ -2465,4 +2470,107 @@ hr {
     transition: none !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Shared category accents preserve the warm, dark discovery palette. */
+.category-pizza {
+  --category-color: #a93d32;
+}
+.category-restaurant {
+  --category-color: #806036;
+}
+.category-qsr {
+  --category-color: #726222;
+}
+.category-bakery {
+  --category-color: #4b6844;
+}
+.category-hotel {
+  --category-color: #665181;
+}
+.pill[class*='category-'] {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--category-color);
+}
+.pill[class*='category-'].active {
+  color: #fff;
+  background: var(--category-color);
+  border-color: var(--category-color);
+}
+.oven-brand {
+  display: block;
+  object-fit: contain;
+  margin-bottom: 14px;
+}
+.brand > img {
+  object-fit: contain;
+  border-radius: 5px;
+}
+.card-grid {
+  align-items: start;
+}
+
+.discovery-map .venue-cluster {
+  display: grid;
+  place-items: center;
+  color: #f8f4eb;
+  background: #34342f;
+  border: 2px solid #cda66d;
+  border-radius: 50%;
+  box-shadow: 0 3px 12px #0004;
+  font: 600 13px var(--sans);
+}
+.discovery-map .moretti-map-marker {
+  display: grid;
+  place-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.venue-report-button {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 22px 18px;
+  padding: 4px 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  color: var(--red);
+  font-size: 11px;
+}
+.report-dialog {
+  color: #f8f4eb;
+  background: #292927;
+  border: 1px solid #4a4942;
+  max-height: 85dvh;
+  overflow: auto;
+  width: min(92vw, 540px);
+}
+.report-dialog::backdrop {
+  background: #0009;
+}
+.report-dialog h2 {
+  padding-right: 30px;
+}
+.staff-reports {
+  padding: 24px;
+  border: 1px solid #4a4942;
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+.staff-reports article {
+  padding: 14px 0;
+  border-top: 1px solid #4a4942;
+}
+.staff-reports p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }

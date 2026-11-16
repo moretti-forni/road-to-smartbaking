@@ -1,6 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
+import { CategoryIcon, categoryColors } from './category-icon';
 import { useParams } from 'next/navigation';
 import { ArrowUpRight, Clock3, Heart, MapPin } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -9,6 +11,7 @@ import { shopImage, type Restaurant } from '../data/restaurants';
 import { resolveOvens } from '../data/ovens';
 import { useSaved } from './providers';
 import styles from './cards.module.css';
+import { VenueReport } from './venue-report';
 
 export function SaveButton({ id, label }: { id: string; label: string }) {
   const { ids, toggle, ready } = useSaved();
@@ -39,6 +42,8 @@ export function RestaurantCard({
 }) {
   const { locale } = useParams<{ locale: string; slug: string }>();
   const { t } = useTranslation();
+  const [imageFailed, setImageFailed] = useState(false);
+  const hasImage = Boolean(restaurant.image) && !imageFailed;
   return (
     <article
       id={`venue-${restaurant.id}`}
@@ -51,25 +56,32 @@ export function RestaurantCard({
         href={`/${locale}/restaurants/${restaurant.id}`}
         aria-label={restaurant.name}
       />
-      <div className={styles.imageWrap}>
-        {restaurant.image && (
-          <img
-            src={shopImage(restaurant.image, 'cards')}
-            alt={
-              restaurant.imageAlt?.[locale === 'en' ? 'en' : 'it'] ??
-              `${restaurant.name} · #RoadToSmartBaking`
-            }
-            loading="lazy"
-            width="600"
-            height="400"
-          />
-        )}
-        <span className={styles.imageTag}>#RoadToSmartBaking</span>
-        <SaveButton id={restaurant.id} label={restaurant.name} />
-      </div>
+      {hasImage && (
+        <div className={styles.imageWrap}>
+          {restaurant.image && (
+            <img
+              onError={() => setImageFailed(true)}
+              src={shopImage(restaurant.image, 'cards')}
+              alt={
+                restaurant.imageAlt?.[locale === 'en' ? 'en' : 'it'] ??
+                `${restaurant.name} · #RoadToSmartBaking`
+              }
+              loading="lazy"
+              width="600"
+              height="400"
+            />
+          )}
+          <span className={styles.imageTag}>#RoadToSmartBaking</span>
+          <SaveButton id={restaurant.id} label={restaurant.name} />
+        </div>
+      )}
+      {!hasImage && <SaveButton id={restaurant.id} label={restaurant.name} />}
       <div className={styles.body}>
         <div className={styles.metadata}>
-          <span>{t(restaurant.kind)}</span>
+          <span style={{ color: categoryColors[restaurant.kind] }}>
+            <CategoryIcon kind={restaurant.kind} />
+            {t(restaurant.kind)}
+          </span>
         </div>
         <h3>{restaurant.name}</h3>
         {restaurant.oven && <OvenModels oven={restaurant.oven} />}
@@ -94,6 +106,7 @@ export function RestaurantCard({
           <ArrowUpRight size={16} aria-hidden="true" />
         </a>
       </div>
+      <VenueReport id={restaurant.id} name={restaurant.name} />
     </article>
   );
 }

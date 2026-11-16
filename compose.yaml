@@ -14,6 +14,8 @@ services:
       - ./src/server/db/migrations/001-initial-schema.sql:/docker-entrypoint-initdb.d/001-initial-schema.sql:ro
       - ./src/server/db/migrations/002-frontend-import-metadata.sql:/docker-entrypoint-initdb.d/002-frontend-import-metadata.sql:ro
       - ./src/server/db/migrations/003-content-drafts.sql:/docker-entrypoint-initdb.d/003-content-drafts.sql:ro
+      - ./src/server/db/migrations/004-venue-categories.sql:/docker-entrypoint-initdb.d/004-venue-categories.sql:ro
+      - ./src/server/db/migrations/005-venue-reports.sql:/docker-entrypoint-initdb.d/005-venue-reports.sql:ro
     healthcheck:
       test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "rtsm", "-d", "rtsm"]
       interval: 5s

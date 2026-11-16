@@ -22,7 +22,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta name="theme-color" content="#20201E" />
         <meta name="robots" content="noindex,nofollow" />
-        <link rel="icon" href={publicPath('/moretti-symbol.svg')} type="image/svg+xml" />
+        <link rel="icon" href={publicPath('/moretti-arch.svg')} type="image/svg+xml" />
         <link rel="manifest" href={publicPath('/manifest.webmanifest')} />
         <Meta />
         <Links />

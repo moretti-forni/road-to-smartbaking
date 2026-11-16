@@ -53,3 +53,35 @@ describe('Next.js API adapter', () => {
     expect(JSON.stringify(await response.json())).not.toContain('private SQL');
   });
 });
+
+describe('venue report submissions', () => {
+  const report = (body: unknown) =>
+    serveApi(
+      request('reports', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(body),
+      }),
+    );
+  it('validates reports before saving and restricts staff access', async () => {
+    expect((await report({ shop: 'fico', reason: 'incorrect', details: ' ' })).status).toBe(400);
+    expect(query).not.toHaveBeenCalled();
+    expect((await serveApi(request('admin/reports'))).status).toBe(401);
+    expect(query).not.toHaveBeenCalled();
+  });
+  it('persists reports for published venues and rejects missing venues', async () => {
+    query.mockResolvedValueOnce({ rows: [{ id: 'receipt' }] });
+    const response = await report({
+      shop: 'fico',
+      reason: 'incorrect',
+      details: 'Address has changed',
+    });
+    expect(response.status).toBe(201);
+    expect(await response.json()).toEqual({ id: 'receipt' });
+    expect(query.mock.calls[0][1]).toEqual(['fico', 'incorrect', 'Address has changed']);
+    query.mockResolvedValueOnce({ rows: [] });
+    expect((await report({ shop: 'missing', reason: 'closed', details: 'Closed' })).status).toBe(
+      404,
+    );
+  });
+});

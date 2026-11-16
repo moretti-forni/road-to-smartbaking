@@ -17,7 +17,7 @@ npm run dev
 
 Open [Italian](http://127.0.0.1:5173/it), [English](http://127.0.0.1:5173/en), or [Studio](http://127.0.0.1:5173/admin). Website and API run on port 5173 in the same process. There is no separate backend installation or API server.
 
-The isolated Compose project is `roadtosmartbaking-next`, with its own `rtsm_next_postgres` volume and port **5434**. It initializes all three SQL migrations on a fresh volume. Do not point `DATABASE_URL` at an existing production database. Keep `.env.local` private. Compose overrides must be supplied using `--env-file .env.local`.
+The isolated Compose project is `roadtosmartbaking-next`, with its own `rtsm_next_postgres` volume and port **5434**. It initializes all five SQL migrations on a fresh volume. Do not point `DATABASE_URL` at an existing production database. Keep `.env.local` private. Compose overrides must be supplied using `--env-file .env.local`.
 
 The seed command requires `--local-demo` (provided by the npm script) and a loopback database URL. It preserves existing records and publication decisions. An empty database produces empty public lists until content is imported or published.
 
@@ -94,3 +94,12 @@ npm run mobile:android
 Add the actual native origins to server-side `RTSM_ALLOWED_ORIGINS`, for example `capacitor://localhost,http://localhost`. Native apps call the same API; they never connect directly to PostgreSQL. The mobile output remains `build/client`. Native device packaging requires Node 22+, Xcode/Android SDK, and the existing platform projects.
 
 Older designs under `docs/references/` describe prior architecture decisions; this README and `docs/technology-architecture.md` describe the current branch.
+
+For an existing local Next.js database, apply the venue category and reporting migrations before using the new registration categories or report form:
+
+```sh
+docker compose --env-file .env.local exec -T db psql -U rtsm -d rtsm -v ON_ERROR_STOP=1 < src/server/db/migrations/004-venue-categories.sql
+docker compose --env-file .env.local exec -T db psql -U rtsm -d rtsm -v ON_ERROR_STOP=1 < src/server/db/migrations/005-venue-reports.sql
+```
+
+Existing `other` records are retained for staff reclassification. New public registrations use the five visible categories. Venue reports appear on the Studio dashboard; they do not send email. The branded Mondolfo map marker is approximate until exact headquarters coordinates are verified.

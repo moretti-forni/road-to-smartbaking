@@ -6,7 +6,7 @@ export const restaurantSchema = z.object({
   name: z.string(),
   city: z.string(),
   address: z.string(),
-  kind: z.enum(['pizza', 'bakery', 'hotel', 'other']),
+  kind: z.enum(['pizza', 'restaurant', 'qsr', 'bakery', 'hotel', 'other']),
   image: z.string(),
   imageAlt: z.object({ it: z.string().nullable(), en: z.string().nullable() }).optional(),
   website: z.string().url().optional(),

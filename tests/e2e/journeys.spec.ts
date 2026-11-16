@@ -4,7 +4,7 @@ test('discovery search, empty recovery, restaurant details and saved persistence
   page,
 }, testInfo) => {
   await page.goto('/en');
-  await expect(page.getByRole('heading', { name: /Discover the/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Discover places with/ })).toBeVisible();
   const search = page.getByRole('textbox', { name: 'Search a place or a city' });
   await search.fill('no-such-city');
   await search.press('Enter');
@@ -74,7 +74,7 @@ test('responsive layout and navigation work without horizontal overflow', async 
     .locator(testInfo.project.name === 'mobile' ? '.mobile-tab-bar' : '.main-nav')
     .getByRole('link', { name: /Explore/ })
     .click();
-  await expect(page.getByRole('heading', { name: /Discover the/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Discover places with/ })).toBeVisible();
   await expect(page.locator('.leaflet-container')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Locations on the map' })).toBeVisible();
   await expect(
@@ -117,4 +117,37 @@ test('denied location and offline map retain manual discovery', async ({ page })
   await search.fill('Singapore');
   await search.press('Enter');
   await expect(page.locator('#places article')).toHaveCount(1);
+});
+
+test('category selections combine, image failures collapse, and reports stay attached to their venue', async ({
+  page,
+}) => {
+  await page.route('**/shops-webp/cards/**', (route) => route.abort());
+  await page.route('**/api/v1/reports', (route) => route.abort());
+  await page.goto('/en');
+  const toolbar = page.locator('.search-toolbar');
+  await expect(toolbar.getByRole('button', { name: 'All places', exact: true })).toHaveCount(0);
+  await toolbar.getByRole('button', { name: 'Pizzerias', exact: true }).click();
+  await toolbar.getByRole('button', { name: 'Bakery', exact: true }).click();
+  await expect(toolbar.getByRole('button', { name: 'Pizzerias', exact: true })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+  await expect(toolbar.getByRole('button', { name: 'Bakery', exact: true })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+  await expect(page).toHaveURL(/kind=pizza%2Cbakery/);
+  const venue = page.locator('#venue-fico');
+  await venue.scrollIntoViewIfNeeded();
+  await expect(venue.locator('img[src*="shops-webp"]')).toHaveCount(0);
+  await venue.getByRole('button', { name: 'Report', exact: true }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByText('FICO', { exact: true })).toBeVisible();
+  await dialog.getByLabel('Details').fill('The address needs review.');
+  await dialog.getByRole('button', { name: 'Send request' }).click();
+  await expect(dialog.getByRole('alert')).toContainText(/demo|Please try again/);
+  await dialog.getByRole('button', { name: 'Close', exact: true }).click();
+  await expect(dialog).not.toBeVisible();
 });

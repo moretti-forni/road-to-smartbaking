@@ -5,7 +5,7 @@ import '../styles/global.css';
 export const metadata: Metadata = {
   title: 'RoadToSmartBaking',
   robots: { index: false, follow: false },
-  icons: { icon: '/moretti-symbol.svg' },
+  icons: { icon: '/moretti-arch.svg', apple: '/moretti-arch-180.png' },
   manifest: '/manifest.webmanifest',
 };
 export const viewport: Viewport = {

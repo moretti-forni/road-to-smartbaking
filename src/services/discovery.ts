@@ -125,9 +125,11 @@ export function parseQuery(params: URLSearchParams): DiscoveryQuery {
   return {
     search: params.get('q')?.trim() ?? '',
     city: params.get('city')?.trim() || undefined,
-    kind: ['pizza', 'bakery', 'hotel', 'other'].includes(params.get('kind') ?? '')
-      ? params.get('kind')!
-      : 'all',
+    kind:
+      (params.get('kind') ?? '')
+        .split(',')
+        .filter((kind) => ['pizza', 'restaurant', 'qsr', 'bakery', 'hotel'].includes(kind))
+        .join(',') || 'all',
     bounds: validBounds
       ? {
           south: boundsValues[0],
@@ -162,7 +164,7 @@ export function filterRestaurants(records: Restaurant[], query: DiscoveryQuery) 
           query.search,
         ) &&
         (!query.city || restaurant.city === query.city) &&
-        (query.kind === 'all' || restaurant.kind === query.kind) &&
+        (query.kind === 'all' || query.kind.split(',').includes(restaurant.kind)) &&
         (!bounds ||
           (restaurant.lat >= bounds.south &&
             restaurant.lat <= bounds.north &&

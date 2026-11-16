@@ -146,9 +146,10 @@ export function ListingRequestButton({ variant = 'nav' }: ListingRequestButtonPr
                           {t('listingChoose')}
                         </option>
                         <option value="pizza">{t('pizza')}</option>
+                        <option value="restaurant">{t('restaurant')}</option>
+                        <option value="qsr">{t('qsr')}</option>
                         <option value="bakery">{t('bakery')}</option>
                         <option value="hotel">{t('hotel')}</option>
-                        <option value="other">{t('listingOther')}</option>
                       </select>
                     </label>
                     <label>
@@ -200,6 +201,7 @@ export function ListingRequestButton({ variant = 'nav' }: ListingRequestButtonPr
 
                   <label>
                     <span>{t('listingNotes')}</span>
+                    <small>{t('socialGuidance')}</small>
                     <textarea name="notes" rows={3} />
                   </label>
 

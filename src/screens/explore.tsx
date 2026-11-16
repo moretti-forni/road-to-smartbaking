@@ -13,6 +13,7 @@ import {
 import { useSearchParams } from '../lib/navigation';
 import { ArrowDown, LocateFixed, MapPin, Navigation, Search, Store, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { CategoryIcon } from '../components/category-icon';
 import { RestaurantCard } from '../components/cards';
 import {
   filterRestaurants,
@@ -26,7 +27,7 @@ import {
 import { useShops } from '../services/catalog';
 
 const DiscoveryMap = lazy(() => import('../components/discovery-map'));
-const venueKinds = ['all', 'pizza', 'bakery', 'hotel', 'other'] as const;
+const venueKinds = ['pizza', 'restaurant', 'qsr', 'bakery', 'hotel'] as const;
 export function meta() {
   return [
     { title: 'Esplora · RoadToSmartBaking' },
@@ -261,10 +262,20 @@ export default function Explore() {
               <button
                 key={kind}
                 type="button"
-                className={`pill ${query.kind === kind ? 'active' : ''}`}
-                aria-pressed={query.kind === kind}
-                onClick={() => update({ kind: kind === 'all' ? null : kind, bounds: null })}
+                className={`pill category-${kind} ${query.kind.split(',').includes(kind) ? 'active' : ''}`}
+                aria-pressed={query.kind.split(',').includes(kind)}
+                onClick={() => {
+                  const selected = query.kind === 'all' ? [] : query.kind.split(',');
+                  const next = selected.includes(kind)
+                    ? selected.filter((item) => item !== kind)
+                    : [...selected, kind];
+                  update({
+                    kind: venueKinds.filter((item) => next.includes(item)).join(',') || null,
+                    bounds: null,
+                  });
+                }}
               >
+                <CategoryIcon kind={kind} />
                 {t(kind)}
               </button>
             ))}
@@ -329,10 +340,20 @@ export default function Explore() {
               <button
                 key={kind}
                 type="button"
-                className={`pill ${query.kind === kind ? 'active' : ''}`}
-                aria-pressed={query.kind === kind}
-                onClick={() => update({ kind: kind === 'all' ? null : kind, bounds: null })}
+                className={`pill category-${kind} ${query.kind.split(',').includes(kind) ? 'active' : ''}`}
+                aria-pressed={query.kind.split(',').includes(kind)}
+                onClick={() => {
+                  const selected = query.kind === 'all' ? [] : query.kind.split(',');
+                  const next = selected.includes(kind)
+                    ? selected.filter((item) => item !== kind)
+                    : [...selected, kind];
+                  update({
+                    kind: venueKinds.filter((item) => next.includes(item)).join(',') || null,
+                    bounds: null,
+                  });
+                }}
               >
+                <CategoryIcon kind={kind} />
                 {t(kind)}
               </button>
             ))}

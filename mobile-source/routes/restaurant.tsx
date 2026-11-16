@@ -1,6 +1,6 @@
 import { fetchShop, useShops } from '../services/catalog';
 import { Link, useParams } from 'react-router';
-import { ArrowLeft, ArrowUpRight, MapPin, Navigation, Flame } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, MapPin, Navigation } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { Route } from './+types/restaurant';
 import { shopImage } from '../data/restaurants';
@@ -141,7 +141,13 @@ function Detail({
           {restaurant.oven && (
             <div className="oven-panel">
               <div className="oven-panel-copy">
-                <Flame size={28} />
+                <img
+                  className="oven-brand"
+                  src="/moretti-symbol.svg"
+                  alt="Moretti Forni"
+                  width="40"
+                  height="40"
+                />
                 <span className="eyebrow">{t('oven')}</span>
                 <h3>{restaurant.oven}</h3>
                 <p>{t('ovenText')}</p>

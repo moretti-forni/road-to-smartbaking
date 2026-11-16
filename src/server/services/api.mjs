@@ -33,6 +33,25 @@ export async function handleApi(db, { method, url, authorization, readBody }, st
       return { body: { items: await data.listShops(db, schema.shopQuery.parse(query)) } };
     case 'GET api/v1/stories':
       return { body: { items: await data.listStories(db, schema.storyQuery.parse(query)) } };
+    case 'POST api/v1/reports': {
+      const input = schema.reportInput.parse(await readBody());
+      const result = await db.query(
+        `INSERT INTO rtsm_reports (shop_id, reason, details)
+        SELECT id, $2, $3 FROM rtsm_shop WHERE slug = $1 AND published_at <= now() AND suspended_at IS NULL
+        RETURNING id`,
+        [input.shop, input.reason, input.details],
+      );
+      return { status: 201, body: found(result.rows[0], 'Published shop not found') };
+    }
+    case 'GET api/v1/admin/reports': {
+      const { limit, offset } = schema.pageInput.parse(query);
+      const result = await db.query(
+        `SELECT r.id, s.name, s.slug, r.reason, r.details, r.created_at AS "createdAt"
+        FROM rtsm_reports r JOIN rtsm_shop s ON s.id = r.shop_id ORDER BY r.created_at DESC LIMIT $1 OFFSET $2`,
+        [limit, offset],
+      );
+      return { body: { items: result.rows } };
+    }
     case 'POST api/v1/requests':
       return {
         status: 201,

@@ -4,7 +4,7 @@ import { imageUrl } from '../../data/story-index';
 import { cloneElement, useId, type ReactElement, type ReactNode } from 'react';
 import styles from '../../screens/admin.module.css';
 
-export const categories = ['pizza', 'bakery', 'hotel', 'other'] as const;
+export const categories = ['pizza', 'restaurant', 'qsr', 'bakery', 'hotel', 'other'] as const;
 export const statuses = {
   submitted: 'New',
   in_review: 'In review',
