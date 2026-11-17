@@ -3,6 +3,9 @@ import { parseArgs } from 'node:util';
 import pg from 'pg';
 import { restaurants, restaurantSchema } from '../src/data/restaurants.ts';
 
+if (process.env.RTSM_DB_SCHEMA)
+  throw new Error('The local demo importer must not target a shared schema.');
+
 const { values } = parseArgs({ options: { 'local-demo': { type: 'boolean' } } });
 const connection = new URL(
   process.env.DATABASE_URL ?? 'postgresql://rtsm:rtsm_local_only@127.0.0.1:5434/rtsm',

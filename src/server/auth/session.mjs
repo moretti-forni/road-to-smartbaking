@@ -31,6 +31,8 @@ export class AuthError extends Error {
   }
 }
 export async function requestCode(db, input, deliver = sendStaffCode) {
+  if (process.env.RTSM_AUTH_MODE === 'managed')
+    throw new AuthError(503, 'Managed staff sign-in is not configured yet.');
   const { email } = z.object({ email: staffEmail }).parse(input);
   const id = randomUUID();
   const code = String(randomInt(0, 1000000)).padStart(6, '0');
@@ -78,6 +80,8 @@ export async function requestCode(db, input, deliver = sendStaffCode) {
   return { challenge: id };
 }
 export async function verifyCode(db, input) {
+  if (process.env.RTSM_AUTH_MODE === 'managed')
+    throw new AuthError(503, 'Managed staff sign-in is not configured yet.');
   const { email, challenge, code } = z
     .object({ email: staffEmail, challenge: z.uuid(), code: z.string().regex(/^\d{6}$/) })
     .parse(input);
@@ -127,6 +131,7 @@ export function cookieToken(request) {
   return value && /^[a-f0-9]{64}$/.test(value) ? value : undefined;
 }
 export async function readSession(db, request) {
+  if (process.env.RTSM_AUTH_MODE === 'managed') return undefined;
   const token = cookieToken(request);
   if (!token) return undefined;
   const {
@@ -138,6 +143,7 @@ export async function readSession(db, request) {
   return row;
 }
 export async function revokeSession(db, request) {
+  if (process.env.RTSM_AUTH_MODE === 'managed') return;
   const token = cookieToken(request);
   if (token) await db.query('DELETE FROM rtsm_staff_session WHERE token_hash = $1', [hash(token)]);
 }

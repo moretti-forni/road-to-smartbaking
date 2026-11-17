@@ -1,66 +1,93 @@
 import { createShop, saveStory, updateShop } from '../repositories/catalog.mjs';
 
-const columns = 'kind, slug, language, payload, revision, saved_at AS "savedAt"';
-
+// Table names come exclusively from this fixed map, never from request input.
+const tables = { shop: 'rtsm_shop', story: 'rtsm_story' };
+function tableFor(kind) {
+  if (!tables[kind]) throw new Error('Unknown draft kind');
+  return tables[kind];
+}
+function columns(kind) {
+  return `'${kind}' AS kind, slug, ${kind === 'shop' ? "''" : 'language'} AS language,
+    draft_payload AS payload, draft_revision AS revision, draft_saved_at AS "savedAt"`;
+}
 export async function listDrafts(db, { limit, offset }) {
   return (
     await db.query(
-      `SELECT ${columns} FROM rtsm_content_draft ORDER BY kind, slug, language LIMIT $1 OFFSET $2`,
+      `SELECT * FROM (
+    SELECT ${columns('shop')} FROM rtsm_shop WHERE draft_payload IS NOT NULL
+    UNION ALL SELECT ${columns('story')} FROM rtsm_story WHERE draft_payload IS NOT NULL
+  ) drafts ORDER BY kind, slug, language LIMIT $1 OFFSET $2`,
       [limit, offset],
     )
   ).rows;
 }
-
 export async function storyEditorVersions(db, slug) {
   const { rows } = await db.query(
-    `SELECT COALESCE(d.language, s.language) AS language, s.slug, d.slug AS "draftSlug",
-       s.title, s.summary, s.category, s.blocks, s.cover_image_url AS "coverImageUrl",
-       s.cover_image_alt AS "coverImageAlt", s.source_url AS "sourceUrl",
-       s.source_published_at AS "sourcePublishedAt",
-       COALESCE(s.published_at <= now() AND (s.expires_at IS NULL OR s.expires_at > now()), false) AS visible,
-       d.payload, d.revision AS "draftRevision"
-     FROM (SELECT * FROM rtsm_story WHERE slug = $1) s
-     FULL JOIN (SELECT * FROM rtsm_content_draft WHERE kind = 'story' AND slug = $1) d USING (language)
-     ORDER BY language DESC`,
+    `SELECT language, slug, title, summary, category, blocks,
+    cover_image_url AS "coverImageUrl", cover_image_alt AS "coverImageAlt", source_url AS "sourceUrl",
+    source_published_at AS "sourcePublishedAt",
+    COALESCE(published_at <= now() AND (expires_at IS NULL OR expires_at > now()), false) AS visible,
+    draft_payload AS payload, draft_revision AS "draftRevision"
+    FROM rtsm_story WHERE slug = $1 ORDER BY language DESC`,
     [slug],
   );
-  return rows.map(({ payload, draftSlug, ...version }) => ({
+  return rows.map(({ payload, ...version }) => ({
     ...version,
     ...payload,
-    slug: draftSlug ?? version.slug,
     visible: version.visible,
   }));
 }
-
 export async function readDraft(db, { kind, slug, language }, lock = false) {
   return (
     await db.query(
-      `SELECT ${columns} FROM rtsm_content_draft WHERE kind = $1 AND slug = $2 AND language = $3
-     ${lock ? 'FOR UPDATE' : ''}`,
-      [kind, slug, language],
+      `SELECT ${columns(kind)} FROM ${tableFor(kind)}
+    WHERE slug = $1 ${kind === 'story' ? 'AND language = $2' : ''} AND draft_payload IS NOT NULL
+    ${lock ? 'FOR UPDATE' : ''}`,
+      kind === 'story' ? [slug, language] : [slug],
     )
   ).rows[0];
 }
-
-export async function saveDraft(db, { kind, slug, language, payload, revision, newRecord }) {
-  // A null revision creates a first draft. An existing draft requires its exact revision.
-  const params = [kind, slug, language, JSON.stringify(payload), revision, newRecord];
-  const { rows } = await db.query(
-    `WITH updated AS (
-      UPDATE rtsm_content_draft SET payload = $4, revision = gen_random_uuid(), saved_at = now()
-      WHERE kind = $1 AND slug = $2 AND language = $3 AND revision = $5::uuid
-      RETURNING ${columns}
-    ), inserted AS (
-      INSERT INTO rtsm_content_draft (kind, slug, language, payload)
-      SELECT $1, $2, $3, $4 WHERE $5::uuid IS NULL AND (NOT $6::boolean OR
-        CASE WHEN $1 = 'shop' THEN NOT EXISTS (SELECT 1 FROM rtsm_shop WHERE slug = $2)
-        ELSE NOT EXISTS (SELECT 1 FROM rtsm_story WHERE slug = $2)
-          AND NOT EXISTS (SELECT 1 FROM rtsm_content_draft WHERE kind = 'story' AND slug = $2) END)
-      ON CONFLICT DO NOTHING RETURNING ${columns}
-    ) SELECT * FROM updated UNION ALL SELECT * FROM inserted`,
-    params,
-  );
-  return rows[0];
+async function saveOnClient(db, { kind, slug, language, payload, revision, newRecord }) {
+  const table = tableFor(kind);
+  // Lock both first saves and updates, including a slug with no row yet.
+  await db.query('SELECT pg_advisory_xact_lock(hashtext($1))', [`${kind}:${slug}`]);
+  const existing = (await db.query(`SELECT id FROM ${table} WHERE slug = $1 LIMIT 1`, [slug]))
+    .rows[0];
+  if (newRecord && existing) return undefined;
+  const row = (
+    await db.query(
+      `SELECT id FROM ${table} WHERE slug = $1 ${kind === 'story' ? 'AND language = $2' : ''}`,
+      kind === 'story' ? [slug, language] : [slug],
+    )
+  ).rows[0];
+  if (!row) {
+    if (revision !== null) return undefined;
+    // New rows contain valid initial content but remain private until publication.
+    if (kind === 'shop') await createShop(db, { ...payload, slug, visible: false });
+    else await saveStory(db, { slug, language }, { ...payload, visible: false }, true);
+  }
+  return (
+    await db.query(
+      `UPDATE ${table} SET draft_payload = $2, draft_revision = gen_random_uuid(),
+    draft_saved_at = now() WHERE slug = $1 AND draft_revision IS NOT DISTINCT FROM $3::uuid
+    ${kind === 'story' ? 'AND language = $4' : ''} RETURNING ${columns(kind)}`,
+      [slug, JSON.stringify(payload), revision, ...(kind === 'story' ? [language] : [])],
+    )
+  ).rows[0];
+}
+export async function saveDraft(db, input) {
+  const client = await db.connect();
+  try {
+    await client.query('BEGIN');
+    const saved = await saveOnClient(client, input);
+    await client.query(saved ? 'COMMIT' : 'ROLLBACK');
+    return saved;
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
 }
 
 export async function saveStoryDrafts(db, entries) {
@@ -70,7 +97,7 @@ export async function saveStoryDrafts(db, entries) {
     await client.query('SELECT pg_advisory_xact_lock(hashtext($1))', [entries[0].slug]);
     const saved = [];
     for (const entry of entries) {
-      const result = await saveDraft(client, {
+      const result = await saveOnClient(client, {
         ...entry,
         newRecord: entry.newRecord && saved.length === 0,
       });
@@ -106,8 +133,9 @@ export async function publishDraft(db, key, revision) {
           (await createShop(client, { ...payload, slug: key.slug })))
         : await saveStory(client, key, payload);
     await client.query(
-      'DELETE FROM rtsm_content_draft WHERE kind = $1 AND slug = $2 AND language = $3',
-      [key.kind, key.slug, key.language],
+      `UPDATE ${tableFor(key.kind)} SET draft_payload = NULL, draft_revision = NULL, draft_saved_at = NULL
+       WHERE slug = $1 ${key.kind === 'story' ? 'AND language = $2' : ''}`,
+      key.kind === 'story' ? [key.slug, key.language] : [key.slug],
     );
     await client.query('COMMIT');
     return live;
