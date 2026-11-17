@@ -111,3 +111,7 @@ Next.js is pinned to 15.5.29 with a patched PostCSS override. See [Amplify setup
 The shared `morettihub-dev` deployment uses four content tables with embedded draft copies. Follow [shared PostgreSQL setup](docs/shared-postgres-setup.md); do not run the legacy migration chain against a fresh shared schema. Managed staff authentication remains a separate integration step.
 
 The initial shared catalog import is recorded in [the November 17 import report](docs/imports/2026-11-17-catalog-import.json): 43 shops (42 public) and 63 Italian stories, with bilingual shop descriptions and Italian article fallback for English routes.
+
+## Amplify private data transport
+
+Amplify is configured for Next.js SSR with an IAM-only VPC Lambda for public catalog reads, requests, and reports. See [private data setup](docs/amplify-private-data.md). Set `RTSM_DATA_FUNCTION_ARN` to enable this transport; local PostgreSQL workflows remain the default without it. Studio stays blocked until managed staff identity and staff data operations are integrated.

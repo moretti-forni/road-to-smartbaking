@@ -2,6 +2,7 @@ import { writeFile } from 'node:fs/promises';
 // Only non-secret runtime settings belong in Amplify deployment artifacts.
 const names = [
   'RTSM_RUNTIME_SECRET_ARN',
+  'RTSM_DATA_FUNCTION_ARN',
   'RTSM_AWS_REGION',
   'RTSM_APP_ORIGIN',
   'RTSM_DB_SCHEMA',
@@ -18,7 +19,10 @@ const names = [
   'NEXT_PUBLIC_MAP_ATTRIBUTION',
   'NEXT_PUBLIC_CARTO_BASEMAP_KEY',
 ];
-if (!process.env.RTSM_RUNTIME_SECRET_ARN || !process.env.RTSM_APP_ORIGIN)
+if (
+  (!process.env.RTSM_RUNTIME_SECRET_ARN && !process.env.RTSM_DATA_FUNCTION_ARN) ||
+  !process.env.RTSM_APP_ORIGIN
+)
   throw new Error('Configure RTSM_RUNTIME_SECRET_ARN and RTSM_APP_ORIGIN for the Amplify branch');
 if (new URL(process.env.RTSM_APP_ORIGIN).protocol !== 'https:')
   throw new Error('Amplify requires an HTTPS application origin');

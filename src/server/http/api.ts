@@ -1,4 +1,6 @@
 import 'server-only';
+import { invokeDataApi } from '../data/client.mjs';
+import { isPublicDataRoute } from '../services/public-api.mjs';
 import { loadRuntimeSecrets } from '../config/runtime.mjs';
 import { MediaError } from '../media/uploads.mjs';
 import { ZodError } from 'zod';
@@ -75,6 +77,26 @@ export async function serveApi(request: Request) {
       return json({ error: 'Origin not allowed' }, 403);
     if (privileged && !['GET', 'HEAD'].includes(request.method) && origin !== appOrigin)
       return json({ error: 'Origin required' }, 403);
+    if (process.env.RTSM_DATA_FUNCTION_ARN) {
+      if (path.startsWith('/api/v1/admin/'))
+        return json({ error: 'Staff authorization required' }, 401);
+      if (path.startsWith('/api/v1/auth/')) {
+        if (path === '/api/v1/auth/logout' && request.method === 'POST') {
+          headers['Set-Cookie'] = sessionHeader('');
+          return json({ ok: true });
+        }
+        if (path === '/api/v1/auth/session') return json({ error: 'Sign in required' }, 401);
+        return json({ error: 'Managed staff sign-in is not configured yet.' }, 503);
+      }
+      if (!isPublicDataRoute(request.method, request.url))
+        return json({ error: 'Endpoint not found' }, 404);
+      const result = await invokeDataApi({
+        method: request.method,
+        url: path + new URL(request.url).search,
+        body: request.method === 'POST' ? await readJson(request) : undefined,
+      });
+      return json(result.body, result.status);
+    }
     await loadRuntimeSecrets();
     if (path.startsWith('/api/v1/auth/')) {
       const db = getDb();

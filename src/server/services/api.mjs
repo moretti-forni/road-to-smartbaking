@@ -4,12 +4,9 @@ import * as drafts from './drafts.mjs';
 import * as data from '../repositories/catalog.mjs';
 import * as schema from '../../features/catalog/validation.mjs';
 
-export class ApiError extends Error {
-  constructor(status, message) {
-    super(message);
-    this.status = status;
-  }
-}
+import { ApiError } from './errors.mjs';
+export { ApiError } from './errors.mjs';
+import { handlePublicApi } from './public-api.mjs';
 
 function found(result, message = 'Record not found') {
   if (!result) throw new ApiError(404, message);
@@ -30,29 +27,15 @@ export async function handleApi(
     throw new ApiError(401, 'Staff authorization required');
   }
 
+  const publicResult = await handlePublicApi(db, { method, url, readBody });
+  if (publicResult) return publicResult;
+
   switch (`${method} ${route}`) {
     case 'POST api/v1/admin/media/:value':
       if (parts[4] === 'uploads') return { status: 201, body: await startUpload(await readBody()) };
       if (parts[4] === 'complete')
         return { status: 201, body: await finishUpload(await readBody()) };
       break;
-    case 'GET api/v1/health':
-      await db.query('SELECT 1');
-      return { body: { status: 'ok' } };
-    case 'GET api/v1/shops':
-      return { body: { items: await data.listShops(db, schema.shopQuery.parse(query)) } };
-    case 'GET api/v1/stories':
-      return { body: { items: await data.listStories(db, schema.storyQuery.parse(query)) } };
-    case 'POST api/v1/reports': {
-      const input = schema.reportInput.parse(await readBody());
-      const result = await db.query(
-        `INSERT INTO rtsm_reports (shop_id, reason, details)
-        SELECT id, $2, $3 FROM rtsm_shop WHERE slug = $1 AND published_at <= now() AND suspended_at IS NULL
-        RETURNING id`,
-        [input.shop, input.reason, input.details],
-      );
-      return { status: 201, body: found(result.rows[0], 'Published shop not found') };
-    }
     case 'GET api/v1/admin/reports': {
       const { limit, offset } = schema.pageInput.parse(query);
       const result = await db.query(
@@ -62,11 +45,6 @@ export async function handleApi(
       );
       return { body: { items: result.rows } };
     }
-    case 'POST api/v1/requests':
-      return {
-        status: 201,
-        body: await data.submitRequest(db, schema.requestInput.parse(await readBody())),
-      };
     case 'GET api/v1/admin/drafts':
       return { body: { items: await drafts.listDrafts(db, schema.pageInput.parse(query)) } };
     case 'GET api/v1/admin/story-drafts/:value': {
@@ -207,19 +185,6 @@ export async function handleApi(
           ),
         ),
       };
-  }
-
-  if (method === 'GET' && parts[0] === 'api' && parts[1] === 'v1') {
-    if (parts[2] === 'shops' && parts.length === 4) {
-      return { body: found(await data.getShop(db, schema.shopKey.parse(parts[3]))) };
-    }
-    if (parts[2] === 'stories' && parts.length === 5) {
-      return {
-        body: found(
-          await data.getStory(db, schema.storyKey.parse({ language: parts[3], slug: parts[4] })),
-        ),
-      };
-    }
   }
 
   throw new ApiError(404, 'Endpoint not found');

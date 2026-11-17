@@ -33,9 +33,11 @@
     "db:migrate:runtime": "node scripts/migrate-runtime.mjs",
     "db:setup:shared": "node --env-file-if-exists=.env.local scripts/setup-shared-db.mjs",
     "db:import:catalog": "node --import tsx --env-file-if-exists=.env.local scripts/import-shared-catalog.mjs",
-    "db:verify:catalog": "node --import tsx --env-file-if-exists=.env.local scripts/verify-shared-catalog.mjs"
+    "db:verify:catalog": "node --import tsx --env-file-if-exists=.env.local scripts/verify-shared-catalog.mjs",
+    "data:build": "node scripts/build-data-function.mjs"
   },
   "dependencies": {
+    "@aws-sdk/client-lambda": "^3.1170.0",
     "@aws-sdk/client-s3": "^3.1170.0",
     "@aws-sdk/client-secrets-manager": "^3.1170.0",
     "@aws-sdk/client-sesv2": "^3.1170.0",
@@ -81,6 +83,7 @@
     "@types/pg": "^8.23.1",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
+    "esbuild": "^0.25.12",
     "eslint": "^10.14.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^16.5.0",

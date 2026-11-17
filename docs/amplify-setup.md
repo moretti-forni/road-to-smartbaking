@@ -1,6 +1,6 @@
 # Amplify staging, SES and media setup
 
-Prepared only: these instructions do not provision AWS resources or change the existing live app.
+For the current shared-database deployment, follow [Amplify private data access](amplify-private-data.md). The SSR platform, roles and public data Lambda have been provisioned; no website deployment has been started. The older staging/SES/media options below remain reference guidance, not a claim those resources are active.
 
 ## 1. Application compatibility
 
@@ -33,15 +33,15 @@ This example assumes the existing direct PostgreSQL adapter has a valid network 
 
 Configure these **non-secret** Amplify branch environment variables:
 
-| Variable | Value |
-|---|---|
-| `RTSM_RUNTIME_SECRET_ARN` | ARN of the staging JSON secret |
-| `RTSM_AWS_REGION` | `eu-west-1` |
-| `RTSM_APP_ORIGIN` | Exact HTTPS staging origin |
-| `RTSM_MAIL_PROVIDER` | `ses` |
-| `SES_FROM` | Approved sender, e.g. `noreply-app@morettiforni.com` |
-| `S3_MEDIA_BUCKET` | Media stack output |
-| `MEDIA_PUBLIC_BASE_URL` | Media stack CloudFront URL |
+| Variable                  | Value                                                |
+| ------------------------- | ---------------------------------------------------- |
+| `RTSM_RUNTIME_SECRET_ARN` | ARN of the staging JSON secret                       |
+| `RTSM_AWS_REGION`         | `eu-west-1`                                          |
+| `RTSM_APP_ORIGIN`         | Exact HTTPS staging origin                           |
+| `RTSM_MAIL_PROVIDER`      | `ses`                                                |
+| `SES_FROM`                | Approved sender, e.g. `noreply-app@morettiforni.com` |
+| `S3_MEDIA_BUCKET`         | Media stack output                                   |
+| `MEDIA_PUBLIC_BASE_URL`   | Media stack CloudFront URL                           |
 
 Optional map settings are listed in `.env.example`. Do not set fixture mode or a development staff token. Do not put `DATABASE_URL`, OTP secrets, SMTP passwords or AWS keys into `NEXT_PUBLIC_*` variables or build artifacts.
 
