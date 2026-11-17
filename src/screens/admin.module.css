@@ -483,7 +483,7 @@
 }
 .heroImage {
   display: flex;
-  align-items: end;
+  align-items: flex-end;
   padding: 16px;
   min-height: 132px;
   border-radius: 13px;

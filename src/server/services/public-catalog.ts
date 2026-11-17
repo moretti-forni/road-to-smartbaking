@@ -1,4 +1,5 @@
 import 'server-only';
+import { loadRuntimeSecrets } from '../config/runtime.mjs';
 import { cache } from 'react';
 import { notFound } from 'next/navigation';
 import { handleApi } from './api.mjs';
@@ -10,6 +11,7 @@ export const getShop = cache(async (slug: string) => {
     const { publishedRestaurants } = await import('../../data/restaurants');
     return publishedRestaurants.find((item) => item.id === slug) ?? notFound();
   }
+  await loadRuntimeSecrets();
   const result = await handleApi(
     getDb(),
     {
@@ -35,6 +37,7 @@ export const getStory = cache(async (slug: string, locale: string) => {
     );
   }
   for (const language of locale === 'en' ? ['en', 'it'] : ['it']) {
+    await loadRuntimeSecrets();
     const result = await handleApi(
       getDb(),
       {

@@ -24,9 +24,19 @@
     "capacitor:copy:after": "node scripts/prepare-native-entry.mjs",
     "start": "next start --hostname 127.0.0.1 --port 5173",
     "mobile:build": "node --env-file-if-exists=.env.local scripts/build-mobile.mjs",
-    "db:seed": "node --import tsx --env-file-if-exists=.env.local scripts/seed-frontend.mjs --local-demo"
+    "db:seed": "node --import tsx --env-file-if-exists=.env.local scripts/seed-frontend.mjs --local-demo",
+    "db:migrate": "node --env-file-if-exists=.env.local scripts/migrate.mjs",
+    "db:status": "npm run db:migrate -- --status",
+    "test:postgres": "node --env-file-if-exists=.env.local scripts/test-postgres.mjs",
+    "test:auth:browser": "node --env-file-if-exists=.env.local scripts/test-auth-browser.mjs",
+    "staging:check": "node --env-file-if-exists=.env.staging scripts/check-staging.mjs",
+    "db:migrate:runtime": "node scripts/migrate-runtime.mjs"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1170.0",
+    "@aws-sdk/client-secrets-manager": "^3.1170.0",
+    "@aws-sdk/client-sesv2": "^3.1170.0",
+    "@aws-sdk/s3-presigned-post": "^3.1170.0",
     "@capacitor/android": "^8.6.0",
     "@capacitor/core": "^8.6.0",
     "@capacitor/ios": "^8.6.0",
@@ -37,7 +47,8 @@
     "isbot": "^5",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.468.0",
-    "next": "^16.4.6",
+    "next": "15.5.29",
+    "nodemailer": "^10.6.0",
     "pg": "^8.23.1",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
@@ -45,10 +56,14 @@
     "react-leaflet": "^5.0.0",
     "react-router": "7.18.5",
     "server-only": "^0.0.1",
+    "sharp": "^0.35.5",
     "zod": "^4.1.0"
   },
   "overrides": {
-    "minimatch": "^11.0.1"
+    "minimatch": "^11.0.1",
+    "next": {
+      "postcss": "8.5.33"
+    }
   },
   "devDependencies": {
     "@capacitor/cli": "^8.6.0",
@@ -59,6 +74,7 @@
     "@testing-library/react": "^16.3.0",
     "@types/leaflet": "^1.9.20",
     "@types/node": "^22.19.0",
+    "@types/nodemailer": "^8.0.2",
     "@types/pg": "^8.23.1",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
@@ -67,10 +83,10 @@
     "globals": "^16.5.0",
     "jsdom": "^26.1.0",
     "prettier": "^3.6.0",
+    "tsx": "^4.23.15",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.72.1",
     "vite": "^6.4.5",
-    "vitest": "^4.1.12",
-    "tsx": "^4.23.15"
+    "vitest": "^4.1.12"
   }
 }

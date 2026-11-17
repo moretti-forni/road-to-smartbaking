@@ -72,8 +72,9 @@ export type ListingRequest = {
   createdAt: string;
 };
 
-export function staffApi(token: string) {
-  const headers = { Authorization: `Bearer ${token}` };
+export function staffApi(identity: string) {
+  if (!identity) throw new Error('Sign in required');
+  const headers = {};
   return {
     async list<T>(path: string, signal?: AbortSignal, language?: Language) {
       const records: T[] = [];
@@ -113,9 +114,11 @@ export function apiError(error: unknown) {
       error,
     )
   ) {
-    if (error.response?.status === 401)
-      return 'Staff token was rejected. Sign in with the staff token configured for this application.';
     const details = error.response?.data;
+    if (error.response?.status === 401)
+      return error.config?.url?.includes('/auth/verify-code')
+        ? details?.error || 'Invalid or expired code.'
+        : 'Your session has expired. Sign in again with your Moretti Forni email.';
     if (details?.issues?.length) {
       return details.issues
         .map(({ path, message }) => `${path.join('.')} — ${message}`)

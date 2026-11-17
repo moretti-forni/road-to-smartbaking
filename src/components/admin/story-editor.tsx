@@ -1,4 +1,5 @@
 'use client';
+import { ImageUpload } from './image-upload';
 
 import { useState, type FormEvent } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -177,7 +178,7 @@ export function StoryEditor({
               <div key={locale} hidden={locale !== language} lang={locale}>
                 {enabled[locale] ? (
                   <>
-                    <StoryVersionEditor language={locale} story={story} />
+                    <StoryVersionEditor language={locale} story={story} api={api} />
                     {!story && (
                       <button
                         type="button"
@@ -264,7 +265,15 @@ function emptyBlock(type: Block['type']): Block {
   return type === 'image' ? { type, image: '', alt: '', aspectRatio: 1.8 } : { type, text: '' };
 }
 
-function StoryVersionEditor({ story, language }: { story?: StoryDetail; language: Language }) {
+function StoryVersionEditor({
+  story,
+  language,
+  api,
+}: {
+  story?: StoryDetail;
+  language: Language;
+  api: StaffApi;
+}) {
   const field = (name: string) => `${language}.${name}`;
   const category = story?.category ?? '#RoadToSmartBaking';
   const storyCategories = ['pizza', 'bakery', 'people'];
@@ -326,6 +335,7 @@ function StoryVersionEditor({ story, language }: { story?: StoryDetail; language
           onChange={(event) => setCover(event.target.value)}
         />
       </Field>
+      <ImageUpload api={api} onUploaded={({ url }) => setCover(url)} />
       <Field
         name={field('coverImageAlt')}
         label="Cover image alt text"
@@ -381,6 +391,12 @@ function StoryVersionEditor({ story, language }: { story?: StoryDetail; language
                   required
                 />
               </label>
+              <ImageUpload
+                api={api}
+                onUploaded={({ url, width, height }) =>
+                  updateBlock(key, { ...block, image: url, aspectRatio: width / height })
+                }
+              />
               <label>
                 Image alt text
                 <input

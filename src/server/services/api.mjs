@@ -1,3 +1,4 @@
+import { startUpload, finishUpload } from '../media/uploads.mjs';
 import { isStaff } from '../auth/staff.mjs';
 import * as drafts from './drafts.mjs';
 import * as data from '../repositories/catalog.mjs';
@@ -15,17 +16,26 @@ function found(result, message = 'Record not found') {
   return result;
 }
 
-export async function handleApi(db, { method, url, authorization, readBody }, staffToken) {
+export async function handleApi(
+  db,
+  { method, url, authorization, readBody, staffEmail = '' },
+  staffToken,
+) {
   const { pathname, searchParams } = new URL(url, 'http://localhost');
   const parts = pathname.split('/').slice(1);
   const route = parts.map((part, index) => (index < 4 ? part : ':value')).join('/');
   const query = Object.fromEntries(searchParams);
 
-  if (pathname.startsWith('/api/v1/admin/') && !isStaff(authorization, staffToken)) {
+  if (pathname.startsWith('/api/v1/admin/') && !staffEmail && !isStaff(authorization, staffToken)) {
     throw new ApiError(401, 'Staff authorization required');
   }
 
   switch (`${method} ${route}`) {
+    case 'POST api/v1/admin/media/:value':
+      if (parts[4] === 'uploads') return { status: 201, body: await startUpload(await readBody()) };
+      if (parts[4] === 'complete')
+        return { status: 201, body: await finishUpload(await readBody()) };
+      break;
     case 'GET api/v1/health':
       await db.query('SELECT 1');
       return { body: { status: 'ok' } };

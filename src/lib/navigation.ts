@@ -1,6 +1,6 @@
 'use client';
 import { useCallback } from 'react';
-import { usePathname, useSearchParams as useNextSearchParams, useRouter } from 'next/navigation';
+import { usePathname, useSearchParams as useNextSearchParams } from 'next/navigation';
 export function useLocation() {
   const pathname = usePathname();
   const params = useNextSearchParams();
@@ -9,7 +9,6 @@ export function useLocation() {
 type Input = URLSearchParams | Record<string, string>;
 export function useSearchParams() {
   const params = useNextSearchParams();
-  const router = useRouter();
   const pathname = usePathname();
   const set = useCallback(
     (
@@ -19,9 +18,10 @@ export function useSearchParams() {
       const current = new URLSearchParams(window.location.search);
       const next = new URLSearchParams(typeof input === 'function' ? input(current) : input);
       const url = pathname + (next.size ? `?${next}` : '');
-      router[options?.replace ? 'replace' : 'push'](url, { scroll: !options?.preventScrollReset });
+      window.history[options?.replace ? 'replaceState' : 'pushState'](null, '', url);
+      if (!options?.preventScrollReset) window.scrollTo({ top: 0 });
     },
-    [pathname, router],
+    [pathname],
   );
   return [new URLSearchParams(params.toString()), set] as const;
 }

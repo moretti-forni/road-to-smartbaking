@@ -9,15 +9,16 @@ Use Node **22.13+** (also required by Capacitor 8) and Docker Desktop.
 ```sh
 npm ci
 cp .env.example .env.local
-# Set a random RTSM_STAFF_TOKEN in .env.local for local Studio access.
+# Configure staff OTP and email settings in .env.local; see docs/amplify-setup.md.
 docker compose --env-file .env.local up -d --wait db
+npm run db:migrate
 npm run db:seed
 npm run dev
 ```
 
 Open [Italian](http://127.0.0.1:5173/it), [English](http://127.0.0.1:5173/en), or [Studio](http://127.0.0.1:5173/admin). Website and API run on port 5173 in the same process. There is no separate backend installation or API server.
 
-The isolated Compose project is `roadtosmartbaking-next`, with its own `rtsm_next_postgres` volume and port **5434**. It initializes all five SQL migrations on a fresh volume. Do not point `DATABASE_URL` at an existing production database. Keep `.env.local` private. Compose overrides must be supplied using `--env-file .env.local`.
+The isolated Compose project is `roadtosmartbaking-next`, with its own `rtsm_next_postgres` volume and port **5434**. Run `npm run db:migrate` to initialize or upgrade its tracked schema. Do not point `DATABASE_URL` at an existing production database. Keep `.env.local` private. Compose overrides must be supplied using `--env-file .env.local`.
 
 The seed command requires `--local-demo` (provided by the npm script) and a loopback database URL. It preserves existing records and publication decisions. An empty database produces empty public lists until content is imported or published.
 
@@ -60,7 +61,9 @@ curl 'http://127.0.0.1:5173/api/v1/shops?category=pizza'
 curl 'http://127.0.0.1:5173/api/v1/stories?language=it'
 ```
 
-For local Studio access, enter `RTSM_STAFF_TOKEN`; it is retained in memory. This shared token is development authentication. Before a production release, replace it with individual staff identity and role checks. Public submissions also need deployment-level abuse controls. Private drafts and listing contact details remain behind staff authorization.
+Studio uses email OTP restricted to exact `@morettiforni.com` mailboxes. Codes expire in ten minutes, allow five attempts and are single-use. Eight-hour HttpOnly sessions are restored on reload and revoked on logout. Configure SMTP locally or SES with a runtime IAM role. The old bearer token is disabled in production.
+
+For Amplify, use `RTSM_RUNTIME_SECRET_ARN` to retrieve `DATABASE_URL` and `RTSM_AUTH_SECRET` from Secrets Manager; do not embed credentials in the deployment artifact. See [the Amplify setup guide](docs/amplify-setup.md).
 
 ## Checks and production build
 
@@ -77,7 +80,7 @@ Playwright launches the app in explicit fixture mode for deterministic browser j
 
 Deploy to a Next.js-capable Node/container or managed SSR host. `amplify.yml` now outputs `.next`; the old Pages workflow has been replaced with validation because GitHub Pages cannot host the API. Deployment credentials and platform provisioning are not included. A standalone container must also copy `public/` and `.next/static/` alongside `.next/standalone/`.
 
-Configure a dedicated PostgreSQL instance/service for production, with its own credentials and backups. S3 media uploads are a future integration; images currently use existing bundled paths or stored URLs. No AWS resources are created by this migration.
+Configure a dedicated PostgreSQL instance/service for production, with its own credentials and backups. Studio supports S3 image uploads with server-side WebP optimization; configure the private bucket and CloudFront delivery before use. Existing bundled paths and stored URLs remain supported. No AWS resources are created by this migration.
 
 ## iOS and Android
 
@@ -95,11 +98,10 @@ Add the actual native origins to server-side `RTSM_ALLOWED_ORIGINS`, for example
 
 Older designs under `docs/references/` describe prior architecture decisions; this README and `docs/technology-architecture.md` describe the current branch.
 
-For an existing local Next.js database, apply the venue category and reporting migrations before using the new registration categories or report form:
+For the legacy local database with manual migrations 001–005 already applied, record that verified state once using `npm run db:migrate -- --baseline-through=005-venue-reports.sql`. Never baseline an empty or partially migrated database. Fresh databases use `npm run db:migrate`; inspect history using `npm run db:status`. Never edit previously applied SQL files.
 
-```sh
-docker compose --env-file .env.local exec -T db psql -U rtsm -d rtsm -v ON_ERROR_STOP=1 < src/server/db/migrations/004-venue-categories.sql
-docker compose --env-file .env.local exec -T db psql -U rtsm -d rtsm -v ON_ERROR_STOP=1 < src/server/db/migrations/005-venue-reports.sql
-```
+Existing `other` records remain available for staff reclassification. The Moretti headquarters marker remains approximate until its coordinates are confirmed.
 
-Existing `other` records are retained for staff reclassification. New public registrations use the five visible categories. Venue reports appear on the Studio dashboard; they do not send email. The branded Mondolfo map marker is approximate until exact headquarters coordinates are verified.
+## Amplify preparation
+
+Next.js is pinned to 15.5.29 with a patched PostCSS override. See [Amplify setup](docs/amplify-setup.md) for branch connection, runtime secrets, SES, private S3/CloudFront media and database choices. S3 uploads are integrated into Studio for venues, covers and story image blocks. No cloud resources have been provisioned.

@@ -85,3 +85,31 @@ describe('venue report submissions', () => {
     );
   });
 });
+
+describe('staff media endpoint routing', () => {
+  const upload = (path: string, body: unknown, authenticated = true) =>
+    serveApi(
+      request(path, {
+        method: 'POST',
+        headers: {
+          origin: 'http://localhost',
+          'content-type': 'application/json',
+          ...(authenticated ? { authorization: 'Bearer test-staff-token' } : {}),
+        },
+        body: JSON.stringify(body),
+      }),
+    );
+  it('requires staff authentication before upload access', async () => {
+    expect((await upload('admin/media/uploads', {}, false)).status).toBe(401);
+    expect(query).not.toHaveBeenCalled();
+  });
+  it('routes initiation and completion through schema validation and fails clearly without storage configuration', async () => {
+    expect((await upload('admin/media/uploads', {})).status).toBe(400);
+    expect((await upload('admin/media/complete', { key: '../private' })).status).toBe(400);
+    vi.stubEnv('S3_MEDIA_BUCKET', '');
+    vi.stubEnv('MEDIA_PUBLIC_BASE_URL', '');
+    expect(
+      (await upload('admin/media/uploads', { size: 100, contentType: 'image/jpeg' })).status,
+    ).toBe(503);
+  });
+});

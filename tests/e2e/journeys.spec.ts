@@ -138,6 +138,20 @@ test('category selections combine, image failures collapse, and reports stay att
     'true',
   );
   await expect(page).toHaveURL(/kind=pizza%2Cbakery/);
+  await page.goBack();
+  await expect(toolbar.getByRole('button', { name: 'Pizzerias', exact: true })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+  await expect(toolbar.getByRole('button', { name: 'Bakery', exact: true })).toHaveAttribute(
+    'aria-pressed',
+    'false',
+  );
+  await page.goForward();
+  await expect(toolbar.getByRole('button', { name: 'Bakery', exact: true })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
   const venue = page.locator('#venue-fico');
   await venue.scrollIntoViewIfNeeded();
   await expect(venue.locator('img[src*="shops-webp"]')).toHaveCount(0);

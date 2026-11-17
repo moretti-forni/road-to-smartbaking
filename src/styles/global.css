@@ -2574,3 +2574,13 @@ hr {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+
+.studio-image-upload {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0 22px;
+}
+.studio-image-upload small,
+.studio-image-upload p {
+  font-size: 12px;
+}

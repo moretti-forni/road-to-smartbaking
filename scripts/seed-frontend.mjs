@@ -28,11 +28,6 @@ await client.connect();
 
 try {
   await client.query('BEGIN');
-  const migration = await readFile(
-    new URL('../src/server/db/migrations/002-frontend-import-metadata.sql', import.meta.url),
-    'utf8',
-  );
-  await client.query(migration);
 
   let shopsAdded = 0;
   let storiesAdded = 0;

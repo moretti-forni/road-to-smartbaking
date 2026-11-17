@@ -109,6 +109,23 @@ export default function Explore() {
       { preventScrollReset: true },
     );
   }
+  function toggleKind(kind: (typeof venueKinds)[number]) {
+    setParams(
+      (current) => {
+        const next = new URLSearchParams(current);
+        const selected = (next.get('kind') ?? '').split(',').filter(Boolean);
+        const kinds = selected.includes(kind)
+          ? selected.filter((item) => item !== kind)
+          : [...selected, kind];
+        const value = venueKinds.filter((item) => kinds.includes(item)).join(',');
+        if (value) next.set('kind', value);
+        else next.delete('kind');
+        next.delete('bounds');
+        return next;
+      },
+      { preventScrollReset: true },
+    );
+  }
   function search(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (activeSuggestion >= 0 && suggestions[activeSuggestion]) {
@@ -264,16 +281,7 @@ export default function Explore() {
                 type="button"
                 className={`pill category-${kind} ${query.kind.split(',').includes(kind) ? 'active' : ''}`}
                 aria-pressed={query.kind.split(',').includes(kind)}
-                onClick={() => {
-                  const selected = query.kind === 'all' ? [] : query.kind.split(',');
-                  const next = selected.includes(kind)
-                    ? selected.filter((item) => item !== kind)
-                    : [...selected, kind];
-                  update({
-                    kind: venueKinds.filter((item) => next.includes(item)).join(',') || null,
-                    bounds: null,
-                  });
-                }}
+                onClick={() => toggleKind(kind)}
               >
                 <CategoryIcon kind={kind} />
                 {t(kind)}
@@ -342,16 +350,7 @@ export default function Explore() {
                 type="button"
                 className={`pill category-${kind} ${query.kind.split(',').includes(kind) ? 'active' : ''}`}
                 aria-pressed={query.kind.split(',').includes(kind)}
-                onClick={() => {
-                  const selected = query.kind === 'all' ? [] : query.kind.split(',');
-                  const next = selected.includes(kind)
-                    ? selected.filter((item) => item !== kind)
-                    : [...selected, kind];
-                  update({
-                    kind: venueKinds.filter((item) => next.includes(item)).join(',') || null,
-                    bounds: null,
-                  });
-                }}
+                onClick={() => toggleKind(kind)}
               >
                 <CategoryIcon kind={kind} />
                 {t(kind)}

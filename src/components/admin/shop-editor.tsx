@@ -11,6 +11,7 @@ import {
   type Save,
   type ListingRequest,
 } from '../../services/studio';
+import { ImageUpload } from './image-upload';
 import { SavedPreview } from './saved-preview';
 import styles from '../../screens/admin.module.css';
 import {
@@ -231,6 +232,7 @@ export function ShopEditor({
                 onChange={(event) => setImage(event.target.value)}
               />
             </Field>
+            <ImageUpload api={api} onUploaded={({ url }) => setImage(url)} />
             <h3>Localized content</h3>
             <LanguageToggle language={language} onChange={setLanguage} />
             {languages.map((locale) => (

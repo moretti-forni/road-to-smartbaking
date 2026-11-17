@@ -10,6 +10,8 @@ Local PostgreSQL uses a separate Compose project/volume and port 5434. Runtime a
 
 Capacitor uses a separate generated static SPA from the same repository. React Router remains a mobile build dependency; it no longer serves the website. `mobile-source` contains the native routing/loader adapters. Public configuration uses `NEXT_PUBLIC_*`; database credentials and staff secrets must never use that prefix.
 
-The local staff token is retained for development compatibility. Production staff identity/roles, deployment provisioning, database backup configuration, rate limiting, and S3 upload workflows remain release work. This migration creates no cloud resources and writes no production data.
+The legacy staff token is development-only. Company-domain email OTP sessions, Secrets Manager runtime loading and S3 image-upload workflows are implemented. Individual role management, cloud provisioning, database backup setup and public-submission rate limiting remain release work. This migration creates no cloud resources and writes no production data.
 
 See the root README for setup, checks, environment variables, and deployment boundaries.
+
+November 17 update: the app now targets Next.js 15.5.29 for Amplify managed SSR, with middleware locale handling and a patched PostCSS override. OTP staff sessions, tracked migrations and server-side Secrets Manager loading are prepared. Studio images use a signed S3 temporary-upload flow followed by server-side validation/WebP conversion and private-bucket CloudFront delivery. See docs/amplify-setup.md. AWS resources have not been provisioned.

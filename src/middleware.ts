@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 // Set document language before server rendering; never trust a caller-supplied locale header.
-export function proxy(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const headers = new Headers(request.headers);
   const segment = request.nextUrl.pathname.split('/')[1];
   headers.set('x-rtsm-locale', segment === 'en' || segment === 'admin' ? 'en' : 'it');
