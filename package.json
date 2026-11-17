@@ -30,7 +30,10 @@
     "test:postgres": "node --env-file-if-exists=.env.local scripts/test-postgres.mjs",
     "test:auth:browser": "node --env-file-if-exists=.env.local scripts/test-auth-browser.mjs",
     "staging:check": "node --env-file-if-exists=.env.staging scripts/check-staging.mjs",
-    "db:migrate:runtime": "node scripts/migrate-runtime.mjs"
+    "db:migrate:runtime": "node scripts/migrate-runtime.mjs",
+    "db:setup:shared": "node --env-file-if-exists=.env.local scripts/setup-shared-db.mjs",
+    "db:import:catalog": "node --import tsx --env-file-if-exists=.env.local scripts/import-shared-catalog.mjs",
+    "db:verify:catalog": "node --import tsx --env-file-if-exists=.env.local scripts/verify-shared-catalog.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1170.0",

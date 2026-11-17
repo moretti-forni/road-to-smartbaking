@@ -42,7 +42,7 @@ suite('real PostgreSQL migrations and staff authentication', () => {
   it('migrates a fresh schema, is repeatable, and detects modified migration history', async () => {
     expect(
       (await db.query('SELECT count(*)::int AS count FROM rtsm_schema_migration')).rows[0].count,
-    ).toBe(6);
+    ).toBe(7);
     await run(process.execPath, ['scripts/migrate.mjs'], {
       env: { ...process.env, DATABASE_URL: databaseUrl },
     });

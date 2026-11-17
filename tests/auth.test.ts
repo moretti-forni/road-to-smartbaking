@@ -36,3 +36,23 @@ describe('staff email access policy', () => {
     ).toBeUndefined();
   });
 });
+
+describe('four-table managed authentication boundary', () => {
+  it('ignores legacy session cookies without accessing removed auth tables', async () => {
+    vi.stubEnv('RTSM_AUTH_MODE', 'managed');
+    const { requestCode, verifyCode, readSession, revokeSession } =
+      await import('../src/server/auth/session.mjs');
+    const db = { query: vi.fn(), connect: vi.fn() };
+    await expect(requestCode(db, { email: 'staff@morettiforni.com' })).rejects.toMatchObject({
+      status: 503,
+    });
+    await expect(verifyCode(db, {})).rejects.toMatchObject({ status: 503 });
+    const request = new Request('http://localhost', {
+      headers: { cookie: `rtsm_staff_session=${'a'.repeat(64)}` },
+    });
+    expect(await readSession(db, request)).toBeUndefined();
+    await revokeSession(db, request);
+    expect(db.query).not.toHaveBeenCalled();
+    expect(db.connect).not.toHaveBeenCalled();
+  });
+});

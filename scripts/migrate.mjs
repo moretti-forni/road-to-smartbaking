@@ -5,6 +5,10 @@ import pg from 'pg';
 const { values } = parseArgs({
   options: { status: { type: 'boolean' }, 'baseline-through': { type: 'string' } },
 });
+if (process.env.RTSM_DB_SCHEMA)
+  throw new Error(
+    'Shared schemas use db:setup:shared and reviewed schema-scoped upgrades, not the legacy migration chain.',
+  );
 if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL is required');
 const directory = new URL('../src/server/db/migrations/', import.meta.url);
 const names = (await readdir(directory)).filter((name) => /^\d{3}-.+\.sql$/.test(name)).sort();

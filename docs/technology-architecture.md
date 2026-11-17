@@ -15,3 +15,5 @@ The legacy staff token is development-only. Company-domain email OTP sessions, S
 See the root README for setup, checks, environment variables, and deployment boundaries.
 
 November 17 update: the app now targets Next.js 15.5.29 for Amplify managed SSR, with middleware locale handling and a patched PostCSS override. OTP staff sessions, tracked migrations and server-side Secrets Manager loading are prepared. Studio images use a signed S3 temporary-upload flow followed by server-side validation/WebP conversion and private-bucket CloudFront delivery. See docs/amplify-setup.md. AWS resources have not been provisioned.
+
+The agreed shared RDS deployment uses `morettihub-dev`, a restricted `rtsm_app_dev` login, and the `road_to_smartbaking` schema. Four content tables store the catalog, requests, reports, and embedded JSON drafts. See [shared PostgreSQL setup](shared-postgres-setup.md) for provisioned resources. Managed identity integration is pending; four-table mode disables the legacy OTP/session implementation. Existing local installations can upgrade drafts through migration 007 without deleting their legacy authentication tables.

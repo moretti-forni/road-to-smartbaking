@@ -18,7 +18,7 @@ npm run dev
 
 Open [Italian](http://127.0.0.1:5173/it), [English](http://127.0.0.1:5173/en), or [Studio](http://127.0.0.1:5173/admin). Website and API run on port 5173 in the same process. There is no separate backend installation or API server.
 
-The isolated Compose project is `roadtosmartbaking-next`, with its own `rtsm_next_postgres` volume and port **5434**. Run `npm run db:migrate` to initialize or upgrade its tracked schema. Do not point `DATABASE_URL` at an existing production database. Keep `.env.local` private. Compose overrides must be supplied using `--env-file .env.local`.
+The isolated Compose project is `roadtosmartbaking-next`, with its own `rtsm_next_postgres` volume and port **5434**. Run `npm run db:migrate` to initialize or upgrade its tracked schema. For the agreed shared RDS deployment, use the [four-table shared database setup](docs/shared-postgres-setup.md) with a separate schema and restricted runtime login. Keep `.env.local` private. Compose overrides must be supplied using `--env-file .env.local`.
 
 The seed command requires `--local-demo` (provided by the npm script) and a loopback database URL. It preserves existing records and publication decisions. An empty database produces empty public lists until content is imported or published.
 
@@ -105,3 +105,9 @@ Existing `other` records remain available for staff reclassification. The Morett
 ## Amplify preparation
 
 Next.js is pinned to 15.5.29 with a patched PostCSS override. See [Amplify setup](docs/amplify-setup.md) for branch connection, runtime secrets, SES, private S3/CloudFront media and database choices. S3 uploads are integrated into Studio for venues, covers and story image blocks. No cloud resources have been provisioned.
+
+## Shared RDS setup
+
+The shared `morettihub-dev` deployment uses four content tables with embedded draft copies. Follow [shared PostgreSQL setup](docs/shared-postgres-setup.md); do not run the legacy migration chain against a fresh shared schema. Managed staff authentication remains a separate integration step.
+
+The initial shared catalog import is recorded in [the November 17 import report](docs/imports/2026-11-17-catalog-import.json): 43 shops (42 public) and 63 Italian stories, with bilingual shop descriptions and Italian article fallback for English routes.
