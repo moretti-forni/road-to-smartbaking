@@ -1,0 +1,73 @@
+name: roadtosmartbaking-staging
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: rtsm
+      POSTGRES_DB: rtsm_staging
+      POSTGRES_PASSWORD: ${STAGING_DB_PASSWORD:?Set STAGING_DB_PASSWORD}
+    volumes:
+      - staging_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U rtsm -d rtsm_staging']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+  migrate:
+    build:
+      context: .
+      target: migrate
+    environment:
+      DATABASE_URL: postgresql://rtsm:${STAGING_DB_PASSWORD}@db:5432/rtsm_staging
+    depends_on:
+      db:
+        condition: service_healthy
+  web:
+    build:
+      context: .
+      target: final
+    ports:
+      - '127.0.0.1:5174:3000'
+    environment:
+      DATABASE_URL: postgresql://rtsm:${STAGING_DB_PASSWORD}@db:5432/rtsm_staging
+      RTSM_APP_ORIGIN: ${RTSM_APP_ORIGIN:?Set the HTTPS staging origin}
+      RTSM_AUTH_SECRET: ${RTSM_AUTH_SECRET:?Set a random auth secret}
+      RTSM_MAIL_PROVIDER: ${RTSM_MAIL_PROVIDER:-smtp}
+      SES_FROM: ${SES_FROM:-}
+      AWS_REGION: ${AWS_REGION:-eu-west-1}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_FROM: ${SMTP_FROM:-}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:3000/api/v1/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped
+  proxy:
+    image: caddy:2
+    profiles: [https]
+    ports:
+      - '80:80'
+      - '443:443'
+    environment:
+      STAGING_DOMAIN: ${STAGING_DOMAIN:-localhost}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - staging_caddy_data:/data
+      - staging_caddy_config:/config
+    depends_on:
+      - web
+    restart: unless-stopped
+
+volumes:
+  staging_postgres:
+  staging_caddy_data:
+  staging_caddy_config:

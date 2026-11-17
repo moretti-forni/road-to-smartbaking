@@ -1,0 +1,234 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "RTSM IAM-only public data API in existing VPC and dedicated Amplify roles. Does not modify database data or rewrites.",
+  "Resources": {
+    "DataSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "RoadToSmartBaking private database access",
+        "VpcId": "vpc-046072dc74be6c6cf",
+        "SecurityGroupEgress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 5432,
+            "ToPort": 5432,
+            "CidrIp": "172.30.0.0/16"
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 443,
+            "ToPort": 443,
+            "CidrIp": "0.0.0.0/0"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Application",
+            "Value": "road-to-smartbaking"
+          }
+        ]
+      }
+    },
+    "DatabaseIngress": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "GroupId": "sg-0173bacbad14b021e",
+        "IpProtocol": "tcp",
+        "FromPort": 5432,
+        "ToPort": 5432,
+        "SourceSecurityGroupId": {
+          "Ref": "DataSecurityGroup"
+        },
+        "Description": "RTSM data Lambda only; no public PostgreSQL access"
+      }
+    },
+    "DataLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/lambda/road-to-smartbaking-data-dev",
+        "RetentionInDays": 14
+      }
+    },
+    "DataRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": "rtsm-private-data-dev",
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+        ],
+        "Policies": [
+          {
+            "PolicyName": "ReadProjectDatabaseSecret",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": "secretsmanager:GetSecretValue",
+                  "Resource": "arn:aws:secretsmanager:eu-west-1:701749480077:secret:/road-to-smartbaking/dev/database-CtScQr"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "DataFunction": {
+      "Type": "AWS::Lambda::Function",
+      "DependsOn": ["DataLogGroup", "DatabaseIngress"],
+      "Properties": {
+        "FunctionName": "road-to-smartbaking-data-dev",
+        "Runtime": "nodejs22.x",
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": ["DataRole", "Arn"]
+        },
+        "MemorySize": 256,
+        "Timeout": 20,
+        "ReservedConcurrentExecutions": 3,
+        "VpcConfig": {
+          "SubnetIds": ["subnet-01e88ce6a9284c0a6"],
+          "SecurityGroupIds": [
+            {
+              "Ref": "DataSecurityGroup"
+            }
+          ]
+        },
+        "Environment": {
+          "Variables": {
+            "RTSM_RUNTIME_SECRET_ARN": "arn:aws:secretsmanager:eu-west-1:701749480077:secret:/road-to-smartbaking/dev/database-CtScQr",
+            "RTSM_AWS_REGION": "eu-west-1",
+            "RTSM_DB_SCHEMA": "road_to_smartbaking",
+            "NODE_ENV": "production",
+            "RTSM_AUTH_MODE": "managed"
+          }
+        },
+        "Code": {
+          "ZipFile": "exports.handler=async()=>({status:503,body:{error:'Data function deployment pending'}});"
+        }
+      }
+    },
+    "AmplifyComputeRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": "rtsm-amplify-ssr-main",
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "amplify.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole",
+              "Condition": {
+                "StringEquals": {
+                  "aws:SourceAccount": "701749480077"
+                },
+                "ArnLike": {
+                  "aws:SourceArn": "arn:aws:amplify:eu-west-1:701749480077:apps/d39rjisb2mzg1i*"
+                }
+              }
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "InvokePrivateDataFunction",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": "lambda:InvokeFunction",
+                  "Resource": {
+                    "Fn::GetAtt": ["DataFunction", "Arn"]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "AmplifyServiceRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": "rtsm-amplify-hosting-service",
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "amplify.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole",
+              "Condition": {
+                "StringEquals": {
+                  "aws:SourceAccount": "701749480077"
+                },
+                "ArnLike": {
+                  "aws:SourceArn": "arn:aws:amplify:eu-west-1:701749480077:apps/d39rjisb2mzg1i*"
+                }
+              }
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "HostingLogsOnly",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": ["logs:CreateLogGroup", "logs:DescribeLogGroups"],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents",
+                    "logs:DescribeLogStreams"
+                  ],
+                  "Resource": "arn:aws:logs:eu-west-1:701749480077:log-group:/aws/amplify/d39rjisb2mzg1i*:*"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "Outputs": {
+    "DataFunctionArn": {
+      "Value": {
+        "Fn::GetAtt": ["DataFunction", "Arn"]
+      }
+    },
+    "ComputeRoleArn": {
+      "Value": {
+        "Fn::GetAtt": ["AmplifyComputeRole", "Arn"]
+      }
+    },
+    "ServiceRoleArn": {
+      "Value": {
+        "Fn::GetAtt": ["AmplifyServiceRole", "Arn"]
+      }
+    }
+  }
+}

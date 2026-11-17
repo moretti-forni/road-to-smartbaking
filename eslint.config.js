@@ -6,6 +6,9 @@ export default tseslint.config(
   {
     ignores: [
       'node_modules',
+      '.next',
+      'mobile',
+      'next-env.d.ts',
       'build',
       '.react-router',
       'assets',

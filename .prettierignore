@@ -3,6 +3,10 @@ build
 node_modules
 assets
 public
-app/data/stories.snapshot.json
+src/data/stories.snapshot.json
 ios/
 android/
+
+.next/
+mobile/
+next-env.d.ts

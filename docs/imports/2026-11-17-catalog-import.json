@@ -1,0 +1,538 @@
+{
+  "importedAt": "2026-11-17T13:58:56.992Z",
+  "database": "morettihub-dev",
+  "schema": "road_to_smartbaking",
+  "source": {
+    "sourceDigest": "c9b69703636a77f89c424ae4fa56ac10d18a165f36a2909fd710fa34ef7d2b13",
+    "shops": 43,
+    "publishedShops": 42,
+    "hiddenShops": ["desdott"],
+    "stories": 63,
+    "storyLanguages": {
+      "it": 63
+    },
+    "verifiedLocalImages": 192,
+    "englishStoryFallback": "Italian originals; no English translations exist in the source snapshot"
+  },
+  "verification": {
+    "matchedShops": 43,
+    "matchedStories": 63,
+    "differences": {
+      "shops": [],
+      "stories": []
+    }
+  },
+  "before": {
+    "shops": 0,
+    "publicShops": 0,
+    "stories": 0,
+    "publicStories": 0,
+    "requests": 0,
+    "reports": 0
+  },
+  "after": {
+    "shops": 43,
+    "publicShops": 42,
+    "stories": 63,
+    "publicStories": 63,
+    "requests": 0,
+    "reports": 0
+  },
+  "inserted": {
+    "shops": [
+      {
+        "id": "de98e5d3-5747-40a3-846d-195eadd382ba",
+        "slug": "fico"
+      },
+      {
+        "id": "2abfcf41-9d6c-4442-9709-4c9614723ba3",
+        "slug": "sorellina"
+      },
+      {
+        "id": "1d6b4688-83a7-4125-b970-5e0c4337cf5e",
+        "slug": "vinarte"
+      },
+      {
+        "id": "98d125bc-ad8f-4fa8-8f7f-2ba1915f981b",
+        "slug": "90-seconds"
+      },
+      {
+        "id": "a205a78a-6466-4a27-9f6d-1ac95603f874",
+        "slug": "a-puteca"
+      },
+      {
+        "id": "1dd28e39-7290-49f0-b881-86bdf34b58a1",
+        "slug": "brunda"
+      },
+      {
+        "id": "f40edb33-3e40-45ad-92cc-432bdec96104",
+        "slug": "capvin"
+      },
+      {
+        "id": "8f5980c4-3304-4326-a792-476167cd14c4",
+        "slug": "carlo-fiamma"
+      },
+      {
+        "id": "1510d145-ce40-4914-8b3f-5a94ffc4a677",
+        "slug": "pizzeria-cavalese"
+      },
+      {
+        "id": "b46bccd6-513c-4120-9a35-23f1b38a35bc",
+        "slug": "desdott"
+      },
+      {
+        "id": "b5bfd900-2d05-473a-94af-918f577bf465",
+        "slug": "elysium"
+      },
+      {
+        "id": "9bab6713-4430-43c7-9c6e-1bb269517289",
+        "slug": "mamma-pizza"
+      },
+      {
+        "id": "86493bf6-e817-48d2-84ef-fbcbc40b791f",
+        "slug": "pizza-dei-signori"
+      },
+      {
+        "id": "b7561237-94de-4e50-9afd-1c29ea779f6d",
+        "slug": "nnea-pizza"
+      },
+      {
+        "id": "e214257c-f353-40c3-92f5-f1aaea0123a1",
+        "slug": "paglia"
+      },
+      {
+        "id": "02f75ccc-6b86-438e-9e3f-9cbf97139328",
+        "slug": "sileo"
+      },
+      {
+        "id": "aaad054b-8b0d-41b6-a18b-9cb1a6685cbb",
+        "slug": "the-italian-cousins"
+      },
+      {
+        "id": "1419f476-40b7-413d-bb6e-b7935ee46e7a",
+        "slug": "triticum"
+      },
+      {
+        "id": "e798424b-181a-4c95-9c79-72f1aee042c6",
+        "slug": "valerio-barralis-patisserie"
+      },
+      {
+        "id": "c918b67d-fb8c-4ee7-ab6f-3414a5df94fa",
+        "slug": "cafe-grensen"
+      },
+      {
+        "id": "86b4ba8a-eff8-4d46-a053-329249811137",
+        "slug": "campana"
+      },
+      {
+        "id": "e724dee4-7982-46a4-a504-836636f3c306",
+        "slug": "casa-tobago"
+      },
+      {
+        "id": "24d66d5c-448a-4cfa-a5b7-0266eed3a673",
+        "slug": "cheesefarm"
+      },
+      {
+        "id": "5fa2c6e6-8ca6-4ed1-8324-56255ca40617",
+        "slug": "impasto"
+      },
+      {
+        "id": "2bfde509-70c9-494e-8158-79f994ef5f0d",
+        "slug": "maiori-pizzeria"
+      },
+      {
+        "id": "4064b485-ffcf-4933-8bc1-35621481c938",
+        "slug": "ultra-milano"
+      },
+      {
+        "id": "720929fd-c777-496d-a971-8a58cf0a1e94",
+        "slug": "zia"
+      },
+      {
+        "id": "f04a818b-7b54-47c0-953f-6b159aaa266c",
+        "slug": "22k-pizza"
+      },
+      {
+        "id": "82f5eb8a-05b5-4e76-8e90-48c25053f2b8",
+        "slug": "bedin"
+      },
+      {
+        "id": "c5102991-e340-4091-9f4a-b3cbc57d0f4d",
+        "slug": "azzurra"
+      },
+      {
+        "id": "58f34958-635f-4e15-a538-6f7830862507",
+        "slug": "bella-napoli-pizzeria"
+      },
+      {
+        "id": "9d0f432b-919a-4d77-b43a-6dec3c5a8913",
+        "slug": "bianca-sicilian-trattoria"
+      },
+      {
+        "id": "e5e429fd-c9c5-4354-8cea-ad68c76f8a42",
+        "slug": "casa-cinquanta"
+      },
+      {
+        "id": "74a6c8aa-a164-4798-80d3-ca8b85a138aa",
+        "slug": "deroma"
+      },
+      {
+        "id": "e607570d-944e-47a6-ad68-579a9808f854",
+        "slug": "glory-pop"
+      },
+      {
+        "id": "3c51f694-6274-44bc-a9de-1e7351ec678e",
+        "slug": "imperfetto"
+      },
+      {
+        "id": "e39561c0-3596-4086-9f9b-5d8de4572e1b",
+        "slug": "l-industrie-pizzeria"
+      },
+      {
+        "id": "fce44271-15ef-4776-938e-151b0ebb4f05",
+        "slug": "panificio-san-giuseppe"
+      },
+      {
+        "id": "7833073c-daae-4247-b908-d2d88ead53e2",
+        "slug": "romanaccia"
+      },
+      {
+        "id": "2f3dc4e1-e9c9-496e-8d6e-c3638017a717",
+        "slug": "saccharum"
+      },
+      {
+        "id": "0b4c561f-1e02-4d69-9086-3156ec68fb1d",
+        "slug": "salentu"
+      },
+      {
+        "id": "b881864b-c08b-435c-b162-d136140226dd",
+        "slug": "trizza-pizza"
+      },
+      {
+        "id": "fb0823c7-1fb7-4f8d-9cb8-0afc8cbbc53f",
+        "slug": "zio-rigo"
+      }
+    ],
+    "stories": [
+      {
+        "id": "a764b6a1-d446-4a24-8cc7-c2fec6172a39",
+        "slug": "l-industrie-tre-sedi-e-series",
+        "language": "it"
+      },
+      {
+        "id": "430cc4a3-5518-4468-aa23-e5248fdb23d7",
+        "slug": "bedin-tradizione-nuovo-modo-di-produrre",
+        "language": "it"
+      },
+      {
+        "id": "917394c5-c9cf-4013-8337-4ebba6db28b6",
+        "slug": "glory-pop-due-anime-di-pizza-series-al-centro",
+        "language": "it"
+      },
+      {
+        "id": "0c679e05-d645-445c-94fa-a40addff8917",
+        "slug": "panificio-san-giuseppe-napolis",
+        "language": "it"
+      },
+      {
+        "id": "9fe0c743-1146-4130-96df-fc2731eda535",
+        "slug": "scalo-zero-aperto-dalla-colazione-al-dopo-cena",
+        "language": "it"
+      },
+      {
+        "id": "cbc2f453-2cc1-49d2-8f37-a5939d266203",
+        "slug": "deroma-pizzeria-roma-forni-moretti-neapolis-series",
+        "language": "it"
+      },
+      {
+        "id": "5c6d583e-280b-4992-b6c8-703ce06555f4",
+        "slug": "natural-village-resort-sul-mare-delle-marche-la-pizza-di-qualit-con-il-forno-series-icon-689406",
+        "language": "it"
+      },
+      {
+        "id": "8d8b1a66-7fd8-43f8-8ae7-b2b0fa4df881",
+        "slug": "zio-rigo-porta-la-pizza-di-qualit-in-lituania-con-il-forno-series-688459",
+        "language": "it"
+      },
+      {
+        "id": "1423b5cd-3118-4aea-aa82-89cc2e2e77e4",
+        "slug": "la-mar-una-pizza-che-parla-di-ricerca-e-identit-nel-cuore-della-romagna-687986",
+        "language": "it"
+      },
+      {
+        "id": "09e10b99-150e-4edb-b2d5-066c5ff13c10",
+        "slug": "bella-napoli-conquista-il-cuore-di-riga-con-neapolis",
+        "language": "it"
+      },
+      {
+        "id": "e5e33943-6ab7-44e9-b43b-edf20bc778d1",
+        "slug": "ancona-dark-kitchen-ibrida-con-la-tecnologia-punta-alla-qualit-replicabile",
+        "language": "it"
+      },
+      {
+        "id": "5402e49f-8f3d-4019-b610-c606c66acae2",
+        "slug": "degusto-e-aromi-in-umbria-passione-per-la-pizza-incontra-neapolis",
+        "language": "it"
+      },
+      {
+        "id": "c22c96bd-ceac-4b09-97bd-3b10ff43395b",
+        "slug": "cafe-grensen-oslo",
+        "language": "it"
+      },
+      {
+        "id": "34fb9511-33fb-4800-bc6b-bb813f410909",
+        "slug": "silvia-ciccolini-wins-over-fabriano-with-her-pizza-full-of-personality-645156",
+        "language": "it"
+      },
+      {
+        "id": "ee92d480-dc6e-49d7-9db8-97ef8aa2a63a",
+        "slug": "parco-manzoni-chooses-series-to-bring-its-culinary-philosophy-to-life-644721",
+        "language": "it"
+      },
+      {
+        "id": "95788cdd-ea6a-4c4a-be65-b3200f275d46",
+        "slug": "granum-in-alba-adriatica-the-true-contemporary-pizza-baked-with-neapolis-645157",
+        "language": "it"
+      },
+      {
+        "id": "44a23fe6-461c-4598-a0a9-82fa588af5dc",
+        "slug": "segreta-how-s-series-oven-brings-true-roman-pizza-al-taglio-to-montr-al-645158",
+        "language": "it"
+      },
+      {
+        "id": "546c5d70-56f3-482a-bcb5-49b66fc7547c",
+        "slug": "darsena-del-sale-where-wellness-and-cuisine-come-together-645165",
+        "language": "it"
+      },
+      {
+        "id": "98ce3b83-52ca-48ba-87af-d4b1bf719b92",
+        "slug": "from-piedimonte-matese-to-the-usa-jonathan-atzeni-s-electric-challenge-645204",
+        "language": "it"
+      },
+      {
+        "id": "f4c00c1c-fc8b-44c4-aa79-ad890c839388",
+        "slug": "baambagia-the-new-contemporary-pizzeria-in-pesaro-with-s-series-icon-645205",
+        "language": "it"
+      },
+      {
+        "id": "9fa0a71b-9f7a-48d9-b119-d9f4eb287669",
+        "slug": "meunier-the-only-tre-spicchi-in-umbria-nine-years-of-success-with-s-series-645206",
+        "language": "it"
+      },
+      {
+        "id": "5b1125e3-be22-4c14-ac36-7a826438b2c9",
+        "slug": "neapolis-6-e-il-rinascimento-della-pizza-napoletana-all-ex-stazione-di-urbino-645275",
+        "language": "it"
+      },
+      {
+        "id": "81057691-b39a-4c90-a5ef-7219a16dfbd0",
+        "slug": "un-locale-costruito-attorno-al-forno-campana-pizza-in-teglia-645278",
+        "language": "it"
+      },
+      {
+        "id": "adaa0c9e-0bf3-414d-ac8b-6cbab2486802",
+        "slug": "over-30-restaurants-and-a-dream-come-true-the-vision-of-vincenzo-capuano-645292",
+        "language": "it"
+      },
+      {
+        "id": "ac6d70df-ef15-44b4-8a94-ef1a39546acf",
+        "slug": "s-series-the-secret-of-la-dolce-vita-at-the-grand-hotel-da-vinci-645293",
+        "language": "it"
+      },
+      {
+        "id": "364a5aae-8f27-4930-a5ff-04d1b76c1985",
+        "slug": "from-basilicata-to-switzerland-the-revolution-of-organic-bread-645294",
+        "language": "it"
+      },
+      {
+        "id": "de27715d-afe6-4557-8718-8735e8d84912",
+        "slug": "the-heart-of-a-puteca-in-florence-beats-strong-thanks-to-neapolis-power-645295",
+        "language": "it"
+      },
+      {
+        "id": "ca1afcee-44d8-4ee3-abec-0362b62c8ef4",
+        "slug": "the-secret-of-cav-in-senigallia-where-technology-meets-passion-645299",
+        "language": "it"
+      },
+      {
+        "id": "13e87112-0d81-4272-b1f8-66dff62662c9",
+        "slug": "vinarte-and-diecinoni-success-stories-in-agropoli-with-neapolis-oven-645304",
+        "language": "it"
+      },
+      {
+        "id": "099bfacc-7f79-4a23-bdc7-aa2f0ef4f5a1",
+        "slug": "rocket-truck-bringing-the-tradition-of-american-hamburgers-around-italy-645313",
+        "language": "it"
+      },
+      {
+        "id": "b0e50581-e3aa-488d-8f5a-de7db54ed77e",
+        "slug": "brunda-double-success-with-double-pair-of-neapolis-645316",
+        "language": "it"
+      },
+      {
+        "id": "33a54253-b0f2-4744-816c-283ec7a263a7",
+        "slug": "carlo-fiamma-in-amalfi-with-the-power-of-neapolis-6-645317",
+        "language": "it"
+      },
+      {
+        "id": "80be2739-87cb-4b27-b6c1-aa0f27e6bcc3",
+        "slug": "leg-mi-debuts-with-series-icon-on-senigallia-s-seafront-645318",
+        "language": "it"
+      },
+      {
+        "id": "f9c11242-71a1-4485-8fa8-f3a1396cd584",
+        "slug": "elysium-the-arrival-of-naporomana-pizza-in-the-capital-645319",
+        "language": "it"
+      },
+      {
+        "id": "05fae76f-55e3-4120-850e-9f3f7bae75d3",
+        "slug": "nnea-in-amsterdam-the-no-1-pizzeria-in-the-netherlands-645326",
+        "language": "it"
+      },
+      {
+        "id": "e0f16dbc-80df-4e75-957b-85c464fb88b0",
+        "slug": "gust-research-and-authenticity-for-a-pizza-made-in-marche-645339",
+        "language": "it"
+      },
+      {
+        "id": "d2a0c85d-8da4-4a29-9916-d2a92fc41223",
+        "slug": "sileo-a-story-of-restart-and-innovation-645340",
+        "language": "it"
+      },
+      {
+        "id": "29b39e33-3b9f-4d38-aee1-d24dfc451014",
+        "slug": "desdott-pizzettas-a-new-fast-casual-format-from-milan-645341",
+        "language": "it"
+      },
+      {
+        "id": "05685d3c-4f1b-4e25-85ad-2f000b24ba99",
+        "slug": "neapolis-the-beating-heart-of-tramontana-in-novi-sad-645342",
+        "language": "it"
+      },
+      {
+        "id": "e3ef79ee-2b9b-420a-9684-178b7d03aee9",
+        "slug": "san-martino-in-rome-the-unique-encounter-between-roman-pizza-and-wine-645343",
+        "language": "it"
+      },
+      {
+        "id": "0f51d9cf-df7b-4d66-8a3c-702431a35976",
+        "slug": "il-capriccio-di-leo-how-to-create-a-successful-pizzeria-645344",
+        "language": "it"
+      },
+      {
+        "id": "83cfaf0a-8450-4e1a-a923-25da56937388",
+        "slug": "spaccaforno-the-excellence-of-neapolitan-pizza-in-hamburg-645345",
+        "language": "it"
+      },
+      {
+        "id": "a0767f06-1544-4553-9154-ef7b9e909915",
+        "slug": "il-progetto-filante-l-evoluzione-della-pizza-al-trancio-645346",
+        "language": "it"
+      },
+      {
+        "id": "50a59175-ceee-415e-affe-1daf413fdc67",
+        "slug": "peperoncino-the-pizzeria-in-sydney-that-has-chosen-series-heat-645347",
+        "language": "it"
+      },
+      {
+        "id": "7176f0e9-1629-4f1e-87f5-fd7ee5be015f",
+        "slug": "la-bottega-in-singapore-antonio-miscellaneo-s-restaurant-awarded-by-50top-pizza-645348",
+        "language": "it"
+      },
+      {
+        "id": "118ec52b-9f23-435f-a6c1-8f22a7fdf19c",
+        "slug": "from-calabria-to-garda-lake-marco-feraco-s-story-also-passes-through-s-series-645349",
+        "language": "it"
+      },
+      {
+        "id": "75f15764-111c-438f-814c-4b4d30e97d24",
+        "slug": "fiata-pizza-hong-kong-s-best-pizzeria-with-the-heat-of-neapolis-oven-645350",
+        "language": "it"
+      },
+      {
+        "id": "532df851-98ce-4a55-89d4-2d22b2d5725f",
+        "slug": "pietro-fontana-and-his-pizza-d-auteur-at-the-foot-of-vesuvius-645351",
+        "language": "it"
+      },
+      {
+        "id": "ca3f927b-607d-4dbb-8289-e9db9d9057f9",
+        "slug": "materia-the-milanese-project-of-two-authentic-lucani-645352",
+        "language": "it"
+      },
+      {
+        "id": "5e1569c7-db0f-479b-bf71-445ff6487ab5",
+        "slug": "ciao-paje-brings-neapolitan-pizza-to-zanzibar-s-most-beautiful-beach-645354",
+        "language": "it"
+      },
+      {
+        "id": "f2f42004-0a11-4410-bbe3-ec1fbcb60340",
+        "slug": "maestro-sourdough-pizza-the-first-contemporary-neapolitan-pizzeria-in-north-beach-645355",
+        "language": "it"
+      },
+      {
+        "id": "8f661564-36bc-488d-bbe0-6cab80526803",
+        "slug": "bolle-pizzeria-the-concept-that-combines-pizza-and-wine-in-brianza-645356",
+        "language": "it"
+      },
+      {
+        "id": "f6be853f-d882-4a45-8f37-28f91645c266",
+        "slug": "ci-sta-the-first-italian-pizzeria-made-by-a-benefit-corporation-born-from-an-idea-of-nico-grammauta-645357",
+        "language": "it"
+      },
+      {
+        "id": "6d792354-47c7-4ade-9d65-43e5ced7ca5c",
+        "slug": "volare-bomboloni-s-a-new-italian-restaurant-project-in-amsterdam-645358",
+        "language": "it"
+      },
+      {
+        "id": "3c0002f4-0035-43b4-bf81-7b2e34e62bd8",
+        "slug": "from-new-york-to-naples-in-90-seconds-with-simone-falco-s-pizza-645359",
+        "language": "it"
+      },
+      {
+        "id": "9b1f60fa-5b25-4331-8cd1-cf0386fbfc80",
+        "slug": "valerio-violetti-the-modern-fairy-tale-of-a-pizza-maker-and-popular-tiktoker-645360",
+        "language": "it"
+      },
+      {
+        "id": "4861b3c2-3145-4ea3-8498-03a5420e8d6f",
+        "slug": "bioesser-the-concept-with-an-organic-soul-in-the-heart-of-milan-645361",
+        "language": "it"
+      },
+      {
+        "id": "af873a08-6893-47a5-b41e-7a0d1a27d05e",
+        "slug": "la-sardella-innamorata-un-nuovo-concept-sulla-spiaggia-di-marotta-645362",
+        "language": "it"
+      },
+      {
+        "id": "da881a01-2e77-48cc-b894-0aedbeaab99f",
+        "slug": "la-regina-di-manarola-the-exclusive-project-by-francesco-migliore-645363",
+        "language": "it"
+      },
+      {
+        "id": "97e1a14d-8661-4117-86aa-a86e2e2fa50e",
+        "slug": "unregular-pizza-gabriele-lamonaca-s-project-conquers-new-york-645365",
+        "language": "it"
+      },
+      {
+        "id": "0b3775cc-3844-4c5d-a72a-6ff46a89c619",
+        "slug": "napizz-il-successo-della-catena-romagnola-ha-come-alleato-il-calore-perfetto-645367",
+        "language": "it"
+      },
+      {
+        "id": "00433c6f-7247-4fea-a496-1dc991275f3c",
+        "slug": "paolo-brunelli-con-il-suo-nuovo-progetto-nel-locale-di-marzocca-propone-anche-pasticceria-da-forno-645370",
+        "language": "it"
+      },
+      {
+        "id": "6940f12e-f7b4-4a6a-a949-07a945ab6fef",
+        "slug": "gianluca-fusto-ho-portato-la-cottura-perfetta-nel-mio-nuovo-laboratorio-645371",
+        "language": "it"
+      }
+    ]
+  },
+  "skipped": {
+    "shops": 0,
+    "stories": 0
+  }
+}

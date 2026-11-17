@@ -1,0 +1,91 @@
+'use client';
+
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
+import { Heart, ArrowUpRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { useSaved } from '../components/providers';
+import { RestaurantCard, StoryCard } from '../components/cards';
+import { useShops, useStories } from '../services/catalog';
+export function meta() {
+  return [{ title: 'Salvati · RoadToSmartBaking' }];
+}
+export default function Saved() {
+  const { ids, ready, clear } = useSaved();
+  const { t } = useTranslation();
+  const { locale } = useParams<{ locale: string; slug: string }>();
+  const needsShops = ids.some((id) => !id.startsWith('story:'));
+  const needsStories = ids.some((id) => id.startsWith('story:'));
+  const shops = useShops(needsShops);
+  const stories = useStories(locale, needsStories);
+  const loading = (needsShops && shops.isPending) || (needsStories && stories.isPending);
+  const failed = (needsShops && shops.isError) || (needsStories && stories.isError);
+  const records = (shops.data ?? []).filter((restaurant) => ids.includes(restaurant.id));
+  const savedStories = (stories.data ?? []).filter((story) => ids.includes(`story:${story.slug}`));
+  const savedCount = records.length + savedStories.length;
+  return (
+    <main id="main" className="container saved-page">
+      <section className="saved-intro">
+        <span className="eyebrow">
+          <Heart size={13} />
+          {t('saved')}
+        </span>
+        <h1>
+          {t('savedTitle')}
+          <br />
+          <em>{t('savedAccent')}</em>
+        </h1>
+        <p>{t('savedIntro')}</p>
+      </section>
+      {!ready || loading ? (
+        <div className="skeleton-card" aria-busy="true" />
+      ) : failed ? (
+        <p className="notice" role="alert">
+          {t('contentError')}{' '}
+          <button
+            onClick={() => {
+              if (needsShops) void shops.refetch();
+              if (needsStories) void stories.refetch();
+            }}
+          >
+            {t('retry')}
+          </button>
+        </p>
+      ) : (
+        <>
+          {savedCount < ids.length && <p className="notice">{t('unavailableSaved')}</p>}
+          {savedCount ? (
+            <>
+              <div className="saved-toolbar">
+                <span>
+                  {savedCount} {t('saved').toLowerCase()}
+                </span>
+                <button className="text-link" onClick={clear}>
+                  {t('clearSaved')}
+                </button>
+              </div>
+              <div className="card-grid">
+                {records.map((restaurant) => (
+                  <RestaurantCard key={restaurant.id} restaurant={restaurant} />
+                ))}
+                {savedStories.map((story) => (
+                  <StoryCard key={story.slug} story={story} />
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="empty-state">
+              <Heart size={35} strokeWidth={1} />
+              <h2>{t('savedEmpty')}</h2>
+              <p>{t('savedEmptyText')}</p>
+              <Link className="button primary" href={`/${locale}`}>
+                {t('browse')}
+                <ArrowUpRight size={17} />
+              </Link>
+            </div>
+          )}
+        </>
+      )}
+    </main>
+  );
+}
