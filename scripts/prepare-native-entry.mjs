@@ -1,4 +1,4 @@
-import { copyFile } from 'node:fs/promises';
+import { copyFile, access } from 'node:fs/promises';
 import { join } from 'node:path';
 
 const nativeWebDirs = {
@@ -7,7 +7,14 @@ const nativeWebDirs = {
 };
 const nativeWebDir = nativeWebDirs[process.env.CAPACITOR_PLATFORM_NAME];
 
-if (nativeWebDir) {
+const fallback = join(process.env.CAPACITOR_WEB_DIR ?? 'build/client', '__spa-fallback.html');
+if (
+  nativeWebDir &&
+  (await access(fallback).then(
+    () => true,
+    () => false,
+  ))
+) {
   // Native WebViews serve index.html for every extensionless URL.
   await copyFile(
     join(process.env.CAPACITOR_WEB_DIR, '__spa-fallback.html'),

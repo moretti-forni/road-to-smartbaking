@@ -11,9 +11,10 @@ frontend:
         - npm run lint
         - npm run typecheck
         - npm run test
+        - node scripts/prepare-amplify-env.mjs
         - npm run build
   artifacts:
-    baseDirectory: build/client
+    baseDirectory: .next
     files:
       - '**/*'
   cache:

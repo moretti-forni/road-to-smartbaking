@@ -1,0 +1,13 @@
+node_modules
+.next
+.git
+.env*
+!.env.example
+build
+mobile
+android
+ios
+outputs
+Shops_Roadto
+test-results
+playwright-report

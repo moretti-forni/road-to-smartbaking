@@ -1,76 +1,107 @@
-# RoadToSmartBaking — web and mobile
+# RoadToSmartBaking
 
-A React/TypeScript consumer frontend with Moretti colours and typography, using the local Blogzine reference for editorial composition and carousel/card behaviour. Separate from the Marketing Studio and Remote Master Hub.
+One Next.js application serves the bilingual public website, Marketing Studio, and `/api/v1` API. PostgreSQL stores shops, bilingual stories, listing requests, and saved editorial drafts. The existing database is not required.
 
-## Run locally
+## Local development
 
-Use Node 22.13+ (the web tooling supports Node 22.13+ on the 22.x line and Node 24+).
+Use Node **22.13+** (also required by Capacitor 8) and Docker Desktop.
 
 ```sh
-npm ci --include=dev
+npm ci
+cp .env.example .env.local
+# Configure staff OTP and email settings in .env.local; see docs/amplify-setup.md.
+docker compose --env-file .env.local up -d --wait db
+npm run db:migrate
+npm run db:seed
 npm run dev
 ```
 
-Open `http://127.0.0.1:5173/it` or `/en`. The root links/redirects to Italian. No backend credentials are required. `npm run build` creates pre-rendered output under `build/client`; `npm run preview` serves it locally.
+Open [Italian](http://127.0.0.1:5173/it), [English](http://127.0.0.1:5173/en), or [Studio](http://127.0.0.1:5173/admin). Website and API run on port 5173 in the same process. There is no separate backend installation or API server.
 
-## Mobile development
+The isolated Compose project is `roadtosmartbaking-next`, with its own `rtsm_next_postgres` volume and port **5434**. Run `npm run db:migrate` to initialize or upgrade its tracked schema. Do not point `DATABASE_URL` at an existing production database. Keep `.env.local` private. Compose overrides must be supplied using `--env-file .env.local`.
 
-Capacitor 8 packages the same pre-rendered `build/client` output in the iOS and Android apps. The bundle ID is `com.morettiforni.roadtosmartbaking`. iOS uses Swift Package Manager and requires Xcode 26+. Android requires Android Studio 2025.2.1+ and Android SDK 36.
+The seed command requires `--local-demo` (provided by the npm script) and a loopback database URL. It preserves existing records and publication decisions. An empty database produces empty public lists until content is imported or published.
 
-```sh
-npm run mobile:sync     # Build and sync both wrappers
-npm run mobile:ios      # Build, sync, and run on an iOS target
-npm run mobile:android  # Build, sync, and run on an Android target
+For UI exploration without PostgreSQL, set `NEXT_PUBLIC_CATALOG_SOURCE=fixtures` in `.env.local` and restart the server. This explicitly uses the bundled catalog; listing submissions are disabled. API endpoints still require PostgreSQL. Never enable fixture mode for a live editorial deployment.
+
+## Structure
+
+```text
+src/
+  app/
+    [locale]/                 Public pages, with Italian/English validation
+    admin/                    Marketing Studio
+    api/v1/[...path]/          Next.js HTTP entrypoint
+  components/                 Shared UI and providers
+  screens/                    Interactive page content
+  features/catalog/           Shared validation and response mapping
+  server/
+    auth/                     Staff authorization
+    http/                     JSON, CORS, size limits, error responses
+    services/                 API workflows, drafts, public server reads
+    repositories/             Parameterized PostgreSQL queries
+    db/                       Connection pool and SQL migrations
+  data/                       Bundled preview catalog and source archive
+  services/                   Browser API clients and discovery logic
+  lib/                        Navigation utilities
+  styles/                     Global styles
 ```
 
-After syncing, use `npx cap open ios` or `npx cap open android` to work in the native IDE. Track the native projects in source control. Each wrapper's ignore rules exclude copied web assets and local build files.
+Routes handle HTTP concerns; services preserve approval and draft/publish workflows; repositories own SQL. Public detail pages read the same workflows on the server, without making HTTP calls back into their own API. Server credentials stay outside the client bundle. API responses use `no-store` and detail pages render on demand, so this migration does not introduce stale publication caches.
 
-The web manifest supports standalone installation where the browser offers it. The website needs connectivity to fetch its pages. Native apps package the local site assets, while map tiles and external links still depend on connectivity.
+Story source content lives in `src/data/stories.snapshot.json`. `npm run content:index` rebuilds its lightweight listing index and runs before production builds. Public images, fonts, and oven assets remain in `public/`; retain their license files.
 
-For release, confirm the bundle ID and signing accounts, replace the scaffold icons and splash screens, and test on real devices. Native geolocation, directions, sharing, push notifications, and verified App Links / Universal Links are separate integration work.
+## API and Studio
 
-## Implemented
-
-- Discovery: lazy-loaded Leaflet map above cards, city/name search, category and map-area filtering, explicit geolocation, distance sorting, highlighted selection and empty-state recovery.
-- Restaurant detail: editorial image, description, illustrative oven relationship, share/save and practical-information panel.
-- Stories: manual swipe/scroll-snap carousel with previous/next/dots, category filters, search and progressive loading.
-- Articles: original body, source links, metadata, related stories and sharing/clipboard fallback.
-- Saved places: local browser storage, failure handling and cross-tab updates.
-- Italian/English interface, responsive navigation, reduced motion, visible focus and skip link.
-- Article and sample restaurant routes pre-rendered in both interface languages.
-
-## Data and release boundaries
-
-**This is a local working frontend preview, not a production service.** Six restaurants, oven assignments and coordinates are demonstration data. Editorial images do not depict the sample venues. No opening hours, phone numbers or verified-address claims are invented. Directions remain disabled until verified destinations are connected.
-
-The 63 Italian articles/images come from the mobile project's imported Moretti archive. The English interface labels Italian editorial content; translations are not fabricated. Publication/image rights still need review.
-
-Discovery uses the fixture repository in `app/services/discovery.ts`. `app/services/http.ts` prepares a public Axios boundary, but **no live restaurant API is wired**. Setting `VITE_PUBLIC_API_BASE_URL` alone does not enable a live mode. Do not connect the hub's private endpoints or credentials.
-
-The map defaults to OpenStreetMap for local evaluation. Set `VITE_CARTO_BASEMAP_KEY` to use CARTO Voyager for a cleaner, familiar road-map style, or supply an approved `VITE_MAP_TILE_URL`. Production needs an approved tile/geocoding provider, visible attribution and usage-policy review. Search filters sample records; live address autocomplete, clustering and production pagination are future integration work.
-
-Preview pages are intentionally `noindex,nofollow`. Before launch: connect verified data, implement publication/rebuild/CDN withdrawal handling, approve legal text and imagery, configure canonical/social metadata, and verify real HTTP 404 behaviour on the host. No deployment or AWS resources are created here.
-
-## Content and assets
-
-`app/data/stories.snapshot.json` is the source archive. `npm run content:index` generates a lightweight index without article bodies; `prebuild` runs it automatically. Full bodies travel as route data rather than entering the listing bundle. `public/media` and `public/fonts` are runtime copies; retain font OFL licenses. Design boards stay outside runtime output in `assets/references`.
-
-The template at `/Users/k.puthussery/Documents/blogzine_v1.3.2/template` is untouched. Its Bootstrap/tiny-slider/global scripts are not dependencies. Template package metadata alone does not establish reuse rights.
-
-## Checks
+Existing `/api/v1` paths and response contracts are preserved: public shops/stories, listing submissions, staff request review/approval, shop editing, bilingual story editing, and saved revision publication. Collection responses use `{ "items": [...] }`, with `limit`/`offset`. JSON writes require `Content-Type: application/json` and have a 512 KiB limit.
 
 ```sh
-npm run lint
+curl http://127.0.0.1:5173/api/v1/health
+curl 'http://127.0.0.1:5173/api/v1/shops?category=pizza'
+curl 'http://127.0.0.1:5173/api/v1/stories?language=it'
+```
+
+Studio uses email OTP restricted to exact `@morettiforni.com` mailboxes. Codes expire in ten minutes, allow five attempts and are single-use. Eight-hour HttpOnly sessions are restored on reload and revoked on logout. Configure SMTP locally or SES with a runtime IAM role. The old bearer token is disabled in production.
+
+For Amplify, use `RTSM_RUNTIME_SECRET_ARN` to retrieve `DATABASE_URL` and `RTSM_AUTH_SECRET` from Secrets Manager; do not embed credentials in the deployment artifact. See [the Amplify setup guide](docs/amplify-setup.md).
+
+## Checks and production build
+
+```sh
 npm run typecheck
-npm run test
-npx playwright install chromium
+npm run lint
+npm test
 npm run test:e2e
-npm run format:check
 npm run build
+npm start
 ```
 
-Browser tests cover discovery/recovery, saved persistence, details, carousel/search, article deep links, language switching, invalid routes and desktop/mobile overflow. Traces/screenshots go to ignored `test-results`.
+Playwright launches the app in explicit fixture mode for deterministic browser journeys. Do not reuse a running API-backed dev server for those tests. API adapter tests use a mocked database; real PostgreSQL integration should additionally verify submissions, approval transactions, and revision-conflict publishing against the isolated local database.
 
-`minimatch` is overridden to patched 11.x for the lint dependency tree; revalidate when upgrading tooling. Dependencies are locked in `package-lock.json`.
+Deploy to a Next.js-capable Node/container or managed SSR host. `amplify.yml` now outputs `.next`; the old Pages workflow has been replaced with validation because GitHub Pages cannot host the API. Deployment credentials and platform provisioning are not included. A standalone container must also copy `public/` and `.next/static/` alongside `.next/standalone/`.
 
-See `docs/technology-architecture.md`, `docs/web-app-plan.md` and `assets/README.md` for rationale and provenance. `amplify.yml` is a proposed static build configuration only; host rewrites/publication policy still need deployment validation.
+Configure a dedicated PostgreSQL instance/service for production, with its own credentials and backups. Studio supports S3 image uploads with server-side WebP optimization; configure the private bucket and CloudFront delivery before use. Existing bundled paths and stored URLs remain supported. No AWS resources are created by this migration.
+
+## iOS and Android
+
+Capacitor still needs a static browser bundle; a Next.js server cannot run inside the native app. `npm run mobile:build` generates a React Router SPA using shared UI/data/services and small adapters in `mobile-source/`. The generated `mobile/` directory is ignored. The temporary route adapters for story and restaurant details must stay aligned with the web detail UI.
+
+Set `NEXT_PUBLIC_API_BASE_URL` to the hosted **HTTPS** `/api/v1` endpoint in `.env.local`, then:
+
+```sh
+npm run mobile:sync
+npm run mobile:ios
+npm run mobile:android
+```
+
+Add the actual native origins to server-side `RTSM_ALLOWED_ORIGINS`, for example `capacitor://localhost,http://localhost`. Native apps call the same API; they never connect directly to PostgreSQL. The mobile output remains `build/client`. Native device packaging requires Node 22+, Xcode/Android SDK, and the existing platform projects.
+
+Older designs under `docs/references/` describe prior architecture decisions; this README and `docs/technology-architecture.md` describe the current branch.
+
+For the legacy local database with manual migrations 001–005 already applied, record that verified state once using `npm run db:migrate -- --baseline-through=005-venue-reports.sql`. Never baseline an empty or partially migrated database. Fresh databases use `npm run db:migrate`; inspect history using `npm run db:status`. Never edit previously applied SQL files.
+
+Existing `other` records remain available for staff reclassification. The Moretti headquarters marker remains approximate until its coordinates are confirmed.
+
+## Amplify preparation
+
+Next.js is pinned to 15.5.29 with a patched PostCSS override. See [Amplify setup](docs/amplify-setup.md) for branch connection, runtime secrets, SES, private S3/CloudFront media and database choices. S3 uploads are integrated into Studio for venues, covers and story image blocks. No cloud resources have been provisioned.
