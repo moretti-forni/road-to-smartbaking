@@ -295,11 +295,6 @@ export default function Explore() {
           </p>
         )}
         <div className="map-frame">
-          <div className="map-label">
-            <span className="live-dot" />
-            {t('map')}
-            <span>{t('mapCoverage', { count: records.length })}</span>
-          </div>
           {hydrated ? (
             <Suspense fallback={<div className="map-placeholder">{t('loadingMap')}</div>}>
               <DiscoveryMap

@@ -128,7 +128,7 @@ export const resources = {
       listingRequestThanksBody:
         'Questa è una conferma dimostrativa: nessun dato è stato inviato. Presto potrai completare la richiesta dal portale dedicato.',
       privacy: 'Privacy & informazioni',
-      credits: 'Moretti Forni · The SmartBaking Company®',
+      credits: 'The SmartBaking Company®',
       next: 'Storia successiva',
       previous: 'Storia precedente',
       unavailable: 'Questa pagina non è disponibile.',
@@ -288,7 +288,7 @@ export const resources = {
       listingRequestThanksBody:
         'This is a demo confirmation: no information has been sent. You will soon be able to complete your request through a dedicated portal.',
       privacy: 'Privacy & information',
-      credits: 'Moretti Forni · The SmartBaking Company®',
+      credits: 'The SmartBaking Company®',
       next: 'Next story',
       previous: 'Previous story',
       unavailable: 'This page is not available.',

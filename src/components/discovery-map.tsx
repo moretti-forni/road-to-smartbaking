@@ -7,6 +7,7 @@ import {
   MapContainer,
   Popup,
   TileLayer,
+  ZoomControl,
   Tooltip,
   useMap,
   useMapEvents,
@@ -31,6 +32,16 @@ interface Props {
   fitKey: string;
   focus?: { lat: number; lng: number; key: number; zoom?: number };
   userLocation?: { lat: number; lng: number };
+}
+
+function MapSize() {
+  const map = useMap();
+  useEffect(() => {
+    const observer = new ResizeObserver(() => map.invalidateSize({ pan: false }));
+    observer.observe(map.getContainer());
+    return () => observer.disconnect();
+  }, [map]);
+  return null;
 }
 
 function ScrollWheelZoom({ enabled }: { enabled: boolean }) {
@@ -95,6 +106,7 @@ export default function DiscoveryMap(props: Props) {
         center={[43.75, 13.1]}
         zoom={5}
         scrollWheelZoom={false}
+        zoomControl={false}
         aria-label={t('map')}
       >
         <TileLayer
@@ -106,7 +118,9 @@ export default function DiscoveryMap(props: Props) {
             tileload: () => setTileError(false),
           }}
         />
+        <ZoomControl position="topright" />
         <ScrollWheelZoom enabled={isScrollZoomEnabled} />
+        <MapSize />
         <MapEvents {...props} />
         {props.userLocation && (
           <CircleMarker
@@ -121,7 +135,9 @@ export default function DiscoveryMap(props: Props) {
         )}
         <VenueMarkers {...props} locale={locale} />
       </MapContainer>
-      {!isScrollZoomEnabled && <p className="map-zoom-hint">{t('mapZoomInstruction')}</p>}
+      {!isScrollZoomEnabled && !tileError && (
+        <p className="map-zoom-hint">{t('mapZoomInstruction')}</p>
+      )}
       {tileError && (
         <div className="map-error" role="status">
           <span>{t('mapUnavailable')}</span>
@@ -166,7 +182,14 @@ function VenueMarkers(props: Props & { locale: string }) {
         })}
       >
         <Tooltip>Moretti Forni · Mondolfo</Tooltip>
-        <Popup className="map-place-popup" closeButton={false} autoPan={false}>
+        <Popup
+          className="map-place-popup"
+          closeButton
+          autoPan
+          keepInView
+          autoPanPaddingTopLeft={[12, 12]}
+          autoPanPaddingBottomRight={[12, 24]}
+        >
           <article className="map-place-card">
             <img
               src={publicPath('/mf_factory.jpg')}
@@ -223,7 +246,10 @@ function VenueMarkers(props: Props & { locale: string }) {
                 html: `<span>${group.length}</span>`,
                 iconSize: [40, 40],
               })}
-              eventHandlers={{ click: () => map.setView([lat, lng], Math.min(zoom + 2, 18)) }}
+              eventHandlers={{
+                click: () =>
+                  map.setView([lat, lng], Math.min(map.getZoom() + 2, 18), { animate: false }),
+              }}
             >
               <Tooltip>{t('mapCoverage', { count: group.length })}</Tooltip>
             </Marker>
@@ -241,7 +267,14 @@ function VenueMarkers(props: Props & { locale: string }) {
             eventHandlers={{ click: () => props.onSelect(restaurant.id) }}
           >
             <Tooltip direction="top">{restaurant.name}</Tooltip>
-            <Popup className="map-place-popup" closeButton={false} autoPan={false}>
+            <Popup
+              className="map-place-popup"
+              closeButton
+              autoPan
+              keepInView
+              autoPanPaddingTopLeft={[12, 12]}
+              autoPanPaddingBottomRight={[12, 24]}
+            >
               <article className="map-place-card">
                 {restaurant.image && (
                   <img src={shopImage(restaurant.image, 'cards')} alt="" width="320" height="180" />

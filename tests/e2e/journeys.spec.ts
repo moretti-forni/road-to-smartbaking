@@ -165,3 +165,95 @@ test('category selections combine, image failures collapse, and reports stay att
   await dialog.getByRole('button', { name: 'Close', exact: true }).click();
   await expect(dialog).not.toBeVisible();
 });
+
+test('mobile discovery filters and popup stay inside their containers', async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== 'mobile');
+  test.setTimeout(60000);
+  for (const width of [320, 360, 390, 430]) {
+    await page.setViewportSize({ width, height: 780 });
+    await page.goto('/it');
+    await expect(page.locator('.leaflet-container')).toBeVisible();
+    for (const selector of ['.search-toolbar > .filter-pills', '.location-filters']) {
+      const row = page.locator(selector);
+      await expect(row.getByRole('button')).toHaveCount(5);
+      const fits = await row.evaluate((element) => {
+        const bounds = element.getBoundingClientRect();
+        return [...element.querySelectorAll('button')].every((button) => {
+          const rect = button.getBoundingClientRect();
+          return (
+            rect.left >= bounds.left - 1 &&
+            rect.right <= bounds.right + 1 &&
+            rect.top >= bounds.top - 1 &&
+            rect.bottom <= bounds.bottom + 1
+          );
+        });
+      });
+      expect(fits, `${selector} at ${width}px`).toBe(true);
+    }
+    await expect(page.locator('.map-zoom-hint')).toBeHidden();
+    await expect(page.locator('.map-label')).toHaveCount(0);
+    await page.locator('.moretti-map-marker').click();
+    const popup = page.locator('.leaflet-popup');
+    await expect(popup).toBeVisible();
+    await expect(page.locator('.map-label')).toBeHidden();
+    await expect
+      .poll(async () => {
+        const popupBounds = await popup.boundingBox();
+        const mapBounds = await page.locator('.map-frame').boundingBox();
+        return Boolean(
+          popupBounds &&
+          mapBounds &&
+          popupBounds.x >= mapBounds.x &&
+          popupBounds.x + popupBounds.width <= mapBounds.x + mapBounds.width &&
+          popupBounds.y >= mapBounds.y &&
+          popupBounds.y + popupBounds.height <= mapBounds.y + mapBounds.height,
+        );
+      })
+      .toBe(true);
+    await page.locator('.leaflet-popup-content').evaluate((element) => {
+      element.scrollTop = element.scrollHeight;
+    });
+    await expect(popup.getByRole('link', { name: 'Indicazioni' })).toBeVisible();
+    await page.screenshot({ path: testInfo.outputPath(`mobile-map-${width}.png`) });
+    await popup.getByRole('button', { name: 'Close popup' }).click();
+    await expect(popup).not.toBeVisible();
+    await expect(page.locator('.leaflet-control-zoom')).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+  }
+  await page.setViewportSize({ width: 360, height: 780 });
+  await page.goto('/it?city=Roma');
+  await expect(page.locator('.leaflet-container')).toBeVisible();
+  const pins = page.locator('.leaflet-overlay-pane path.leaflet-interactive');
+  for (let step = 0; step < 5 && (await pins.count()) === 0; step++) {
+    await page.locator('.venue-cluster').first().click();
+  }
+  await expect(pins.first()).toBeVisible();
+  await pins.first().click();
+  const venuePopup = page.locator('.leaflet-popup');
+  await expect(venuePopup.getByRole('link', { name: 'Scopri il locale' })).toBeVisible();
+  await page.locator('.leaflet-popup-content').evaluate((element) => {
+    element.scrollTop = element.scrollHeight;
+  });
+  await expect
+    .poll(async () => {
+      const venueBounds = await venuePopup.boundingBox();
+      const frameBounds = await page.locator('.map-frame').boundingBox();
+      return Boolean(
+        venueBounds &&
+        frameBounds &&
+        venueBounds.x >= frameBounds.x &&
+        venueBounds.x + venueBounds.width <= frameBounds.x + frameBounds.width,
+      );
+    })
+    .toBe(true);
+  const linkColor = await venuePopup
+    .getByRole('link', { name: 'Scopri il locale' })
+    .evaluate((element) => getComputedStyle(element).color);
+  expect(['rgb(248, 244, 235)', 'rgb(255, 254, 251)']).toContain(linkColor);
+  await page.screenshot({ path: testInfo.outputPath('mobile-venue-popup.png') });
+  await venuePopup.getByRole('button', { name: 'Close popup' }).click();
+});
