@@ -3,6 +3,7 @@ import { writeFile } from 'node:fs/promises';
 const names = [
   'RTSM_RUNTIME_SECRET_ARN',
   'RTSM_DATA_FUNCTION_ARN',
+  'RTSM_STAFF_FUNCTION_ARN',
   'RTSM_AWS_REGION',
   'RTSM_APP_ORIGIN',
   'RTSM_DB_SCHEMA',

@@ -1,0 +1,174 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "IAM-only staff OTP and admin API. Reuses the existing database security group and secret; no public function URL.",
+  "Parameters": {
+    "CodeBucket": {
+      "Type": "String"
+    },
+    "CodeKey": {
+      "Type": "String"
+    },
+    "RuntimeSecretArn": {
+      "Type": "String"
+    },
+    "SubnetId": {
+      "Type": "String",
+      "Default": "subnet-01e88ce6a9284c0a6"
+    },
+    "SecurityGroupId": {
+      "Type": "String"
+    },
+    "SesIdentityArn": {
+      "Type": "String"
+    },
+    "SenderEmail": {
+      "Type": "String"
+    },
+    "AmplifyComputeRoleName": {
+      "Type": "String",
+      "Default": "rtsm-amplify-ssr-main"
+    }
+  },
+  "Resources": {
+    "StaffRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+        ],
+        "Policies": [
+          {
+            "PolicyName": "StaffDatabaseAndEmail",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": "secretsmanager:GetSecretValue",
+                  "Resource": {
+                    "Ref": "RuntimeSecretArn"
+                  }
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": "ses:SendEmail",
+                  "Resource": {
+                    "Ref": "SesIdentityArn"
+                  },
+                  "Condition": {
+                    "StringEquals": {
+                      "ses:FromAddress": {
+                        "Ref": "SenderEmail"
+                      }
+                    },
+                    "ForAllValues:StringLike": {
+                      "ses:Recipients": ["*@morettiforni.com"]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "StaffFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Runtime": "nodejs22.x",
+        "Handler": "index.handler",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "ReservedConcurrentExecutions": 3,
+        "Role": {
+          "Fn::GetAtt": ["StaffRole", "Arn"]
+        },
+        "Code": {
+          "S3Bucket": {
+            "Ref": "CodeBucket"
+          },
+          "S3Key": {
+            "Ref": "CodeKey"
+          }
+        },
+        "VpcConfig": {
+          "SubnetIds": [
+            {
+              "Ref": "SubnetId"
+            }
+          ],
+          "SecurityGroupIds": [
+            {
+              "Ref": "SecurityGroupId"
+            }
+          ]
+        },
+        "Environment": {
+          "Variables": {
+            "RTSM_RUNTIME_SECRET_ARN": {
+              "Ref": "RuntimeSecretArn"
+            },
+            "RTSM_DB_SCHEMA": "road_to_smartbaking",
+            "RTSM_AUTH_MODE": "email-otp",
+            "RTSM_MAIL_PROVIDER": "ses",
+            "SES_FROM": {
+              "Ref": "SenderEmail"
+            },
+            "NODE_ENV": "production"
+          }
+        }
+      }
+    },
+    "AmplifyInvokeStaff": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "InvokeRoadToSmartBakingStaff",
+        "Roles": [
+          {
+            "Ref": "AmplifyComputeRoleName"
+          }
+        ],
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": "lambda:InvokeFunction",
+              "Resource": {
+                "Fn::GetAtt": ["StaffFunction", "Arn"]
+              }
+            }
+          ]
+        }
+      }
+    },
+    "StaffLogs": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Sub": "/aws/lambda/${StaffFunction}"
+        },
+        "RetentionInDays": 14
+      }
+    }
+  },
+  "Outputs": {
+    "StaffFunctionArn": {
+      "Value": {
+        "Fn::GetAtt": ["StaffFunction", "Arn"]
+      }
+    }
+  }
+}

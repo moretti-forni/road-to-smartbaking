@@ -1,13 +1,14 @@
 import 'server-only';
-import { invokeDataApi } from '../data/client.mjs';
+import { invokeDataApi, invokeStaffApi } from '../data/client.mjs';
 import { isPublicDataRoute } from '../services/public-api.mjs';
 import { loadRuntimeSecrets } from '../config/runtime.mjs';
-import { MediaError } from '../media/uploads.mjs';
-import { ZodError } from 'zod';
+import { MediaError, startUpload, finishUpload } from '../media/uploads.mjs';
+import { z, ZodError } from 'zod';
 import { ApiError, handleApi } from '../services/api.mjs';
 import { isStaff } from '../auth/staff.mjs';
 import {
   AuthError,
+  cookieToken,
   requestCode,
   verifyCode,
   readSession,
@@ -48,7 +49,25 @@ async function readJson(request: Request) {
 }
 export async function serveApi(request: Request) {
   const origin = request.headers.get('origin');
-  const appOrigin = process.env.RTSM_APP_ORIGIN || new URL(request.url).origin;
+  const requestUrl = new URL(request.url);
+  let appOrigin = process.env.RTSM_APP_ORIGIN || requestUrl.origin;
+  // Next's local server may report 127.0.0.1 when the browser uses localhost.
+  if (
+    process.env.NODE_ENV !== 'production' &&
+    !process.env.RTSM_APP_ORIGIN &&
+    origin &&
+    URL.canParse(origin)
+  ) {
+    const browserUrl = new URL(origin);
+    const loopback = new Set(['localhost', '127.0.0.1', '[::1]']);
+    if (
+      loopback.has(requestUrl.hostname) &&
+      loopback.has(browserUrl.hostname) &&
+      requestUrl.protocol === browserUrl.protocol &&
+      requestUrl.port === browserUrl.port
+    )
+      appOrigin = browserUrl.origin;
+  }
   const allowed = new Set(
     (process.env.RTSM_ALLOWED_ORIGINS ?? '')
       .split(',')
@@ -77,6 +96,51 @@ export async function serveApi(request: Request) {
       return json({ error: 'Origin not allowed' }, 403);
     if (privileged && !['GET', 'HEAD'].includes(request.method) && origin !== appOrigin)
       return json({ error: 'Origin required' }, 403);
+    if (process.env.RTSM_DATA_FUNCTION_ARN && privileged && process.env.RTSM_STAFF_FUNCTION_ARN) {
+      const token = cookieToken(request);
+      const url = path + new URL(request.url).search;
+      if (path.startsWith('/api/v1/admin/media/')) {
+        const session = await invokeStaffApi({ method: 'GET', url: '/api/v1/auth/session', token });
+        if (session.status !== 200) return json(session.body, session.status);
+        const result = await handleApi(
+          null,
+          {
+            method: request.method,
+            url,
+            staffEmail: z.object({ email: z.email() }).parse(session.body).email,
+            authorization: undefined,
+            readBody: () => readJson(request),
+          },
+          undefined,
+          { startUpload, finishUpload },
+        );
+        return json(result.body, result.status ?? 200);
+      }
+      const result = await invokeStaffApi({
+        method: request.method,
+        url,
+        token,
+        body:
+          ['POST', 'PUT', 'PATCH'].includes(request.method) && path !== '/api/v1/auth/logout'
+            ? await readJson(request)
+            : undefined,
+      });
+      if (
+        path === '/api/v1/auth/verify-code' &&
+        request.method === 'POST' &&
+        result.status === 200
+      ) {
+        const verified = z
+          .object({ token: z.string().regex(/^[a-f0-9]{64}$/), email: z.email() })
+          .safeParse(result.body);
+        if (!verified.success) throw new ApiError(503, 'Invalid staff service response');
+        headers['Set-Cookie'] = sessionHeader(verified.data.token);
+        return json({ email: verified.data.email });
+      }
+      if (path === '/api/v1/auth/logout' && request.method === 'POST')
+        headers['Set-Cookie'] = sessionHeader('');
+      return json(result.body, result.status);
+    }
     if (process.env.RTSM_DATA_FUNCTION_ARN) {
       if (path.startsWith('/api/v1/admin/'))
         return json({ error: 'Staff authorization required' }, 401);
@@ -134,6 +198,7 @@ export async function serveApi(request: Request) {
         readBody: () => readJson(request),
       },
       process.env.RTSM_STAFF_TOKEN,
+      { startUpload, finishUpload },
     );
     return json(result.body, result.status ?? 200);
   } catch (error) {

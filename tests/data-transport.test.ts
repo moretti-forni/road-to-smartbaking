@@ -69,24 +69,22 @@ describe('Amplify IAM data transport', () => {
     expect(database).not.toHaveBeenCalled();
   });
   it('uses the private data function for server-rendered story fallback', async () => {
-    send
-      .mockResolvedValueOnce(reply(404, { error: 'Not found' }))
-      .mockResolvedValueOnce(
-        reply(200, {
-          slug: 'test',
-          language: 'it',
-          title: 'Italian original',
-          summary: 'Summary',
-          category: 'pizza',
-          publishedAt: null,
-          sourcePublishedAt: null,
-          sourceUrl: null,
-          readMinutes: 1,
-          coverImageUrl: null,
-          coverImageAlt: null,
-          blocks: [{ type: 'paragraph', text: 'Body' }],
-        }),
-      );
+    send.mockResolvedValueOnce(reply(404, { error: 'Not found' })).mockResolvedValueOnce(
+      reply(200, {
+        slug: 'test',
+        language: 'it',
+        title: 'Italian original',
+        summary: 'Summary',
+        category: 'pizza',
+        publishedAt: null,
+        sourcePublishedAt: null,
+        sourceUrl: null,
+        readMinutes: 1,
+        coverImageUrl: null,
+        coverImageAlt: null,
+        blocks: [{ type: 'paragraph', text: 'Body' }],
+      }),
+    );
     const story = await getStory('test', 'en');
     expect(story.language).toBe('it');
     expect(send).toHaveBeenCalledTimes(2);
@@ -98,4 +96,64 @@ describe('Amplify IAM data transport', () => {
       invokeDataApi({ method: 'GET', url: '/api/v1/health', body: undefined }),
     ).rejects.toMatchObject({ status: 503, message: 'Data service unavailable' });
   });
+});
+it('exchanges the private login token for an HttpOnly cookie without exposing it in JSON', async () => {
+  vi.stubEnv('RTSM_STAFF_FUNCTION_ARN', 'arn:aws:lambda:eu-west-1:123:function:staff');
+  send.mockResolvedValue(reply(200, { token: 'a'.repeat(64), email: 'staff@morettiforni.com' }));
+  const response = await serveApi(
+    new Request('https://app.test/api/v1/auth/verify-code', {
+      method: 'POST',
+      headers: { origin: 'https://app.test', 'content-type': 'application/json' },
+      body: JSON.stringify({ email: 'staff@morettiforni.com', code: '123456', challenge: 'test' }),
+    }),
+  );
+  expect(response.status).toBe(200);
+  expect(await response.json()).toEqual({ email: 'staff@morettiforni.com' });
+  expect(response.headers.get('set-cookie')).toContain('HttpOnly; SameSite=Strict');
+  expect(send.mock.calls[0][0].input.FunctionName).toContain('function:staff');
+  expect(database).not.toHaveBeenCalled();
+});
+it('passes the session cookie to the staff function and refuses unsigned media uploads', async () => {
+  vi.stubEnv('RTSM_STAFF_FUNCTION_ARN', 'arn:aws:lambda:eu-west-1:123:function:staff');
+  send.mockResolvedValue(reply(401, { error: 'Sign in required' }));
+  const response = await serveApi(
+    new Request('https://app.test/api/v1/admin/media/uploads', {
+      method: 'POST',
+      headers: {
+        origin: 'https://app.test',
+        cookie: `rtsm_staff_session=${'b'.repeat(64)}`,
+        'content-type': 'application/json',
+      },
+      body: '{}',
+    }),
+  );
+  expect(response.status).toBe(401);
+  expect(JSON.parse(Buffer.from(send.mock.calls[0][0].input.Payload).toString()).token).toBe(
+    'b'.repeat(64),
+  );
+  expect(database).not.toHaveBeenCalled();
+});
+
+it('accepts localhost versus loopback only for unconfigured local development origins', async () => {
+  vi.stubEnv('NODE_ENV', 'development');
+  vi.stubEnv('RTSM_APP_ORIGIN', '');
+  vi.stubEnv('RTSM_STAFF_FUNCTION_ARN', 'arn:aws:lambda:eu-west-1:123:function:staff');
+  send.mockResolvedValue(reply(200, { challenge: 'test' }));
+  const response = await serveApi(
+    new Request('http://127.0.0.1:5173/api/v1/auth/request-code', {
+      method: 'POST',
+      headers: { origin: 'http://localhost:5173', 'content-type': 'application/json' },
+      body: '{}',
+    }),
+  );
+  expect(response.status).toBe(200);
+  vi.stubEnv('NODE_ENV', 'production');
+  const denied = await serveApi(
+    new Request('http://127.0.0.1:5173/api/v1/auth/request-code', {
+      method: 'POST',
+      headers: { origin: 'http://localhost:5173', 'content-type': 'application/json' },
+      body: '{}',
+    }),
+  );
+  expect(denied.status).toBe(403);
 });
