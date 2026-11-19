@@ -57,3 +57,7 @@ The `postbuild` check rejects catalogue media in public or standalone deployment
 A real signed POST/processing/CDN/retry test passed on November 19, 2026, with the generated test object and all its S3 versions removed afterward. The Amplify role `rtsm-amplify-ssr-main` now has scoped Put/Get permissions for this bucket's incoming/media prefixes and Delete only for incoming objects. No public bucket access was enabled.
 
 The currently deployed private-data mode explicitly blocks Studio authentication/admin endpoints. The infrastructure and upload pipeline are verified; staff-browser uploads remain unavailable until that authentication integration is completed and the new code is deployed. This change does not bypass those restrictions. Unreferenced processed images from abandoned drafts are retained; automatic deletion needs reference-aware cleanup and is not performed here.
+
+## Browser upload origins
+
+The media stack's `AllowedOrigin` parameter accepts a comma-separated list. The shared bucket permits POST uploads from `https://roadtosmartbaking.com`, `https://www.roadtosmartbaking.com`, and `https://dev.d39rjisb2mzg1i.amplifyapp.com`. Keep these exact origins aligned with each Amplify branch's `RTSM_APP_ORIGIN`. CORS permits browser access; staff session authorization and signed S3 upload policies are still required.

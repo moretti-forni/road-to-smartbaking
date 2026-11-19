@@ -2,9 +2,9 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: Private staging image storage and CloudFront delivery. Does not create a database or Amplify app.
 Parameters:
   AllowedOrigin:
-    Type: String
+    Type: CommaDelimitedList
     AllowedPattern: 'https://[^/ ]+'
-    Description: Exact HTTPS staging origin, without a trailing slash.
+    Description: Comma-separated exact HTTPS application origins, without trailing slashes.
 Resources:
   MediaBucket:
     Type: AWS::S3::Bucket
@@ -27,7 +27,7 @@ Resources:
         Status: Enabled
       CorsConfiguration:
         CorsRules:
-          - AllowedOrigins: [!Ref AllowedOrigin]
+          - AllowedOrigins: !Ref AllowedOrigin
             AllowedMethods: [POST]
             AllowedHeaders: ['*']
             ExposedHeaders: [ETag]
