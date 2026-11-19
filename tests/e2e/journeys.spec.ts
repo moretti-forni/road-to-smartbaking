@@ -1,3 +1,5 @@
+import { publishedRestaurants } from '../../src/data/restaurants';
+import { parseQuery, filterRestaurants } from '../../src/services/discovery';
 import { expect, test } from '@playwright/test';
 
 test('discovery search, empty recovery, restaurant details and saved persistence', async ({
@@ -286,4 +288,114 @@ test('mobile footer is compact and floating shop action opens registration', asy
   await expect(page.getByRole('dialog')).toBeVisible();
   await page.getByRole('dialog').getByRole('button', { name: 'Chiudi', exact: true }).click();
   await expect(page.getByRole('dialog')).not.toBeVisible();
+});
+
+test('map searches automatically after zoom and drag without popup or history side effects', async ({
+  page,
+}, testInfo) => {
+  await page.goto('/it');
+  await expect(page.locator('.leaflet-container')).toBeVisible();
+  await page
+    .locator('.search-toolbar')
+    .getByRole('button', { name: 'Pizzerie', exact: true })
+    .click();
+  const historyLength = await page.evaluate(() => history.length);
+  await expect(page.locator('.map-search')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Zoom in', exact: true }).click();
+  await expect.poll(() => new URL(page.url()).searchParams.get('bounds')).not.toBeNull();
+  const zoomBounds = new URL(page.url()).searchParams.get('bounds');
+  expect(new URL(page.url()).searchParams.get('kind')).toBe('pizza');
+  const expected = filterRestaurants(
+    publishedRestaurants,
+    parseQuery(new URL(page.url()).searchParams),
+  );
+  await expect(page.locator('#places article')).toHaveCount(expected.length);
+  expect(await page.evaluate(() => history.length)).toBe(historyLength);
+  await page.locator('.moretti-map-marker').click();
+  await expect(page.locator('.leaflet-popup')).toBeVisible();
+  // Wait beyond the debounce interval: popup auto-panning must not trigger a search.
+  await page.waitForTimeout(800);
+  expect(new URL(page.url()).searchParams.get('bounds')).toBe(zoomBounds);
+  await page.locator('.leaflet-popup').getByRole('button', { name: 'Close popup' }).click();
+  await expect(page.locator('.leaflet-popup')).toHaveCount(0);
+  await page.locator('.leaflet-container').scrollIntoViewIfNeeded();
+  const box = (await page.locator('.leaflet-container').boundingBox())!;
+  if (testInfo.project.name === 'mobile') {
+    const touch = await page.context().newCDPSession(page);
+    await touch.send('Input.dispatchTouchEvent', {
+      type: 'touchStart',
+      touchPoints: [{ x: box.x + 80, y: box.y + box.height / 2 }],
+    });
+    for (let step = 1; step <= 12; step++)
+      await touch.send('Input.dispatchTouchEvent', {
+        type: 'touchMove',
+        touchPoints: [{ x: box.x + 80 + step * 7, y: box.y + box.height / 2 }],
+      });
+    await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    await touch.detach();
+  } else {
+    await page.mouse.move(box.x + 80, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 160, box.y + box.height / 2, { steps: 12 });
+    await page.mouse.up();
+  }
+  await expect.poll(() => new URL(page.url()).searchParams.get('bounds')).not.toBe(zoomBounds);
+  const afterDrag = filterRestaurants(
+    publishedRestaurants,
+    parseQuery(new URL(page.url()).searchParams),
+  );
+  await expect(page.locator('#places article')).toHaveCount(afterDrag.length);
+  expect(new URL(page.url()).searchParams.get('kind')).toBe('pizza');
+  expect(await page.evaluate(() => history.length)).toBe(historyLength);
+  const keyboardArea = new URL(page.url()).searchParams.get('bounds');
+  await page.locator('.leaflet-container').focus();
+  await page.keyboard.press('ArrowLeft');
+  await expect.poll(() => new URL(page.url()).searchParams.get('bounds')).not.toBe(keyboardArea);
+  const area = new URL(page.url()).searchParams.get('bounds');
+  await page
+    .locator('.search-toolbar')
+    .getByRole('button', { name: 'Bakery', exact: true })
+    .click();
+  expect(new URL(page.url()).searchParams.get('bounds')).toBe(area);
+  const combined = filterRestaurants(
+    publishedRestaurants,
+    parseQuery(new URL(page.url()).searchParams),
+  );
+  await expect(page.locator('#places article')).toHaveCount(combined.length);
+});
+
+test('search and category removal stay synchronized between map controls and venue list', async ({
+  page,
+}) => {
+  await page.goto('/it?city=Roma&kind=pizza&bounds=41,12,43,13');
+  const search = page.getByRole('textbox', { name: 'Trova un locale o una città' });
+  await expect(search).toHaveValue('Roma');
+  await page.getByRole('button', { name: 'Cancella la ricerca: Roma', exact: true }).click();
+  await expect(search).toHaveValue('');
+  expect(new URL(page.url()).searchParams.has('city')).toBe(false);
+  expect(new URL(page.url()).searchParams.has('bounds')).toBe(false);
+  expect(new URL(page.url()).searchParams.get('kind')).toBe('pizza');
+  await expect(page.locator('#places article')).toHaveCount(
+    filterRestaurants(publishedRestaurants, parseQuery(new URL(page.url()).searchParams)).length,
+  );
+  await search.fill('Roma');
+  await page.getByRole('option', { name: /^Roma/ }).first().click();
+  await expect.poll(() => new URL(page.url()).searchParams.get('city')).toBe('Roma');
+  await search.fill('');
+  await expect(page.locator('.applied-filters')).not.toContainText('Roma');
+  expect(new URL(page.url()).searchParams.has('city')).toBe(false);
+  await page
+    .locator('.location-filters')
+    .getByRole('button', { name: 'Pizzerie', exact: true })
+    .click();
+  await expect(
+    page.locator('.search-toolbar').getByRole('button', { name: 'Pizzerie', exact: true }),
+  ).toHaveAttribute('aria-pressed', 'false');
+  await expect(page.locator('#places article')).toHaveCount(publishedRestaurants.length);
+  await search.fill('FICO');
+  await search.press('Enter');
+  await expect(page.locator('#places article')).toHaveCount(1);
+  await page.getByRole('button', { name: 'Cancella la ricerca', exact: true }).click();
+  await expect(search).toHaveValue('');
+  await expect(page.locator('#places article')).toHaveCount(publishedRestaurants.length);
 });

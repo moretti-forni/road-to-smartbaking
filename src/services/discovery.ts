@@ -110,10 +110,11 @@ export function parseQuery(params: URLSearchParams): DiscoveryQuery {
     boundsValues?.length === 4 &&
     boundsValues.every(Number.isFinite) &&
     boundsValues[0] <= boundsValues[2] &&
-    boundsValues[1] <= boundsValues[3] &&
     boundsValues[0] >= -90 &&
     boundsValues[2] <= 90 &&
     boundsValues[1] >= -180 &&
+    boundsValues[1] <= 180 &&
+    boundsValues[3] >= -180 &&
     boundsValues[3] <= 180;
   const latitude = params.has('lat') ? Number(params.get('lat')) : NaN;
   const longitude = params.has('lng') ? Number(params.get('lng')) : NaN;
@@ -168,8 +169,9 @@ export function filterRestaurants(records: Restaurant[], query: DiscoveryQuery) 
         (!bounds ||
           (restaurant.lat >= bounds.south &&
             restaurant.lat <= bounds.north &&
-            restaurant.lng >= bounds.west &&
-            restaurant.lng <= bounds.east))
+            (bounds.west <= bounds.east
+              ? restaurant.lng >= bounds.west && restaurant.lng <= bounds.east
+              : restaurant.lng >= bounds.west || restaurant.lng <= bounds.east)))
       );
     })
     .sort((first, second) =>

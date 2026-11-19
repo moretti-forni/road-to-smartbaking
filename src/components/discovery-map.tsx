@@ -57,39 +57,74 @@ function ScrollWheelZoom({ enabled }: { enabled: boolean }) {
 
 function MapEvents({ onBounds, focus, userLocation }: Props) {
   const map = useMap();
-  const lastBounds = useRef<Bounds | undefined>(undefined);
-  useEffect(() => {
-    if (focus)
-      map.flyTo([focus.lat, focus.lng], focus.zoom ?? 11, { animate: true, duration: 0.7 });
-  }, [focus, map]);
-  useEffect(() => {
-    if (!focus && userLocation)
-      map.setView([userLocation.lat, userLocation.lng], 5, { animate: false });
-  }, [focus, map, userLocation]);
+  const pending = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const userMove = useRef(false);
+  const programmaticMove = useRef(false);
+  const userLat = userLocation?.lat;
+  const userLng = userLocation?.lng;
+  function cancel() {
+    clearTimeout(pending.current);
+  }
+  function startUserMove() {
+    cancel();
+    programmaticMove.current = false;
+    userMove.current = true;
+    map.closePopup();
+  }
   useMapEvents({
+    dragstart: startUserMove,
+    zoomstart() {
+      if (!programmaticMove.current) startUserMove();
+    },
+    keydown(event) {
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.originalEvent.key))
+        startUserMove();
+    },
+    autopanstart() {
+      userMove.current = false;
+    },
+    popupopen() {
+      userMove.current = false;
+      map.getContainer().classList.add('has-open-popup');
+    },
+    popupclose() {
+      map.getContainer().classList.remove('has-open-popup');
+    },
     moveend() {
+      const shouldSearch = userMove.current && !programmaticMove.current;
+      userMove.current = false;
+      programmaticMove.current = false;
+      if (!shouldSearch) return;
       const bounds = map.getBounds();
-      const nextBounds = {
-        south: bounds.getSouth(),
-        west: bounds.getWest(),
-        north: bounds.getNorth(),
-        east: bounds.getEast(),
+      const wrap = (number: number) => ((((number + 180) % 360) + 360) % 360) - 180;
+      const world = bounds.getEast() - bounds.getWest() >= 360;
+      const next = {
+        south: Math.max(-90, bounds.getSouth()),
+        west: world ? -180 : wrap(bounds.getWest()),
+        north: Math.min(90, bounds.getNorth()),
+        east: world ? 180 : wrap(bounds.getEast()),
       };
-      const previousBounds = lastBounds.current;
-      const hasChanged =
-        !previousBounds ||
-        Object.keys(nextBounds).some(
-          (key) =>
-            Math.abs(nextBounds[key as keyof Bounds] - previousBounds[key as keyof Bounds]) >
-            0.0001,
-        );
-
-      if (hasChanged) {
-        lastBounds.current = nextBounds;
-        onBounds(nextBounds);
-      }
+      cancel();
+      pending.current = setTimeout(() => onBounds(next), 350);
     },
   });
+  useEffect(() => () => clearTimeout(pending.current), []);
+  useEffect(() => {
+    if (!focus) return;
+    clearTimeout(pending.current);
+    userMove.current = false;
+    programmaticMove.current = true;
+    map.closePopup();
+    map.flyTo([focus.lat, focus.lng], focus.zoom ?? 11, { animate: true, duration: 0.7 });
+  }, [focus, map]);
+  useEffect(() => {
+    if (focus || userLat === undefined || userLng === undefined) return;
+    clearTimeout(pending.current);
+    userMove.current = false;
+    programmaticMove.current = true;
+    map.closePopup();
+    map.setView([userLat, userLng], 5, { animate: false });
+  }, [focus, map, userLat, userLng]);
   return null;
 }
 export default function DiscoveryMap(props: Props) {

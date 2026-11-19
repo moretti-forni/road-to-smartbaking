@@ -2606,25 +2606,6 @@ hr {
   }
 }
 
-.map-search {
-  position: absolute;
-  bottom: 25px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
-  background: var(--white);
-  border-color: var(--stone);
-  border-radius: 999px;
-  box-shadow: 0 2px 10px #20201e12;
-  min-height: 40px;
-  padding: 10px 18px;
-  font-size: 11px;
-}
-  .map-search {
-    font-size: 12px;
-    min-height: 44px;
-    bottom: 24px;
-  }
 .listing-request-floating {
   display: none;
 }
@@ -2695,4 +2676,21 @@ hr {
   .listing-request-floating:active {
     background: var(--red-dark);
   }
+}
+
+.search-clear {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  padding: 6px;
+  border: 0;
+  border-radius: 50%;
+  color: var(--muted);
+  background: transparent;
+}
+.search-clear:hover {
+  background: #eee9e1;
+  color: var(--ink);
 }

@@ -12,6 +12,23 @@ import { resources } from '../src/i18n';
 import { existsSync } from 'node:fs';
 
 describe('discovery query and filtering', () => {
+  it('finds venues on both sides of the date line in a wrapped map area', () => {
+    const query = parseQuery(new URLSearchParams('bounds=-10,170,10,-170'));
+    expect(parseQuery(new URLSearchParams('bounds=-10,190,10,-170')).bounds).toBeUndefined();
+    expect(parseQuery(new URLSearchParams('bounds=-10,170,10,-190')).bounds).toBeUndefined();
+    const base = restaurants[0];
+    const records = [
+      { ...base, id: 'east', lat: 0, lng: 179 },
+      { ...base, id: 'west', lat: 0, lng: -179 },
+      { ...base, id: 'outside', lat: 0, lng: 0 },
+    ];
+    expect(
+      filterRestaurants(records, query)
+        .map((record) => record.id)
+        .sort(),
+    ).toEqual(['east', 'west']);
+  });
+
   it('combines selected categories with OR and ignores unsupported categories', () => {
     const query = parseQuery(new URLSearchParams('kind=pizza,bakery,unknown'));
     const result = filterRestaurants(restaurants, query);
