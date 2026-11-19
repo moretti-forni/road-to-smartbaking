@@ -1,8 +1,9 @@
-import { randomUUID } from 'node:crypto';
+import { randomUUID, createHash } from 'node:crypto';
 import {
   S3Client,
   GetObjectCommand,
   PutObjectCommand,
+  HeadObjectCommand,
   DeleteObjectCommand,
 } from '@aws-sdk/client-s3';
 import { createPresignedPost } from '@aws-sdk/s3-presigned-post';
@@ -75,20 +76,52 @@ export async function finishUpload(input, client) {
   const { key } = completeInput.parse(input);
   const { bucket, base } = configuration();
   client ??= new S3Client({ region: process.env.RTSM_AWS_REGION || process.env.AWS_REGION });
+  const finalKey = `media/${key.slice('incoming/'.length)}.webp`;
+  try {
+    const existing = await client.send(
+      new HeadObjectCommand({ Bucket: bucket, Key: finalKey, ChecksumMode: 'ENABLED' }),
+    );
+    if (
+      !existing.ChecksumSHA256 ||
+      existing.ContentType !== 'image/webp' ||
+      !existing.Metadata?.width ||
+      !existing.Metadata?.height
+    )
+      throw new MediaError(409, 'Stored image metadata is invalid.');
+    return {
+      url: `${base}/${finalKey}`,
+      width: Number(existing.Metadata.width),
+      height: Number(existing.Metadata.height),
+    };
+  } catch (error) {
+    if (error.name !== 'NotFound' && error.$metadata?.httpStatusCode !== 404) throw error;
+  }
   const object = await client.send(new GetObjectCommand({ Bucket: bucket, Key: key }));
   if (!object.ContentLength || object.ContentLength > maxUploadBytes || !object.Body)
     throw new MediaError(400, 'Invalid uploaded image.');
   const image = await optimizeImage(await object.Body.transformToByteArray());
-  const finalKey = `media/${randomUUID()}.webp`;
-  await client.send(
-    new PutObjectCommand({
-      Bucket: bucket,
-      Key: finalKey,
-      Body: image.bytes,
-      ContentType: 'image/webp',
-      CacheControl: 'public, max-age=31536000, immutable',
-    }),
+  const checksum = createHash('sha256').update(image.bytes).digest('base64');
+  try {
+    await client.send(
+      new PutObjectCommand({
+        Bucket: bucket,
+        Key: finalKey,
+        Body: image.bytes,
+        ContentType: 'image/webp',
+        ChecksumSHA256: checksum,
+        IfNoneMatch: '*',
+        Metadata: { width: String(image.width), height: String(image.height) },
+        CacheControl: 'public, max-age=31536000, immutable',
+      }),
+    );
+  } catch (error) {
+    if (error.$metadata?.httpStatusCode !== 412) throw error;
+  }
+  const stored = await client.send(
+    new HeadObjectCommand({ Bucket: bucket, Key: finalKey, ChecksumMode: 'ENABLED' }),
   );
+  if (stored.ContentLength !== image.bytes.length || stored.ChecksumSHA256 !== checksum)
+    throw new MediaError(503, 'Could not verify the uploaded image. Please retry.');
   try {
     await client.send(new DeleteObjectCommand({ Bucket: bucket, Key: key }));
   } catch {

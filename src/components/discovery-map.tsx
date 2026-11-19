@@ -7,6 +7,7 @@ import {
   MapContainer,
   Popup,
   TileLayer,
+  ZoomControl,
   Tooltip,
   useMap,
   useMapEvents,
@@ -19,6 +20,7 @@ import { useParams } from 'next/navigation';
 import { shopImage, type Restaurant } from '../data/restaurants';
 import { resolveOvens } from '../data/ovens';
 import type { Bounds } from '../services/discovery';
+import { mediaPath } from '../utils/media-path';
 import { publicPath } from '../utils/public-path';
 import { mapTiles } from '../services/map-tiles';
 import 'leaflet/dist/leaflet.css';
@@ -31,6 +33,16 @@ interface Props {
   fitKey: string;
   focus?: { lat: number; lng: number; key: number; zoom?: number };
   userLocation?: { lat: number; lng: number };
+}
+
+function MapSize() {
+  const map = useMap();
+  useEffect(() => {
+    const observer = new ResizeObserver(() => map.invalidateSize({ pan: false }));
+    observer.observe(map.getContainer());
+    return () => observer.disconnect();
+  }, [map]);
+  return null;
 }
 
 function ScrollWheelZoom({ enabled }: { enabled: boolean }) {
@@ -46,39 +58,74 @@ function ScrollWheelZoom({ enabled }: { enabled: boolean }) {
 
 function MapEvents({ onBounds, focus, userLocation }: Props) {
   const map = useMap();
-  const lastBounds = useRef<Bounds | undefined>(undefined);
-  useEffect(() => {
-    if (focus)
-      map.flyTo([focus.lat, focus.lng], focus.zoom ?? 11, { animate: true, duration: 0.7 });
-  }, [focus, map]);
-  useEffect(() => {
-    if (!focus && userLocation)
-      map.setView([userLocation.lat, userLocation.lng], 5, { animate: false });
-  }, [focus, map, userLocation]);
+  const pending = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const userMove = useRef(false);
+  const programmaticMove = useRef(false);
+  const userLat = userLocation?.lat;
+  const userLng = userLocation?.lng;
+  function cancel() {
+    clearTimeout(pending.current);
+  }
+  function startUserMove() {
+    cancel();
+    programmaticMove.current = false;
+    userMove.current = true;
+    map.closePopup();
+  }
   useMapEvents({
+    dragstart: startUserMove,
+    zoomstart() {
+      if (!programmaticMove.current) startUserMove();
+    },
+    keydown(event) {
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.originalEvent.key))
+        startUserMove();
+    },
+    autopanstart() {
+      userMove.current = false;
+    },
+    popupopen() {
+      userMove.current = false;
+      map.getContainer().classList.add('has-open-popup');
+    },
+    popupclose() {
+      map.getContainer().classList.remove('has-open-popup');
+    },
     moveend() {
+      const shouldSearch = userMove.current && !programmaticMove.current;
+      userMove.current = false;
+      programmaticMove.current = false;
+      if (!shouldSearch) return;
       const bounds = map.getBounds();
-      const nextBounds = {
-        south: bounds.getSouth(),
-        west: bounds.getWest(),
-        north: bounds.getNorth(),
-        east: bounds.getEast(),
+      const wrap = (number: number) => ((((number + 180) % 360) + 360) % 360) - 180;
+      const world = bounds.getEast() - bounds.getWest() >= 360;
+      const next = {
+        south: Math.max(-90, bounds.getSouth()),
+        west: world ? -180 : wrap(bounds.getWest()),
+        north: Math.min(90, bounds.getNorth()),
+        east: world ? 180 : wrap(bounds.getEast()),
       };
-      const previousBounds = lastBounds.current;
-      const hasChanged =
-        !previousBounds ||
-        Object.keys(nextBounds).some(
-          (key) =>
-            Math.abs(nextBounds[key as keyof Bounds] - previousBounds[key as keyof Bounds]) >
-            0.0001,
-        );
-
-      if (hasChanged) {
-        lastBounds.current = nextBounds;
-        onBounds(nextBounds);
-      }
+      cancel();
+      pending.current = setTimeout(() => onBounds(next), 350);
     },
   });
+  useEffect(() => () => clearTimeout(pending.current), []);
+  useEffect(() => {
+    if (!focus) return;
+    clearTimeout(pending.current);
+    userMove.current = false;
+    programmaticMove.current = true;
+    map.closePopup();
+    map.flyTo([focus.lat, focus.lng], focus.zoom ?? 11, { animate: true, duration: 0.7 });
+  }, [focus, map]);
+  useEffect(() => {
+    if (focus || userLat === undefined || userLng === undefined) return;
+    clearTimeout(pending.current);
+    userMove.current = false;
+    programmaticMove.current = true;
+    map.closePopup();
+    map.setView([userLat, userLng], 5, { animate: false });
+  }, [focus, map, userLat, userLng]);
   return null;
 }
 export default function DiscoveryMap(props: Props) {
@@ -95,6 +142,7 @@ export default function DiscoveryMap(props: Props) {
         center={[43.75, 13.1]}
         zoom={5}
         scrollWheelZoom={false}
+        zoomControl={false}
         aria-label={t('map')}
       >
         <TileLayer
@@ -106,7 +154,9 @@ export default function DiscoveryMap(props: Props) {
             tileload: () => setTileError(false),
           }}
         />
+        <ZoomControl position="topright" />
         <ScrollWheelZoom enabled={isScrollZoomEnabled} />
+        <MapSize />
         <MapEvents {...props} />
         {props.userLocation && (
           <CircleMarker
@@ -121,7 +171,9 @@ export default function DiscoveryMap(props: Props) {
         )}
         <VenueMarkers {...props} locale={locale} />
       </MapContainer>
-      {!isScrollZoomEnabled && <p className="map-zoom-hint">{t('mapZoomInstruction')}</p>}
+      {!isScrollZoomEnabled && !tileError && (
+        <p className="map-zoom-hint">{t('mapZoomInstruction')}</p>
+      )}
       {tileError && (
         <div className="map-error" role="status">
           <span>{t('mapUnavailable')}</span>
@@ -166,10 +218,17 @@ function VenueMarkers(props: Props & { locale: string }) {
         })}
       >
         <Tooltip>Moretti Forni · Mondolfo</Tooltip>
-        <Popup className="map-place-popup" closeButton={false} autoPan={false}>
+        <Popup
+          className="map-place-popup"
+          closeButton
+          autoPan
+          keepInView
+          autoPanPaddingTopLeft={[12, 12]}
+          autoPanPaddingBottomRight={[12, 24]}
+        >
           <article className="map-place-card">
             <img
-              src={publicPath('/mf_factory.jpg')}
+              src={mediaPath('/mf_factory.jpg')}
               alt="Moretti Forni · Mondolfo"
               width="320"
               height="180"
@@ -223,7 +282,10 @@ function VenueMarkers(props: Props & { locale: string }) {
                 html: `<span>${group.length}</span>`,
                 iconSize: [40, 40],
               })}
-              eventHandlers={{ click: () => map.setView([lat, lng], Math.min(zoom + 2, 18)) }}
+              eventHandlers={{
+                click: () =>
+                  map.setView([lat, lng], Math.min(map.getZoom() + 2, 18), { animate: false }),
+              }}
             >
               <Tooltip>{t('mapCoverage', { count: group.length })}</Tooltip>
             </Marker>
@@ -241,7 +303,14 @@ function VenueMarkers(props: Props & { locale: string }) {
             eventHandlers={{ click: () => props.onSelect(restaurant.id) }}
           >
             <Tooltip direction="top">{restaurant.name}</Tooltip>
-            <Popup className="map-place-popup" closeButton={false} autoPan={false}>
+            <Popup
+              className="map-place-popup"
+              closeButton
+              autoPan
+              keepInView
+              autoPanPaddingTopLeft={[12, 12]}
+              autoPanPaddingBottomRight={[12, 24]}
+            >
               <article className="map-place-card">
                 {restaurant.image && (
                   <img src={shopImage(restaurant.image, 'cards')} alt="" width="320" height="180" />

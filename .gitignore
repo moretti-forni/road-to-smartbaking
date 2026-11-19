@@ -13,3 +13,10 @@ mobile/
 next-env.d.ts
 .env.*
 !.env.example
+
+# Generated development media only; production serves these from S3.
+/public/shops/
+/public/shops-webp/
+/public/media/
+/public/ovens/
+/public/mf_factory.jpg

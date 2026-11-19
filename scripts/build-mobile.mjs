@@ -62,6 +62,13 @@ await writeFile(
     (_, key) => JSON.stringify(process.env[key] ?? ''),
   ),
 );
+await writeFile(
+  'mobile/utils/media-path.ts',
+  (await readFile('src/utils/media-path.ts', 'utf8')).replace(
+    /process\.env\.(NEXT_PUBLIC_\w+)/g,
+    (_, key) => JSON.stringify(process.env[key] ?? ''),
+  ),
+);
 const run = spawnSync(resolve('node_modules/.bin/react-router'), ['build'], {
   stdio: 'inherit',
   env: { ...process.env, NODE_ENV: 'production' },

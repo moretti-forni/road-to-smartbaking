@@ -17,7 +17,7 @@ if (!values['local-demo'] || !['localhost', '127.0.0.1', '[::1]'].includes(conne
 const snapshot = JSON.parse(
   await readFile(new URL('../src/data/stories.snapshot.json', import.meta.url), 'utf8'),
 );
-const filenames = await readdir(new URL('../public/media/', import.meta.url));
+const filenames = await readdir(new URL('../assets/catalog/media/', import.meta.url));
 const images = new Map(filenames.map((file) => [file.slice(0, file.lastIndexOf('.')), file]));
 
 function imagePath(id) {

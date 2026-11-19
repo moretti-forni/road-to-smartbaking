@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import sharp from 'sharp';
+import { createHash } from 'node:crypto';
 import {
   completeInput,
   optimizeImage,
@@ -60,19 +61,69 @@ describe('staff image upload pipeline', () => {
     })
       .png()
       .toBuffer();
+    const processed = await optimizeImage(source);
     const send = vi
       .fn()
+      .mockRejectedValueOnce(Object.assign(new Error('not found'), { name: 'NotFound' }))
       .mockResolvedValueOnce({
         ContentLength: source.length,
         Body: { transformToByteArray: async () => source },
       })
-      .mockResolvedValue({});
+      .mockResolvedValueOnce({})
+      .mockResolvedValueOnce({
+        ContentLength: processed.bytes.length,
+        ChecksumSHA256: createHash('sha256').update(processed.bytes).digest('base64'),
+      })
+      .mockResolvedValueOnce({});
     const result = await finishUpload(
       { key: 'incoming/12345678-1234-4123-8123-123456789abc' },
       { send },
     );
     expect(result.url).toMatch(/^https:\/\/images.example.com\/media\/.+\.webp$/);
-    expect(send.mock.calls[1][0].input.ContentType).toBe('image/webp');
-    expect(send.mock.calls[2][0].input.Key).toBe('incoming/12345678-1234-4123-8123-123456789abc');
+    expect(send.mock.calls[2][0].input.ContentType).toBe('image/webp');
+    expect(send.mock.calls[4][0].input.Key).toBe('incoming/12345678-1234-4123-8123-123456789abc');
+  });
+  it('returns an existing verified image on completion retries without another write', async () => {
+    vi.stubEnv('S3_MEDIA_BUCKET', 'test-images');
+    vi.stubEnv('MEDIA_PUBLIC_BASE_URL', 'https://images.example.com');
+    const send = vi
+      .fn()
+      .mockResolvedValue({
+        ContentType: 'image/webp',
+        ChecksumSHA256: 'verified-checksum',
+        Metadata: { width: '20', height: '10' },
+      });
+    const result = await finishUpload(
+      { key: 'incoming/12345678-1234-4123-8123-123456789abc' },
+      { send },
+    );
+    expect(result).toEqual({
+      url: 'https://images.example.com/media/12345678-1234-4123-8123-123456789abc.webp',
+      width: 20,
+      height: 10,
+    });
+    expect(send).toHaveBeenCalledTimes(1);
+  });
+  it('does not report success or delete the original when stored verification fails', async () => {
+    vi.stubEnv('S3_MEDIA_BUCKET', 'test-images');
+    vi.stubEnv('MEDIA_PUBLIC_BASE_URL', 'https://images.example.com');
+    const source = await sharp({
+      create: { width: 20, height: 10, channels: 3, background: '#c33' },
+    })
+      .png()
+      .toBuffer();
+    const send = vi
+      .fn()
+      .mockRejectedValueOnce(Object.assign(new Error('not found'), { name: 'NotFound' }))
+      .mockResolvedValueOnce({
+        ContentLength: source.length,
+        Body: { transformToByteArray: async () => source },
+      })
+      .mockResolvedValueOnce({})
+      .mockResolvedValueOnce({ ContentLength: 1, ChecksumSHA256: 'wrong' });
+    await expect(
+      finishUpload({ key: 'incoming/12345678-1234-4123-8123-123456789abc' }, { send }),
+    ).rejects.toMatchObject({ status: 503 });
+    expect(send).toHaveBeenCalledTimes(4);
   });
 });

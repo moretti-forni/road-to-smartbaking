@@ -22,6 +22,7 @@ export const resources = {
         'Professionisti, luoghi e prodotti lievitati. Scopri le storie della cottura perfetta con Moretti Forni.',
       eyebrow: 'Moretti is the ingredient',
       search: 'Trova un locale o una città',
+      clearSearch: 'Cancella la ricerca',
       yourLocation: 'La tua posizione',
       searchButton: 'Trova',
       useLocation: 'Usa la mia posizione',
@@ -100,7 +101,7 @@ export const resources = {
       browse: 'Esplora i locali',
       storageError:
         'Il browser non consente di salvare le preferenze. I tuoi salvati restano disponibili solo durante questa visita.',
-      footer: 'La cottura perfetta, ovunque.',
+      footer: 'Moretti is the ingredient',
       footerSmall: 'Tecnologie di cottura dei prodotti lievitati.',
       listingRequestCta: 'Iscrivi il tuo locale',
       listingRequestTitle: 'Raccontaci la tua realtà.',
@@ -128,7 +129,7 @@ export const resources = {
       listingRequestThanksBody:
         'Questa è una conferma dimostrativa: nessun dato è stato inviato. Presto potrai completare la richiesta dal portale dedicato.',
       privacy: 'Privacy & informazioni',
-      credits: 'Moretti Forni · The SmartBaking Company®',
+      credits: 'The SmartBaking Company®',
       next: 'Storia successiva',
       previous: 'Storia precedente',
       unavailable: 'Questa pagina non è disponibile.',
@@ -182,6 +183,7 @@ export const resources = {
         'Professionals, places and leavened products. Discover the stories of perfect baking with Moretti Forni.',
       eyebrow: 'Moretti is the ingredient',
       search: 'Search a place or a city',
+      clearSearch: 'Clear search',
       yourLocation: 'Your location',
       searchButton: 'Search',
       useLocation: 'Use my location',
@@ -261,7 +263,7 @@ export const resources = {
       browse: 'Explore places',
       storageError:
         'Your browser cannot store preferences. Saved places will only be available during this visit.',
-      footer: 'Perfect baking, everywhere.',
+      footer: 'Moretti is the ingredient',
       footerSmall: 'Baking technologies for leavened products.',
       listingRequestCta: 'List your place',
       listingRequestTitle: 'Tell us about your place.',
@@ -288,7 +290,7 @@ export const resources = {
       listingRequestThanksBody:
         'This is a demo confirmation: no information has been sent. You will soon be able to complete your request through a dedicated portal.',
       privacy: 'Privacy & information',
-      credits: 'Moretti Forni · The SmartBaking Company®',
+      credits: 'The SmartBaking Company®',
       next: 'Next story',
       previous: 'Previous story',
       unavailable: 'This page is not available.',

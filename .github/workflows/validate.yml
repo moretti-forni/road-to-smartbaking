@@ -18,6 +18,7 @@ jobs:
         image: axllent/mailpit:v1.27
         ports: ['1025:1025', '8025:8025']
     env:
+      NEXT_PUBLIC_MEDIA_BASE_URL: https://d3qfdqu26x4ym8.cloudfront.net
       TEST_DATABASE_URL: postgresql://rtsm:test_only@127.0.0.1:5432/rtsm_test
     steps:
       - uses: actions/checkout@v6
@@ -33,3 +34,11 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
       - run: npm run test:auth:browser
+      - name: Upload browser failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-test-results
+          path: test-results/
+          retention-days: 7
+          if-no-files-found: ignore

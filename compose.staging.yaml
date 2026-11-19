@@ -27,6 +27,8 @@ services:
     build:
       context: .
       target: final
+      args:
+        NEXT_PUBLIC_MEDIA_BASE_URL: ${NEXT_PUBLIC_MEDIA_BASE_URL:?Set the CloudFront media origin}
     ports:
       - '127.0.0.1:5174:3000'
     environment:

@@ -8,7 +8,7 @@
   },
   "scripts": {
     "content:index": "node scripts/sync-story-index.mjs",
-    "prebuild": "npm run content:index",
+    "prebuild": "npm run content:index && node scripts/prepare-public-media.mjs --production",
     "dev": "next dev --hostname 127.0.0.1 --port 5173",
     "build": "next build",
     "preview": "npm start",
@@ -34,7 +34,11 @@
     "db:setup:shared": "node --env-file-if-exists=.env.local scripts/setup-shared-db.mjs",
     "db:import:catalog": "node --import tsx --env-file-if-exists=.env.local scripts/import-shared-catalog.mjs",
     "db:verify:catalog": "node --import tsx --env-file-if-exists=.env.local scripts/verify-shared-catalog.mjs",
-    "data:build": "node scripts/build-data-function.mjs"
+    "data:build": "node scripts/build-data-function.mjs",
+    "media:upload": "node --env-file-if-exists=.env.local scripts/upload-catalog-media.mjs",
+    "predev": "node scripts/prepare-public-media.mjs",
+    "postbuild": "node scripts/check-media-bundle.mjs",
+    "staff:build": "node scripts/build-staff-function.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-lambda": "^3.1170.0",

@@ -2,6 +2,7 @@
 import { useEffect } from 'react';
 import { Providers, useSaved } from './providers';
 import { Header, Footer, MobileTabBar } from './shell';
+import { ListingRequestButton } from './listing-request';
 import { useTranslation } from 'react-i18next';
 function StorageNotice() {
   const { storageError } = useSaved();
@@ -28,6 +29,7 @@ export function LocaleShell({
       <StorageNotice />
       {children}
       <Footer />
+      <ListingRequestButton variant="floating" />
       <MobileTabBar />
     </Providers>
   );

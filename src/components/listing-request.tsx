@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { Check, Plus, Send, X } from 'lucide-react';
+import { Check, Plus, Send, Store, X } from 'lucide-react';
 import { publicHttp, usesPublicApi } from '../services/http';
 import { useTranslation } from 'react-i18next';
 
 type ListingRequestButtonProps = {
-  variant?: 'nav' | 'footer';
+  variant?: 'nav' | 'footer' | 'floating';
 };
 
 export function ListingRequestButton({ variant = 'nav' }: ListingRequestButtonProps) {
@@ -80,11 +80,19 @@ export function ListingRequestButton({ variant = 'nav' }: ListingRequestButtonPr
     <>
       <button
         type="button"
-        className={variant === 'footer' ? 'listing-request-footer' : 'listing-request-nav'}
+        className={`listing-request-${variant}`}
+        aria-label={t('listingRequestCta')}
+        title={variant === 'floating' ? t('listingRequestCta') : undefined}
         onClick={() => setOpen(true)}
       >
-        <Plus size={variant === 'footer' ? 17 : 14} aria-hidden="true" />
-        {t('listingRequestCta')}
+        {variant === 'floating' ? (
+          <Store size={24} aria-hidden="true" />
+        ) : (
+          <>
+            <Plus size={variant === 'footer' ? 17 : 14} aria-hidden="true" />
+            {t('listingRequestCta')}
+          </>
+        )}
       </button>
 
       {open && (

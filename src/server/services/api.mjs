@@ -1,4 +1,3 @@
-import { startUpload, finishUpload } from '../media/uploads.mjs';
 import { isStaff } from '../auth/staff.mjs';
 import * as drafts from './drafts.mjs';
 import * as data from '../repositories/catalog.mjs';
@@ -17,6 +16,7 @@ export async function handleApi(
   db,
   { method, url, authorization, readBody, staffEmail = '' },
   staffToken,
+  media,
 ) {
   const { pathname, searchParams } = new URL(url, 'http://localhost');
   const parts = pathname.split('/').slice(1);
@@ -31,11 +31,14 @@ export async function handleApi(
   if (publicResult) return publicResult;
 
   switch (`${method} ${route}`) {
-    case 'POST api/v1/admin/media/:value':
+    case 'POST api/v1/admin/media/:value': {
+      if (!media) throw new ApiError(503, 'Media service unavailable');
+      const { startUpload, finishUpload } = media;
       if (parts[4] === 'uploads') return { status: 201, body: await startUpload(await readBody()) };
       if (parts[4] === 'complete')
         return { status: 201, body: await finishUpload(await readBody()) };
       break;
+    }
     case 'GET api/v1/admin/reports': {
       const { limit, offset } = schema.pageInput.parse(query);
       const result = await db.query(

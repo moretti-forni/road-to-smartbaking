@@ -3,8 +3,13 @@ import { z } from 'zod';
 import { ApiError } from '../services/errors.mjs';
 const responseSchema = z.object({ status: z.number().int().min(200).max(599), body: z.unknown() });
 let client;
-export async function invokeDataApi({ method, url, body }, transport) {
-  const arn = process.env.RTSM_DATA_FUNCTION_ARN;
+export async function invokeDataApi(input, transport) {
+  return invokeFunction(process.env.RTSM_DATA_FUNCTION_ARN, input, transport);
+}
+export async function invokeStaffApi(input, transport) {
+  return invokeFunction(process.env.RTSM_STAFF_FUNCTION_ARN, input, transport);
+}
+async function invokeFunction(arn, input, transport) {
   if (!arn) throw new ApiError(503, 'Data service is not configured');
   client ??= new LambdaClient({
     region: process.env.RTSM_AWS_REGION || process.env.AWS_REGION,
@@ -15,7 +20,7 @@ export async function invokeDataApi({ method, url, body }, transport) {
       new InvokeCommand({
         FunctionName: arn,
         InvocationType: 'RequestResponse',
-        Payload: Buffer.from(JSON.stringify({ method, url, body })),
+        Payload: Buffer.from(JSON.stringify(input)),
       }),
     );
     if (response.FunctionError || !response.Payload) throw new Error('Data function failed');

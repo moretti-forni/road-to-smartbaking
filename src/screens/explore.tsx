@@ -2,6 +2,7 @@
 
 import {
   lazy,
+  useCallback,
   Suspense,
   useEffect,
   useMemo,
@@ -44,7 +45,6 @@ export default function Explore() {
   const query = parseQuery(params);
   const [hydrated, setHydrated] = useState(false);
   const [selected, setSelected] = useState<string>();
-  const [draftBounds, setDraftBounds] = useState<Bounds>();
   const [locationStatus, setLocationStatus] = useState('');
   const [locating, setLocating] = useState(false);
   const [searchValue, setSearchValue] = useState(query.search || query.city || '');
@@ -59,6 +59,9 @@ export default function Explore() {
   const hasTriedInitialLocation = useRef(false);
   const result = useShops();
   const records = result.data ? filterRestaurants(result.data, query) : [];
+  const mapRecords = result.data
+    ? filterRestaurants(result.data, { ...query, bounds: undefined })
+    : [];
   const suggestions = useMemo(
     () => getDiscoverySuggestions(searchValue, 8, result.data ?? []),
     [searchValue, result.data],
@@ -109,6 +112,22 @@ export default function Explore() {
       { preventScrollReset: true },
     );
   }
+  function clearSearch() {
+    setSearchValue('');
+    setShowSuggestions(false);
+    setActiveSuggestion(-1);
+    setSelected(undefined);
+    setMapFocus({ lat: query.lat ?? 43.75, lng: query.lng ?? 13.1, key: Date.now(), zoom: 5 });
+    update({ q: null, city: null, bounds: null });
+  }
+  function resetFilters() {
+    setSearchValue('');
+    setShowSuggestions(false);
+    setActiveSuggestion(-1);
+    setSelected(undefined);
+    setMapFocus({ lat: 43.75, lng: 13.1, key: Date.now(), zoom: 5 });
+    setParams({}, { preventScrollReset: true });
+  }
   function toggleKind(kind: (typeof venueKinds)[number]) {
     setParams(
       (current) => {
@@ -120,7 +139,6 @@ export default function Explore() {
         const value = venueKinds.filter((item) => kinds.includes(item)).join(',');
         if (value) next.set('kind', value);
         else next.delete('kind');
-        next.delete('bounds');
         return next;
       },
       { preventScrollReset: true },
@@ -190,14 +208,22 @@ export default function Explore() {
       { timeout: 10000, maximumAge: 60000 },
     );
   }
-  function searchArea() {
-    if (draftBounds)
-      update({
-        bounds: [draftBounds.south, draftBounds.west, draftBounds.north, draftBounds.east]
-          .map((value) => value.toFixed(5))
-          .join(','),
-      });
-  }
+  const searchArea = useCallback(
+    (bounds: Bounds) => {
+      const value = [bounds.south, bounds.west, bounds.north, bounds.east]
+        .map((number) => number.toFixed(5))
+        .join(',');
+      setParams(
+        (current) => {
+          const next = new URLSearchParams(current);
+          next.set('bounds', value);
+          return next;
+        },
+        { replace: true, preventScrollReset: true },
+      );
+    },
+    [setParams],
+  );
   function selectVenue(id: string) {
     setSelected(id);
   }
@@ -234,6 +260,10 @@ export default function Explore() {
               autoComplete="off"
               value={searchValue}
               onChange={(event) => {
+                if (!event.target.value.trim()) {
+                  clearSearch();
+                  return;
+                }
                 setSearchValue(event.target.value);
                 setShowSuggestions(true);
                 setActiveSuggestion(-1);
@@ -244,6 +274,16 @@ export default function Explore() {
               aria-expanded={showSuggestions && suggestions.length > 0}
               aria-controls="place-suggestions"
             />
+            {searchValue && (
+              <button
+                type="button"
+                className="search-clear"
+                aria-label={t('clearSearch')}
+                onClick={clearSearch}
+              >
+                <X size={16} />
+              </button>
+            )}
             <button className="search-submit" aria-label={t('searchButton')}>
               <Search size={18} />
             </button>
@@ -295,18 +335,13 @@ export default function Explore() {
           </p>
         )}
         <div className="map-frame">
-          <div className="map-label">
-            <span className="live-dot" />
-            {t('map')}
-            <span>{t('mapCoverage', { count: records.length })}</span>
-          </div>
           {hydrated ? (
             <Suspense fallback={<div className="map-placeholder">{t('loadingMap')}</div>}>
               <DiscoveryMap
-                records={records}
+                records={mapRecords}
                 selected={selected}
                 onSelect={selectVenue}
-                onBounds={setDraftBounds}
+                onBounds={searchArea}
                 fitKey={`${query.search}:${query.city}:${query.kind}`}
                 focus={mapFocus}
                 userLocation={
@@ -319,10 +354,6 @@ export default function Explore() {
           ) : (
             <div className="map-placeholder">{t('loadingMap')}</div>
           )}
-          <button className="button map-search" disabled={!draftBounds} onClick={searchArea}>
-            <Search size={14} />
-            {t('searchArea')}
-          </button>
         </div>
         <p className="map-card-instruction">
           <MapPin size={15} aria-hidden="true" />
@@ -362,7 +393,7 @@ export default function Explore() {
               {query.search && (
                 <span>
                   {query.search}
-                  <button aria-label={t('reset')} onClick={() => update({ q: null })}>
+                  <button aria-label={`${t('clearSearch')}: ${query.search}`} onClick={clearSearch}>
                     <X size={13} />
                   </button>
                 </span>
@@ -370,7 +401,7 @@ export default function Explore() {
               {query.city && (
                 <span>
                   {query.city}
-                  <button aria-label={t('reset')} onClick={() => update({ city: null })}>
+                  <button aria-label={`${t('clearSearch')}: ${query.city}`} onClick={clearSearch}>
                     <X size={13} />
                   </button>
                 </span>
@@ -381,7 +412,7 @@ export default function Explore() {
                   <X size={13} />
                 </button>
               )}
-              <button className="text-link" onClick={() => setParams({})}>
+              <button className="text-link" onClick={resetFilters}>
                 {t('reset')}
               </button>
             </div>
@@ -420,7 +451,7 @@ export default function Explore() {
               <Search size={30} />
               <h3>{t('empty')}</h3>
               <p>{t('emptyText')}</p>
-              <button className="button primary" onClick={() => setParams({})}>
+              <button className="button primary" onClick={resetFilters}>
                 {t('reset')}
               </button>
             </div>

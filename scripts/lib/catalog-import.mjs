@@ -8,7 +8,15 @@ import { stories } from '../../src/data/content.ts';
 import { imageUrl } from '../../src/data/story-index.ts';
 
 const sourceRoot = new URL('../../', import.meta.url);
-const publicRoot = resolve(new URL('public/', sourceRoot).pathname);
+const publicRoot = resolve(new URL('assets/catalog/', sourceRoot).pathname);
+function localMediaPath(path) {
+  if (/^https?:\/\//.test(path)) {
+    const url = new URL(path);
+    if (url.pathname.startsWith('/media/catalog/'))
+      return decodeURI(url.pathname.slice('/media/catalog'.length));
+  }
+  return path;
+}
 function unique(records, key) {
   const keys = records.map(key);
   if (new Set(keys).size !== keys.length) throw new Error('Duplicate source catalog keys');
@@ -16,7 +24,7 @@ function unique(records, key) {
 export async function prepareCatalog() {
   unique(restaurants, (shop) => shop.id);
   unique(stories, (story) => `${story.slug}:${story.language}`);
-  const files = await readdir(new URL('public/media/', sourceRoot));
+  const files = await readdir(new URL('assets/catalog/media/', sourceRoot));
   const images = new Set(files);
   const paths = new Set();
   const shops = restaurants.map((record) => {
@@ -30,12 +38,12 @@ export async function prepareCatalog() {
         : shop.address.split(',').at(-1).trim();
     if (!country) throw new Error(`Missing country: ${shop.id}`);
     paths.add(shop.image);
-    paths.add(shopImage(shop.image, 'cards'));
-    paths.add(shopImage(shop.image, 'heroes'));
+    paths.add(localMediaPath(shopImage(shop.image, 'cards')));
+    paths.add(localMediaPath(shopImage(shop.image, 'heroes')));
     return { ...shop, country, published: shop.isPublished !== false };
   });
   function bundledImage(id) {
-    const path = imageUrl(id);
+    const path = localMediaPath(imageUrl(id));
     if (!path.startsWith('/media/') || !images.has(path.slice('/media/'.length)))
       throw new Error(`Missing bundled story image: ${id}`);
     paths.add(path);

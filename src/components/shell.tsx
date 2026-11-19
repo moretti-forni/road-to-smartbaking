@@ -89,7 +89,6 @@ export function Footer() {
           <Brand footer />
           <p>{t('footerSmall')}</p>
         </div>
-        <p className="footer-message">{t('footer')}</p>
         <div className="footer-actions">
           <ListingRequestButton variant="footer" />
           <a href="https://morettiforni.com" target="_blank" rel="noreferrer">
@@ -99,7 +98,8 @@ export function Footer() {
       </div>
       <div className="container footer-bottom">
         <span>
-          © {new Date().getFullYear()} Moretti Forni · {t('credits')}
+          © {new Date().getFullYear()} Moretti Forni
+          <span className="footer-credits"> · {t('credits')}</span>
         </span>
         <Link href={`/${locale}/privacy`}>{t('privacy')}</Link>
       </div>

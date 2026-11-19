@@ -12,6 +12,23 @@ import { resources } from '../src/i18n';
 import { existsSync } from 'node:fs';
 
 describe('discovery query and filtering', () => {
+  it('finds venues on both sides of the date line in a wrapped map area', () => {
+    const query = parseQuery(new URLSearchParams('bounds=-10,170,10,-170'));
+    expect(parseQuery(new URLSearchParams('bounds=-10,190,10,-170')).bounds).toBeUndefined();
+    expect(parseQuery(new URLSearchParams('bounds=-10,170,10,-190')).bounds).toBeUndefined();
+    const base = restaurants[0];
+    const records = [
+      { ...base, id: 'east', lat: 0, lng: 179 },
+      { ...base, id: 'west', lat: 0, lng: -179 },
+      { ...base, id: 'outside', lat: 0, lng: 0 },
+    ];
+    expect(
+      filterRestaurants(records, query)
+        .map((record) => record.id)
+        .sort(),
+    ).toEqual(['east', 'west']);
+  });
+
   it('combines selected categories with OR and ignores unsupported categories', () => {
     const query = parseQuery(new URLSearchParams('kind=pizza,bakery,unknown'));
     const result = filterRestaurants(restaurants, query);
@@ -51,7 +68,7 @@ describe('discovery query and filtering', () => {
     for (const restaurant of restaurants) {
       expect(restaurant.mapsUrl).toContain('google.com/maps/search');
       expect(Number.isFinite(restaurant.lat) && Number.isFinite(restaurant.lng)).toBe(true);
-      expect(existsSync(`public${restaurant.image}`)).toBe(true);
+      expect(existsSync(`assets/catalog${restaurant.image}`)).toBe(true);
     }
   });
   it('returns a useful empty result and sorts by distance only with a reference point', () => {
@@ -87,7 +104,7 @@ describe('content and persistence boundaries', () => {
   it('has unique story routes and existing images', () => {
     expect(new Set(stories.map((story) => story.slug)).size).toBe(stories.length);
     for (const story of stories) {
-      expect(existsSync(`public${imageUrl(story.cover.image)}`)).toBe(true);
+      expect(existsSync(`assets/catalog${imageUrl(story.cover.image)}`)).toBe(true);
       expect(['pizza', 'bakery', 'people']).toContain(storyCategory(story));
     }
   });
