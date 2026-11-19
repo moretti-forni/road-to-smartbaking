@@ -18,6 +18,7 @@ jobs:
         image: axllent/mailpit:v1.27
         ports: ['1025:1025', '8025:8025']
     env:
+      NEXT_PUBLIC_MEDIA_BASE_URL: https://d3qfdqu26x4ym8.cloudfront.net
       TEST_DATABASE_URL: postgresql://rtsm:test_only@127.0.0.1:5432/rtsm_test
     steps:
       - uses: actions/checkout@v6

@@ -8,7 +8,7 @@ import { stories } from '../../src/data/content.ts';
 import { imageUrl } from '../../src/data/story-index.ts';
 
 const sourceRoot = new URL('../../', import.meta.url);
-const publicRoot = resolve(new URL('public/', sourceRoot).pathname);
+const publicRoot = resolve(new URL('assets/catalog/', sourceRoot).pathname);
 function localMediaPath(path) {
   if (/^https?:\/\//.test(path)) {
     const url = new URL(path);
@@ -24,7 +24,7 @@ function unique(records, key) {
 export async function prepareCatalog() {
   unique(restaurants, (shop) => shop.id);
   unique(stories, (story) => `${story.slug}:${story.language}`);
-  const files = await readdir(new URL('public/media/', sourceRoot));
+  const files = await readdir(new URL('assets/catalog/media/', sourceRoot));
   const images = new Set(files);
   const paths = new Set();
   const shops = restaurants.map((record) => {

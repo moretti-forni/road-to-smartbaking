@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 import { parseArgs } from 'node:util';
 import { S3Client, HeadObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
 const { values } = parseArgs({ options: { apply: { type: 'boolean' } } });
-const root = resolve('public');
+const root = resolve('assets/catalog');
 const files = [];
 async function collect(path) {
   for (const entry of await readdir(path, { withFileTypes: true })) {

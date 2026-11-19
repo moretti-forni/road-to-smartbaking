@@ -15,6 +15,7 @@ export default defineConfig({
       S3_MEDIA_BUCKET: '',
       MEDIA_PUBLIC_BASE_URL: '',
       NEXT_PUBLIC_CATALOG_SOURCE: 'api',
+      NEXT_PUBLIC_MEDIA_BASE_URL: '',
     },
   },
 });

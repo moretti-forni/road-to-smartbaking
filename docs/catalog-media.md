@@ -1,6 +1,6 @@
 # Catalogue images from S3
 
-Existing venue images, card/hero WebP variants, story images, oven images and the factory photograph are uploaded under `media/catalog/`, preserving the public-directory structure. App icons, fonts and navigation branding remain local. Existing external URLs and newly uploaded Studio media URLs are preserved unchanged.
+Existing venue images, card/hero WebP variants, story images, oven images and the factory photograph are uploaded under `media/catalog/`, preserving the original directory structure. Catalogue source files now live in `assets/catalog/`, outside the web public directory. App icons, fonts and navigation branding remain local. Existing external URLs and newly uploaded Studio media URLs are preserved unchanged.
 
 AWS deployment:
 
@@ -16,7 +16,7 @@ Set the following non-secret values for the application build:
 NEXT_PUBLIC_MEDIA_BASE_URL=https://d3qfdqu26x4ym8.cloudfront.net
 ```
 
-The URL resolver maps `/shops-webp/cards/example.webp` to `${NEXT_PUBLIC_MEDIA_BASE_URL}/media/catalog/shops-webp/cards/example.webp`. If the build variable is absent, bundled local images are used. It must be present during `next build` and mobile builds because client code embeds it at build time. `scripts/prepare-amplify-env.mjs` allowlists it for Amplify. Keep local files until the deployed site is verified.
+The URL resolver maps `/shops-webp/cards/example.webp` to `${NEXT_PUBLIC_MEDIA_BASE_URL}/media/catalog/shops-webp/cards/example.webp`. Production builds require the CDN variable and fail if it is absent. For local development without it, `predev` generates ignored local public copies from the source archive. It must be present during `next build` and mobile builds because client code embeds it at build time. `scripts/prepare-amplify-env.mjs` allowlists it for Amplify. The source archive stays available for verification/re-upload but is excluded from deployed public assets and the Docker build context.
 
 For new Studio uploads, also configure the server-side values:
 
@@ -47,3 +47,13 @@ Without `--apply`, the script only reports the file count and total size. Applie
 4. Verify venue cards/details, story covers/body images, map popups and oven images.
 
 Cloud resource creation does not publish these local code changes to the website. Public S3 URLs remain forbidden; CloudFront URLs are the intended delivery route.
+
+## Upload guarantees and current limits
+
+Completion uses a deterministic processed key derived from the temporary upload ID. Retries return the same verified object; conditional writes avoid duplicate object versions from concurrent completions. S3 SHA-256 checksums and stored length are checked before success is returned. Files are processed in memory and are never written to web-server disk. Essential app icons/fonts remain bundled.
+
+The `postbuild` check rejects catalogue media in public or standalone deployment output. CI uses the real non-secret CDN origin for production builds. `Dockerfile` requires the same build argument; Compose passes it from `NEXT_PUBLIC_MEDIA_BASE_URL`.
+
+A real signed POST/processing/CDN/retry test passed on November 19, 2026, with the generated test object and all its S3 versions removed afterward. The Amplify role `rtsm-amplify-ssr-main` now has scoped Put/Get permissions for this bucket's incoming/media prefixes and Delete only for incoming objects. No public bucket access was enabled.
+
+The currently deployed private-data mode explicitly blocks Studio authentication/admin endpoints. The infrastructure and upload pipeline are verified; staff-browser uploads remain unavailable until that authentication integration is completed and the new code is deployed. This change does not bypass those restrictions. Unreferenced processed images from abandoned drafts are retained; automatic deletion needs reference-aware cleanup and is not performed here.

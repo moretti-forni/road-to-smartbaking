@@ -58,7 +58,7 @@ For a migration runner with a valid database network path and an IAM role, `npm 
    - `secretsmanager:GetSecretValue` on the staging secret ARN.
    - `ses:SendEmail` on the approved sender/domain identity ARNs, constrained by `ses:FromAddress` to the approved sender.
    - `s3:PutObject` on `incoming/*` and `media/*` in the media bucket.
-   - `s3:GetObject` and `s3:DeleteObject` on `incoming/*` in that bucket.
+   - `s3:GetObject` on `incoming/*` and `media/*`, and `s3:DeleteObject` only on `incoming/*` in that bucket.
    - `kms:Decrypt` on the specific KMS key only when using a customer-managed key for the secret.
 5. Attach the role to the staging app/branch through Amplify's SSR compute role setting. A build role alone is insufficient; no hardcoded AWS access keys are needed.
 6. Request an OTP from an approved test company mailbox, verify login/reload/logout, then check CloudWatch logs for delivery failures. Never log codes or session tokens.

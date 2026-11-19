@@ -49,7 +49,7 @@ src/
 
 Routes handle HTTP concerns; services preserve approval and draft/publish workflows; repositories own SQL. Public detail pages read the same workflows on the server, without making HTTP calls back into their own API. Server credentials stay outside the client bundle. API responses use `no-store` and detail pages render on demand, so this migration does not introduce stale publication caches.
 
-Story source content lives in `src/data/stories.snapshot.json`. `npm run content:index` rebuilds its lightweight listing index and runs before production builds. Public images, fonts, and oven assets remain in `public/`; retain their license files.
+Story source content lives in `src/data/stories.snapshot.json`. `npm run content:index` rebuilds its lightweight listing index and runs before production builds. Catalogue image sources live in `assets/catalog/` for upload/import tooling; production serves them from S3/CloudFront. Only essential icons/fonts remain in `public/`; retain their license files. Production builds require `NEXT_PUBLIC_MEDIA_BASE_URL` and verify that catalogue images are absent from deployment output.
 
 ## API and Studio
 
@@ -117,3 +117,5 @@ The initial shared catalog import is recorded in [the November 17 import report]
 Amplify is configured for Next.js SSR with an IAM-only VPC Lambda for public catalog reads, requests, and reports. See [private data setup](docs/amplify-private-data.md). Set `RTSM_DATA_FUNCTION_ARN` to enable this transport; local PostgreSQL workflows remain the default without it. Studio stays blocked until managed staff identity and staff data operations are integrated.
 
 Catalogue image delivery and upload verification: [S3 catalogue media](docs/catalog-media.md).
+
+Staff login deployment and verification: [Staff authentication](docs/staff-authentication.md).

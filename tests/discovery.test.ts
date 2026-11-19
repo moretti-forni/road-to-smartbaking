@@ -68,7 +68,7 @@ describe('discovery query and filtering', () => {
     for (const restaurant of restaurants) {
       expect(restaurant.mapsUrl).toContain('google.com/maps/search');
       expect(Number.isFinite(restaurant.lat) && Number.isFinite(restaurant.lng)).toBe(true);
-      expect(existsSync(`public${restaurant.image}`)).toBe(true);
+      expect(existsSync(`assets/catalog${restaurant.image}`)).toBe(true);
     }
   });
   it('returns a useful empty result and sorts by distance only with a reference point', () => {
@@ -104,7 +104,7 @@ describe('content and persistence boundaries', () => {
   it('has unique story routes and existing images', () => {
     expect(new Set(stories.map((story) => story.slug)).size).toBe(stories.length);
     for (const story of stories) {
-      expect(existsSync(`public${imageUrl(story.cover.image)}`)).toBe(true);
+      expect(existsSync(`assets/catalog${imageUrl(story.cover.image)}`)).toBe(true);
       expect(['pizza', 'bakery', 'people']).toContain(storyCategory(story));
     }
   });
