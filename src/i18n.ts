@@ -100,7 +100,7 @@ export const resources = {
       browse: 'Esplora i locali',
       storageError:
         'Il browser non consente di salvare le preferenze. I tuoi salvati restano disponibili solo durante questa visita.',
-      footer: 'La cottura perfetta, ovunque.',
+      footer: 'Moretti is the ingredient',
       footerSmall: 'Tecnologie di cottura dei prodotti lievitati.',
       listingRequestCta: 'Iscrivi il tuo locale',
       listingRequestTitle: 'Raccontaci la tua realtà.',
@@ -261,7 +261,7 @@ export const resources = {
       browse: 'Explore places',
       storageError:
         'Your browser cannot store preferences. Saved places will only be available during this visit.',
-      footer: 'Perfect baking, everywhere.',
+      footer: 'Moretti is the ingredient',
       footerSmall: 'Baking technologies for leavened products.',
       listingRequestCta: 'List your place',
       listingRequestTitle: 'Tell us about your place.',

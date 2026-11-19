@@ -256,4 +256,34 @@ test('mobile discovery filters and popup stay inside their containers', async ({
   expect(['rgb(248, 244, 235)', 'rgb(255, 254, 251)']).toContain(linkColor);
   await page.screenshot({ path: testInfo.outputPath('mobile-venue-popup.png') });
   await venuePopup.getByRole('button', { name: 'Close popup' }).click();
+  await expect(page.locator('.footer-message')).toHaveCount(0);
+});
+
+test('mobile footer is compact and floating shop action opens registration', async ({
+  page,
+}, testInfo) => {
+  await page.goto('/it');
+  const floating = page.locator('.listing-request-floating');
+  await expect(page.locator('.footer-message')).toHaveCount(0);
+  if (testInfo.project.name !== 'mobile') {
+    await expect(floating).toBeHidden();
+    return;
+  }
+  await expect(floating).toBeVisible();
+  await expect(floating).toHaveAccessibleName('Iscrivi il tuo locale');
+  const button = await floating.boundingBox();
+  const tabs = await page.locator('.mobile-tab-bar').boundingBox();
+  expect(button && tabs && button.y + button.height < tabs.y).toBeTruthy();
+  await page.locator('.site-footer').scrollIntoViewIfNeeded();
+  await expect(page.locator('.footer-actions .listing-request-footer')).toBeHidden();
+  const viewport = page.viewportSize()!;
+  await page.screenshot({
+    path: testInfo.outputPath('mobile-footer-floating.png'),
+    clip: { x: 0, y: viewport.height - 280, width: viewport.width, height: 280 },
+    style: 'nextjs-portal { visibility: hidden; }',
+  });
+  await floating.click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await page.getByRole('dialog').getByRole('button', { name: 'Chiudi', exact: true }).click();
+  await expect(page.getByRole('dialog')).not.toBeVisible();
 });
