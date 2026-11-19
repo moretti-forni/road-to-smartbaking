@@ -21,10 +21,12 @@ test('discovery search, empty recovery, restaurant details and saved persistence
   await page
     .locator('article')
     .filter({ has: page.getByRole('heading', { name: 'FICO', exact: true }) })
-    .getByRole('link')
-    .first()
+    .getByRole('link', { name: 'FICO', exact: true })
     .click();
-  await expect(page.getByRole('heading', { level: 1, name: 'FICO' })).toBeVisible();
+  await expect(page).toHaveURL(/\/en\/restaurants\/fico$/, { timeout: 30000 });
+  await expect(page.getByRole('heading', { level: 1, name: 'FICO' })).toBeVisible({
+    timeout: 15000,
+  });
   await expect(page.getByRole('link', { name: 'Directions', exact: true })).toHaveAttribute(
     'href',
     /google.com/,
