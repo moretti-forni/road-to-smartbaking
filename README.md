@@ -115,3 +115,5 @@ The initial shared catalog import is recorded in [the November 17 import report]
 ## Amplify private data transport
 
 Amplify is configured for Next.js SSR with an IAM-only VPC Lambda for public catalog reads, requests, and reports. See [private data setup](docs/amplify-private-data.md). Set `RTSM_DATA_FUNCTION_ARN` to enable this transport; local PostgreSQL workflows remain the default without it. Studio stays blocked until managed staff identity and staff data operations are integrated.
+
+Catalogue image delivery and upload verification: [S3 catalogue media](docs/catalog-media.md).

@@ -20,6 +20,7 @@ import { useParams } from 'next/navigation';
 import { shopImage, type Restaurant } from '../data/restaurants';
 import { resolveOvens } from '../data/ovens';
 import type { Bounds } from '../services/discovery';
+import { mediaPath } from '../utils/media-path';
 import { publicPath } from '../utils/public-path';
 import { mapTiles } from '../services/map-tiles';
 import 'leaflet/dist/leaflet.css';
@@ -227,7 +228,7 @@ function VenueMarkers(props: Props & { locale: string }) {
         >
           <article className="map-place-card">
             <img
-              src={publicPath('/mf_factory.jpg')}
+              src={mediaPath('/mf_factory.jpg')}
               alt="Moretti Forni · Mondolfo"
               width="320"
               height="180"

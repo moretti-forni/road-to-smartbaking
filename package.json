@@ -34,7 +34,8 @@
     "db:setup:shared": "node --env-file-if-exists=.env.local scripts/setup-shared-db.mjs",
     "db:import:catalog": "node --import tsx --env-file-if-exists=.env.local scripts/import-shared-catalog.mjs",
     "db:verify:catalog": "node --import tsx --env-file-if-exists=.env.local scripts/verify-shared-catalog.mjs",
-    "data:build": "node scripts/build-data-function.mjs"
+    "data:build": "node scripts/build-data-function.mjs",
+    "media:upload": "node --env-file-if-exists=.env.local scripts/upload-catalog-media.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-lambda": "^3.1170.0",

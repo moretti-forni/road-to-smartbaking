@@ -9,6 +9,14 @@ import { imageUrl } from '../../src/data/story-index.ts';
 
 const sourceRoot = new URL('../../', import.meta.url);
 const publicRoot = resolve(new URL('public/', sourceRoot).pathname);
+function localMediaPath(path) {
+  if (/^https?:\/\//.test(path)) {
+    const url = new URL(path);
+    if (url.pathname.startsWith('/media/catalog/'))
+      return decodeURI(url.pathname.slice('/media/catalog'.length));
+  }
+  return path;
+}
 function unique(records, key) {
   const keys = records.map(key);
   if (new Set(keys).size !== keys.length) throw new Error('Duplicate source catalog keys');
@@ -30,12 +38,12 @@ export async function prepareCatalog() {
         : shop.address.split(',').at(-1).trim();
     if (!country) throw new Error(`Missing country: ${shop.id}`);
     paths.add(shop.image);
-    paths.add(shopImage(shop.image, 'cards'));
-    paths.add(shopImage(shop.image, 'heroes'));
+    paths.add(localMediaPath(shopImage(shop.image, 'cards')));
+    paths.add(localMediaPath(shopImage(shop.image, 'heroes')));
     return { ...shop, country, published: shop.isPublished !== false };
   });
   function bundledImage(id) {
-    const path = imageUrl(id);
+    const path = localMediaPath(imageUrl(id));
     if (!path.startsWith('/media/') || !images.has(path.slice('/media/'.length)))
       throw new Error(`Missing bundled story image: ${id}`);
     paths.add(path);

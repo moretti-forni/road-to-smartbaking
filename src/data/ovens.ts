@@ -1,3 +1,4 @@
+import { mediaPath } from '../utils/media-path';
 const iDeckDetail = '/ovens/iDeck_dettaglio.png';
 const linkDetail = '/ovens/link_dettaglio.png';
 const neapolisDetail = '/ovens/neapolis_dettaglio.svg';
@@ -61,8 +62,12 @@ export function resolveOvens(value: string): OvenModel[] {
 
   return uniqueModels.map((name) => ({
     name,
-    image: ovenImages[name.toLocaleLowerCase()],
-    logo: ovenLogos[name.toLocaleLowerCase()],
+    image: ovenImages[name.toLocaleLowerCase()]
+      ? mediaPath(ovenImages[name.toLocaleLowerCase()])
+      : undefined,
+    logo: ovenLogos[name.toLocaleLowerCase()]
+      ? mediaPath(ovenLogos[name.toLocaleLowerCase()])
+      : undefined,
     productUrl: ovenProductUrls[name.toLocaleLowerCase()],
   }));
 }

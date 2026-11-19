@@ -105,3 +105,7 @@ This is feasible for a modest workload, but the current repositories, schema and
 - [SES sandbox and production access](https://docs.aws.amazon.com/ses/latest/dg/request-production-access.html)
 - [SQLite over a network](https://www.sqlite.org/useovernet.html)
 - [S3 object storage](https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html)
+
+## Catalogue media deployment — November 19, 2026
+
+The dedicated media stack `roadtosmartbaking-media-prod` has now been created and the bundled catalogue images uploaded. See [catalogue media](catalog-media.md) for the actual bucket/CDN configuration. The preparation-only wording above describes the original setup procedure. Application code publication remains a separate release step.

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { mediaPath } from '../utils/media-path';
 import { publicPath } from '../utils/public-path';
 
 export const restaurantSchema = z.object({
@@ -24,12 +25,12 @@ export const restaurantSchema = z.object({
 export type Restaurant = z.infer<typeof restaurantSchema>;
 
 export function shopImage(image: string, variant: 'cards' | 'heroes') {
-  if (!image.startsWith('/shops/')) return image.startsWith('/') ? publicPath(image) : image;
+  if (!image.startsWith('/shops/')) return image.startsWith('/') ? mediaPath(image) : image;
   const filename = image
     .split('/')
     .pop()
     ?.replace(/\.[^.]+$/, '');
-  return filename ? publicPath(`/shops-webp/${variant}/${filename}.webp`) : image;
+  return filename ? mediaPath(`/shops-webp/${variant}/${filename}.webp`) : image;
 }
 
 export const restaurants: Restaurant[] = z
