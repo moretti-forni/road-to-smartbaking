@@ -169,8 +169,6 @@ export default function Admin() {
     () => new QueryClient({ defaultOptions: { queries: { retry: false } } }),
   );
   const [token, setToken] = useState('');
-  const [email, setEmail] = useState('');
-  const [challenge, setChallenge] = useState('');
   const [signingIn, setSigningIn] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
   const [error, setError] = useState('');
@@ -196,24 +194,13 @@ export default function Admin() {
     setSigningIn(true);
     setError('');
     try {
-      if (challenge) {
-        const { data } = await publicHttp.post<{ email: string }>('/auth/verify-code', {
-          email,
-          challenge,
-          code: String(fields.get('code') ?? ''),
-        });
-        setToken(data.email);
-        setChallenge('');
-      } else {
-        const address = String(fields.get('email') ?? '')
+      const { data } = await publicHttp.post<{ email: string }>('/auth/login', {
+        email: String(fields.get('email') ?? '')
           .trim()
-          .toLowerCase();
-        const { data } = await publicHttp.post<{ challenge: string }>('/auth/request-code', {
-          email: address,
-        });
-        setEmail(address);
-        setChallenge(data.challenge);
-      }
+          .toLowerCase(),
+        password: String(fields.get('password') ?? ''),
+      });
+      setToken(data.email);
     } catch (error) {
       setError(apiError(error));
     } finally {
@@ -226,7 +213,6 @@ export default function Admin() {
       await publicHttp.post('/auth/logout');
       client.clear();
       setToken('');
-      setChallenge('');
     } catch (error) {
       setError(apiError(error));
     }
@@ -256,55 +242,24 @@ export default function Admin() {
         <h1>Marketing Studio</h1>
         {usesPublicApi ? (
           <form onSubmit={signIn}>
-            <p>
-              {challenge
-                ? `Enter the six-digit code sent to ${email}. It expires in 10 minutes.`
-                : 'Sign in with your @morettiforni.com email. We will send you a one-time access code.'}
-            </p>
-            {challenge ? (
-              <label>
-                Access code
-                <input
-                  key="code"
-                  name="code"
-                  inputMode="numeric"
-                  autoComplete="one-time-code"
-                  pattern="[0-9]{6}"
-                  minLength={6}
-                  maxLength={6}
-                  required
-                  autoFocus
-                />
-              </label>
-            ) : (
-              <label>
-                Work email
-                <input
-                  key="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  pattern="[^@]+@[Mm][Oo][Rr][Ee][Tt][Tt][Ii][Ff][Oo][Rr][Nn][Ii]\.[Cc][Oo][Mm]"
-                  required
-                  defaultValue={email}
-                />
-              </label>
-            )}
+            <p>Sign in with your staff email and password.</p>
+            <label>
+              Work email
+              <input name="email" type="email" autoComplete="username" required />
+            </label>
+            <label>
+              Password
+              <input
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                required
+                maxLength={128}
+              />
+            </label>
             <button className={styles.primary} disabled={signingIn}>
-              {signingIn ? 'Please wait…' : challenge ? 'Verify and sign in' : 'Send access code'}
+              {signingIn ? 'Please wait…' : 'Sign in'}
             </button>
-            {challenge && (
-              <button
-                type="button"
-                disabled={signingIn}
-                onClick={() => {
-                  setChallenge('');
-                  setError('');
-                }}
-              >
-                Change email or request a new code
-              </button>
-            )}
             {error && (
               <p className={styles.error} role="alert">
                 {error}

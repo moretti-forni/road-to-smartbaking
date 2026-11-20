@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "IAM-only staff OTP and admin API. Reuses the existing database security group and secret; no public function URL.",
+  "Description": "IAM-only staff password and admin API. No public function URL or email delivery.",
   "Parameters": {
     "CodeBucket": {
       "Type": "String"
@@ -16,12 +16,6 @@
       "Default": "subnet-01e88ce6a9284c0a6"
     },
     "SecurityGroupId": {
-      "Type": "String"
-    },
-    "SesIdentityArn": {
-      "Type": "String"
-    },
-    "SenderEmail": {
       "Type": "String"
     },
     "AmplifyComputeRoleName": {
@@ -59,23 +53,6 @@
                   "Action": "secretsmanager:GetSecretValue",
                   "Resource": {
                     "Ref": "RuntimeSecretArn"
-                  }
-                },
-                {
-                  "Effect": "Allow",
-                  "Action": "ses:SendEmail",
-                  "Resource": {
-                    "Ref": "SesIdentityArn"
-                  },
-                  "Condition": {
-                    "StringEquals": {
-                      "ses:FromAddress": {
-                        "Ref": "SenderEmail"
-                      }
-                    },
-                    "ForAllValues:StringLike": {
-                      "ses:Recipients": ["*@morettiforni.com"]
-                    }
                   }
                 }
               ]
@@ -121,11 +98,7 @@
               "Ref": "RuntimeSecretArn"
             },
             "RTSM_DB_SCHEMA": "road_to_smartbaking",
-            "RTSM_AUTH_MODE": "email-otp",
-            "RTSM_MAIL_PROVIDER": "ses",
-            "SES_FROM": {
-              "Ref": "SenderEmail"
-            },
+            "RTSM_AUTH_MODE": "password",
             "NODE_ENV": "production"
           }
         }

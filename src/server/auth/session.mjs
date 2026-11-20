@@ -140,6 +140,12 @@ export async function readSession(db, request) {
     'SELECT email FROM rtsm_staff_session WHERE token_hash = $1 AND expires_at > now()',
     [hash(token)],
   );
+  if (
+    process.env.RTSM_AUTH_MODE === 'password' &&
+    row &&
+    !['noreply-app@morettiforni.com', 'app@morettiforni.com'].includes(row.email)
+  )
+    return undefined;
   return row;
 }
 export async function revokeSession(db, request) {

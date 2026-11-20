@@ -23,7 +23,7 @@ vi.mock('../src/server/services/api.mjs', async (original) => ({
 import { handler } from '../src/server/staff/handler.mjs';
 beforeEach(() => {
   vi.clearAllMocks();
-  vi.stubEnv('RTSM_AUTH_MODE', 'email-otp');
+  vi.stubEnv('RTSM_AUTH_MODE', 'password');
   mocks.db.mockResolvedValue({});
   mocks.read.mockResolvedValue(undefined);
 });
@@ -37,7 +37,7 @@ it('rejects identity assertions, SQL and public routes before database access', 
     expect((await handler(input)).status).toBe(400);
   expect(mocks.db).not.toHaveBeenCalled();
 });
-it('requires explicit email OTP configuration', async () => {
+it('requires explicit password configuration', async () => {
   vi.stubEnv('RTSM_AUTH_MODE', 'managed');
   expect((await handler({ method: 'GET', url: '/api/v1/auth/session' })).status).toBe(503);
   expect(mocks.db).not.toHaveBeenCalled();

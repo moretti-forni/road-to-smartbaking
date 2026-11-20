@@ -20,3 +20,5 @@ next-env.d.ts
 /public/media/
 /public/ovens/
 /public/mf_factory.jpg
+
+.staff-passwords.json
