@@ -116,8 +116,8 @@ export function apiError(error: unknown) {
   ) {
     const details = error.response?.data;
     if (error.response?.status === 401)
-      return error.config?.url?.includes('/auth/verify-code')
-        ? details?.error || 'Invalid or expired code.'
+      return error.config?.url?.includes('/auth/login')
+        ? details?.error || 'Invalid email or password.'
         : 'Your session has expired. Sign in again with your Moretti Forni email.';
     if (details?.issues?.length) {
       return details.issues

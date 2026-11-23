@@ -101,7 +101,7 @@ it('exchanges the private login token for an HttpOnly cookie without exposing it
   vi.stubEnv('RTSM_STAFF_FUNCTION_ARN', 'arn:aws:lambda:eu-west-1:123:function:staff');
   send.mockResolvedValue(reply(200, { token: 'a'.repeat(64), email: 'staff@morettiforni.com' }));
   const response = await serveApi(
-    new Request('https://app.test/api/v1/auth/verify-code', {
+    new Request('https://app.test/api/v1/auth/login', {
       method: 'POST',
       headers: { origin: 'https://app.test', 'content-type': 'application/json' },
       body: JSON.stringify({ email: 'staff@morettiforni.com', code: '123456', challenge: 'test' }),
@@ -138,9 +138,9 @@ it('accepts localhost versus loopback only for unconfigured local development or
   vi.stubEnv('NODE_ENV', 'development');
   vi.stubEnv('RTSM_APP_ORIGIN', '');
   vi.stubEnv('RTSM_STAFF_FUNCTION_ARN', 'arn:aws:lambda:eu-west-1:123:function:staff');
-  send.mockResolvedValue(reply(200, { challenge: 'test' }));
+  send.mockResolvedValue(reply(200, { token: 'c'.repeat(64), email: 'app@morettiforni.com' }));
   const response = await serveApi(
-    new Request('http://127.0.0.1:5173/api/v1/auth/request-code', {
+    new Request('http://127.0.0.1:5173/api/v1/auth/login', {
       method: 'POST',
       headers: { origin: 'http://localhost:5173', 'content-type': 'application/json' },
       body: '{}',
@@ -149,7 +149,7 @@ it('accepts localhost versus loopback only for unconfigured local development or
   expect(response.status).toBe(200);
   vi.stubEnv('NODE_ENV', 'production');
   const denied = await serveApi(
-    new Request('http://127.0.0.1:5173/api/v1/auth/request-code', {
+    new Request('http://127.0.0.1:5173/api/v1/auth/login', {
       method: 'POST',
       headers: { origin: 'http://localhost:5173', 'content-type': 'application/json' },
       body: '{}',

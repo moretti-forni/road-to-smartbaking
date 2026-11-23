@@ -9,7 +9,7 @@ Use Node **22.13+** (also required by Capacitor 8) and Docker Desktop.
 ```sh
 npm ci
 cp .env.example .env.local
-# Configure staff OTP and email settings in .env.local; see docs/amplify-setup.md.
+# Configure staff passwords privately; see docs/staff-authentication.md.
 docker compose --env-file .env.local up -d --wait db
 npm run db:migrate
 npm run db:seed
@@ -61,7 +61,7 @@ curl 'http://127.0.0.1:5173/api/v1/shops?category=pizza'
 curl 'http://127.0.0.1:5173/api/v1/stories?language=it'
 ```
 
-Studio uses email OTP restricted to exact `@morettiforni.com` mailboxes. Codes expire in ten minutes, allow five attempts and are single-use. Eight-hour HttpOnly sessions are restored on reload and revoked on logout. Configure SMTP locally or SES with a runtime IAM role. The old bearer token is disabled in production.
+Studio uses two fixed staff accounts with individual passwords, salted scrypt hashes and eight-hour HttpOnly sessions. See [staff authentication](docs/staff-authentication.md) for private password setup and AWS activation. The old bearer token is disabled in production.
 
 For Amplify, use `RTSM_RUNTIME_SECRET_ARN` to retrieve `DATABASE_URL` and `RTSM_AUTH_SECRET` from Secrets Manager; do not embed credentials in the deployment artifact. See [the Amplify setup guide](docs/amplify-setup.md).
 

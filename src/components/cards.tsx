@@ -11,7 +11,6 @@ import { shopImage, type Restaurant } from '../data/restaurants';
 import { resolveOvens } from '../data/ovens';
 import { useSaved } from './providers';
 import styles from './cards.module.css';
-import { VenueReport } from './venue-report';
 
 export function SaveButton({ id, label }: { id: string; label: string }) {
   const { ids, toggle, ready } = useSaved();
@@ -60,6 +59,9 @@ export function RestaurantCard({
         <div className={styles.imageWrap}>
           {restaurant.image && (
             <img
+              ref={(image) => {
+                if (image?.complete && image.naturalWidth === 0) setImageFailed(true);
+              }}
               onError={() => setImageFailed(true)}
               src={shopImage(restaurant.image, 'cards')}
               alt={
@@ -83,7 +85,7 @@ export function RestaurantCard({
             {t(restaurant.kind)}
           </span>
         </div>
-        <h3>{restaurant.name}</h3>
+        <h3 title={restaurant.name}>{restaurant.name}</h3>
         {restaurant.oven && <OvenModels oven={restaurant.oven} />}
         <a
           className={styles.location}
@@ -106,7 +108,6 @@ export function RestaurantCard({
           <ArrowUpRight size={16} aria-hidden="true" />
         </a>
       </div>
-      <VenueReport id={restaurant.id} name={restaurant.name} />
     </article>
   );
 }

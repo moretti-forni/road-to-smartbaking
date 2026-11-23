@@ -4,6 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import pg from 'pg';
+import { passwordLogin, hashPassword } from '../src/server/auth/password.mjs';
 import {
   requestCode,
   verifyCode,
@@ -136,5 +137,44 @@ suite('real PostgreSQL migrations and staff authentication', () => {
         ])
       ).rows[0].consumed_at,
     ).not.toBeNull();
+  });
+  it('enforces the two password accounts, throttles attempts and revokes sessions', async () => {
+    vi.stubEnv('RTSM_AUTH_MODE', 'password');
+    const password = 'integration-password-only';
+    vi.stubEnv(
+      'RTSM_STAFF_PASSWORD_HASHES',
+      JSON.stringify({
+        'noreply-app@morettiforni.com': await hashPassword(password),
+        'app@morettiforni.com': await hashPassword(password),
+      }),
+    );
+    try {
+      for (const email of ['other@morettiforni.com', 'other@example.com'])
+        await expect(passwordLogin(db, { email, password })).rejects.toMatchObject({ status: 401 });
+      await expect(
+        passwordLogin(db, { email: 'app@morettiforni.com', password: 'wrong' }),
+      ).rejects.toMatchObject({ status: 401 });
+      for (const email of ['noreply-app@morettiforni.com', 'app@morettiforni.com']) {
+        const session = await passwordLogin(db, { email: email.toUpperCase(), password });
+        const request = new Request('https://app.test', {
+          headers: { cookie: `rtsm_staff_session=${session.token}` },
+        });
+        expect(await readSession(db, request)).toEqual({ email });
+        await revokeSession(db, request);
+        expect(await readSession(db, request)).toBeUndefined();
+      }
+      await db.query(
+        "INSERT INTO rtsm_staff_challenge(id,email,code_hash,consumed_at) SELECT gen_random_uuid(), 'app@morettiforni.com', 'password-login', now() FROM generate_series(1,10)",
+      );
+      await expect(
+        passwordLogin(db, { email: 'app@morettiforni.com', password }),
+      ).rejects.toMatchObject({ status: 429 });
+      vi.stubEnv('RTSM_STAFF_PASSWORD_HASHES', '{}');
+      await expect(
+        passwordLogin(db, { email: 'app@morettiforni.com', password }),
+      ).rejects.toMatchObject({ status: 503 });
+    } finally {
+      vi.stubEnv('RTSM_AUTH_MODE', '');
+    }
   });
 });

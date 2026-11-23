@@ -9,12 +9,11 @@ import { isStaff } from '../auth/staff.mjs';
 import {
   AuthError,
   cookieToken,
-  requestCode,
-  verifyCode,
   readSession,
   revokeSession,
   sessionHeader,
 } from '../auth/session.mjs';
+import { passwordLogin } from '../auth/password.mjs';
 import { getDb } from '../db/pool';
 const maxBytes = 512 * 1024;
 async function readJson(request: Request) {
@@ -125,11 +124,7 @@ export async function serveApi(request: Request) {
             ? await readJson(request)
             : undefined,
       });
-      if (
-        path === '/api/v1/auth/verify-code' &&
-        request.method === 'POST' &&
-        result.status === 200
-      ) {
+      if (path === '/api/v1/auth/login' && request.method === 'POST' && result.status === 200) {
         const verified = z
           .object({ token: z.string().regex(/^[a-f0-9]{64}$/), email: z.email() })
           .safeParse(result.body);
@@ -164,10 +159,8 @@ export async function serveApi(request: Request) {
     await loadRuntimeSecrets();
     if (path.startsWith('/api/v1/auth/')) {
       const db = getDb();
-      if (path === '/api/v1/auth/request-code' && request.method === 'POST')
-        return json(await requestCode(db, await readJson(request)));
-      if (path === '/api/v1/auth/verify-code' && request.method === 'POST') {
-        const session = await verifyCode(db, await readJson(request));
+      if (path === '/api/v1/auth/login' && request.method === 'POST') {
+        const session = await passwordLogin(db, await readJson(request));
         headers['Set-Cookie'] = sessionHeader(session.token);
         return json({ email: session.email });
       }

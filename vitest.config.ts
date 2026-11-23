@@ -8,6 +8,8 @@ export default defineConfig({
     // TEST_DATABASE_URL remains explicit for the isolated PostgreSQL suites.
     env: {
       RTSM_DATA_FUNCTION_ARN: '',
+      RTSM_STAFF_FUNCTION_ARN: '',
+      RTSM_STAFF_PASSWORD_HASHES: '',
       RTSM_RUNTIME_SECRET_ARN: '',
       RTSM_APP_ORIGIN: 'http://localhost',
       RTSM_AUTH_MODE: 'legacy',

@@ -31,7 +31,14 @@ export const requestInput = z.object({
   oven: text(120),
   contactName: text(160),
   email: z.email().max(254),
+  notes: z.string().trim().max(8000).optional(),
+});
+
+export const requestSubmissionInput = requestInput.extend({
   notes: z.string().trim().max(4000).optional(),
+  serviceAccepted: z.literal(true),
+  publicationAuthorized: z.literal(true),
+  consentLanguage: z.enum(['it', 'en']),
 });
 
 export const shopInput = z.object({

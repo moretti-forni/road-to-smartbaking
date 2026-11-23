@@ -1056,6 +1056,47 @@ hr {
 .listing-form textarea:focus {
   border-color: var(--red);
 }
+.listing-consents {
+  display: grid;
+  gap: 18px;
+  padding-top: 20px;
+  border-top: 1px solid #5b5a54;
+  color: #e9e3d8;
+  font-size: 13px;
+  line-height: 1.65;
+}
+.listing-consents > p {
+  margin: 0;
+}
+.listing-form .listing-consent {
+  grid-template-columns: 20px minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  font-size: inherit;
+  font-weight: 400;
+  cursor: pointer;
+}
+.listing-consent > input[type='checkbox'] {
+  appearance: auto;
+  width: 20px;
+  height: 20px;
+  min-height: 0;
+  margin: 3px 0 0;
+  padding: 0;
+  accent-color: var(--red);
+}
+.listing-consent > input:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: 3px;
+}
+.listing-consent strong,
+.listing-consent > span > span {
+  display: block;
+}
+.listing-consent strong {
+  margin-bottom: 4px;
+  font-size: 14px;
+}
 .listing-form-footer {
   display: flex;
   align-items: flex-end;
@@ -1503,6 +1544,7 @@ hr {
 }
 .venue-actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 12px;
   padding-bottom: 7px;
@@ -2525,20 +2567,29 @@ hr {
 }
 
 .venue-report-button {
-  position: relative;
-  z-index: 2;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  margin: 0 22px 18px;
-  padding: 4px 0;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  margin: 0;
+  padding: 8px 0;
   background: transparent;
   border: 0;
-  border-radius: 0;
   box-shadow: none;
   color: var(--red);
-  font-size: 11px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
 }
+.venue-report-button:hover {
+  color: var(--red-dark);
+}
+.venue-report-button:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: 4px;
+}
+
 .report-dialog {
   color: #f8f4eb;
   background: #292927;

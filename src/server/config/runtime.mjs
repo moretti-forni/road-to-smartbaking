@@ -4,6 +4,7 @@ const secretSchema = z.object({
   DATABASE_URL: z.string().url(),
   RTSM_DB_SSL_CA: z.string().min(1).optional(),
   RTSM_AUTH_SECRET: z.string().min(32),
+  RTSM_STAFF_PASSWORD_HASHES: z.string().optional(),
   SMTP_USER: z.string().optional(),
   SMTP_PASSWORD: z.string().optional(),
 });

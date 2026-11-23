@@ -1,3 +1,4 @@
+import { scryptSync } from 'node:crypto';
 import { defineConfig } from '@playwright/test';
 export default defineConfig({
   testDir: './tests/e2e',
@@ -13,6 +14,15 @@ export default defineConfig({
       NEXT_PUBLIC_CATALOG_SOURCE: 'database',
       NEXT_PUBLIC_API_BASE_URL: '/api/v1',
       RTSM_APP_ORIGIN: 'http://127.0.0.1:5175',
+      RTSM_AUTH_MODE: 'password',
+      RTSM_STAFF_PASSWORD_HASHES: JSON.stringify(
+        Object.fromEntries(
+          ['noreply-app@morettiforni.com', 'app@morettiforni.com'].map((email) => [
+            email,
+            `scrypt$32768$${'1'.repeat(32)}$${scryptSync('browser-test-password-only', '1'.repeat(32), 64, { N: 32768, r: 8, p: 1, maxmem: 64 * 1024 * 1024 }).toString('hex')}`,
+          ]),
+        ),
+      ),
       RTSM_AUTH_SECRET: 'local-browser-test-only-secret-not-for-deployment',
       RTSM_MAIL_PROVIDER: 'smtp',
       SMTP_HOST: '127.0.0.1',

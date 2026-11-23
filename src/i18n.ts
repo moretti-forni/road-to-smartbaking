@@ -1,3 +1,4 @@
+import { registrationConsent } from './features/catalog/registration-consent.mjs';
 import { createInstance } from 'i18next';
 
 export const resources = {
@@ -103,6 +104,7 @@ export const resources = {
         'Il browser non consente di salvare le preferenze. I tuoi salvati restano disponibili solo durante questa visita.',
       footer: 'Moretti is the ingredient',
       footerSmall: 'Tecnologie di cottura dei prodotti lievitati.',
+      ...registrationConsent.it,
       listingRequestCta: 'Iscrivi il tuo locale',
       listingRequestTitle: 'Raccontaci la tua realtà.',
       listingRequestIntro:
@@ -265,6 +267,7 @@ export const resources = {
         'Your browser cannot store preferences. Saved places will only be available during this visit.',
       footer: 'Moretti is the ingredient',
       footerSmall: 'Baking technologies for leavened products.',
+      ...registrationConsent.en,
       listingRequestCta: 'List your place',
       listingRequestTitle: 'Tell us about your place.',
       listingRequestIntro: 'Share your project and the Moretti Forni technology that supports it.',

@@ -1,14 +1,8 @@
 import { z, ZodError } from 'zod';
+import { passwordLogin } from '../auth/password.mjs';
 import { database } from '../data/database.mjs';
 import { ApiError, handleApi } from '../services/api.mjs';
-import {
-  AuthError,
-  requestCode,
-  verifyCode,
-  readSession,
-  revokeSession,
-  sessionCookie,
-} from '../auth/session.mjs';
+import { AuthError, readSession, revokeSession, sessionCookie } from '../auth/session.mjs';
 const envelope = z
   .object({
     method: z.enum(['GET', 'POST', 'PUT', 'PATCH']),
@@ -31,7 +25,7 @@ export async function handler(event, context) {
       throw new ApiError(413, 'Request body is too large');
     const input = envelope.parse(event);
     const path = new URL(input.url, 'https://internal.invalid').pathname;
-    if (process.env.RTSM_AUTH_MODE !== 'email-otp')
+    if (process.env.RTSM_AUTH_MODE !== 'password')
       throw new AuthError(503, 'Staff sign-in is not configured');
     // Media stays on Amplify compute; this function only authorizes its session.
     if (path.startsWith('/api/v1/admin/media/')) throw new ApiError(403, 'Endpoint not allowed');
@@ -40,10 +34,8 @@ export async function handler(event, context) {
       headers: input.token ? { cookie: `${sessionCookie}=${input.token}` } : {},
     });
     const route = `${input.method} ${path}`;
-    if (route === 'POST /api/v1/auth/request-code')
-      return { status: 200, body: await requestCode(db, input.body) };
-    if (route === 'POST /api/v1/auth/verify-code')
-      return { status: 200, body: await verifyCode(db, input.body) };
+    if (route === 'POST /api/v1/auth/login')
+      return { status: 200, body: await passwordLogin(db, input.body) };
     if (route === 'POST /api/v1/auth/logout') {
       await revokeSession(db, request);
       return { status: 200, body: { ok: true } };
