@@ -9,6 +9,7 @@ import type { Restaurant } from '../data/restaurants';
 import { shopImage } from '../data/restaurants';
 import { resolveOvens } from '../data/ovens';
 import { RestaurantCard, SaveButton } from '../components/cards';
+import { VenueReport } from '../components/venue-report';
 import { ShareButton } from '../components/share';
 
 export default function RestaurantDetail({ restaurant }: { restaurant: Restaurant }) {
@@ -45,6 +46,7 @@ function Detail({ restaurant }: { restaurant: Restaurant }) {
             </p>
           </div>
           <div className="venue-actions">
+            <VenueReport id={restaurant.id} name={restaurant.name} />
             <ShareButton title={restaurant.name} />
             <SaveButton id={restaurant.id} label={restaurant.name} />
           </div>

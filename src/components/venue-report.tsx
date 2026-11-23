@@ -40,7 +40,7 @@ export function VenueReport({ id, name }: { id: string; name: string }) {
           dialog.current?.showModal();
         }}
       >
-        <Flag size={13} />
+        <Flag size={15} aria-hidden="true" />
         {t('reportVenue')}
       </button>
       <dialog

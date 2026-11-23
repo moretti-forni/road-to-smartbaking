@@ -113,3 +113,45 @@ describe('staff media endpoint routing', () => {
     ).toBe(503);
   });
 });
+
+describe('registration declarations', () => {
+  const payload = {
+    businessName: 'Consent test venue',
+    category: 'pizza',
+    address: 'Via Roma 1',
+    city: 'Mondolfo',
+    country: 'Italia',
+    oven: 'serieS',
+    contactName: 'Test Owner',
+    email: 'owner@example.com',
+    notes: 'Original venue notes',
+    serviceAccepted: true,
+    publicationAuthorized: true,
+    consentLanguage: 'it',
+  };
+  const submit = (body: unknown) =>
+    serveApi(
+      request('requests', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(body),
+      }),
+    );
+  it('rejects missing, unchecked and string-valued permissions before writing', async () => {
+    for (const field of ['serviceAccepted', 'publicationAuthorized']) {
+      for (const value of [undefined, false, 'true'])
+        expect((await submit({ ...payload, [field]: value })).status).toBe(400);
+    }
+    expect(query).not.toHaveBeenCalled();
+  });
+  it('stores the versioned declarations and server timestamp with the original notes', async () => {
+    query.mockResolvedValue({ rows: [{ id: 'receipt', status: 'submitted' }] });
+    expect((await submit(payload)).status).toBe(201);
+    const notes = query.mock.calls[0][1][9];
+    expect(notes).toContain('Original venue notes');
+    expect(notes).toMatch(/2026-11-23 · it · \d{4}-\d{2}-\d{2}T/);
+    expect(notes).toContain('Adesione al servizio');
+    expect(notes).toContain('Autorizzazione alla pubblicazione dei contenuti');
+    expect(notes).toContain('Moretti Forni S.p.A.');
+  });
+});

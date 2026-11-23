@@ -126,7 +126,7 @@ test('denied location and offline map retain manual discovery', async ({ page })
 test('category selections combine, image failures collapse, and reports stay attached to their venue', async ({
   page,
 }) => {
-  await page.route('**/shops-webp/cards/**', (route) => route.abort());
+  await page.route('**/shops-webp/cards/**', (route) => route.fulfill({ status: 404, body: '' }));
   await page.route('**/api/v1/reports', (route) => route.abort());
   await page.goto('/en');
   const toolbar = page.locator('.search-toolbar');
@@ -159,7 +159,17 @@ test('category selections combine, image failures collapse, and reports stay att
   const venue = page.locator('#venue-fico');
   await venue.scrollIntoViewIfNeeded();
   await expect(venue.locator('img[src*="shops-webp"]')).toHaveCount(0);
-  await venue.getByRole('button', { name: 'Report', exact: true }).click();
+  await expect(venue.getByRole('button', { name: 'Report', exact: true })).toHaveCount(0);
+  await venue.getByRole('link', { name: 'FICO', exact: true }).click();
+  const actions = page.locator('.venue-actions');
+  const report = actions.getByRole('button', { name: 'Report', exact: true });
+  const share = actions.getByRole('button', { name: 'Share', exact: true });
+  await expect(report).toBeVisible();
+  await expect(share).toBeVisible();
+  const reportBox = await report.boundingBox();
+  const shareBox = await share.boundingBox();
+  expect(reportBox!.x + reportBox!.width).toBeLessThanOrEqual(shareBox!.x);
+  await report.click();
   const dialog = page.getByRole('dialog');
   await expect(dialog).toBeVisible();
   await expect(dialog.getByText('FICO', { exact: true })).toBeVisible();
@@ -400,4 +410,41 @@ test('search and category removal stay synchronized between map controls and ven
   await page.getByRole('button', { name: 'Cancella la ricerca', exact: true }).click();
   await expect(search).toHaveValue('');
   await expect(page.locator('#places article')).toHaveCount(publishedRestaurants.length);
+});
+
+test('registration consent checkboxes are required and unchecked in both languages', async ({
+  page,
+}) => {
+  for (const locale of ['it', 'en']) {
+    await page.goto(`/${locale}`);
+    await page
+      .getByRole('button', {
+        name: locale === 'it' ? 'Iscrivi il tuo locale' : 'List your place',
+        exact: true,
+      })
+      .first()
+      .click();
+    const modal = page.getByRole('dialog');
+    const consents = modal.locator('input[type="checkbox"]');
+    await expect(consents).toHaveCount(2);
+    for (const checkbox of await consents.all()) {
+      await expect(checkbox).not.toBeChecked();
+      await expect(checkbox).toHaveAttribute('required', '');
+      expect(await checkbox.evaluate((input) => (input as HTMLInputElement).checkValidity())).toBe(
+        false,
+      );
+      await checkbox.check();
+      expect(await checkbox.evaluate((input) => (input as HTMLInputElement).checkValidity())).toBe(
+        true,
+      );
+    }
+    const group = modal.locator('.listing-consents');
+    await expect(group).toContainText(
+      locale === 'it' ? 'Adesione al servizio' : 'Service membership',
+    );
+    await expect(group).toContainText('Moretti Forni S.p.A.');
+    expect(await group.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(
+      true,
+    );
+  }
 });

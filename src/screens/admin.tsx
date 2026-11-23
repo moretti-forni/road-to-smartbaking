@@ -428,7 +428,6 @@ function Studio({ token, onSignOut }: { token: string; onSignOut: () => void }) 
             </div>
           ) : dashboardQueries.every((query) => query.isSuccess) ? (
             <>
-              <VenueReports token={token} />
               <Dashboard
                 shops={
                   shops.data?.flatMap((record) =>
@@ -447,6 +446,7 @@ function Studio({ token, onSignOut }: { token: string; onSignOut: () => void }) 
                 }
                 onOpen={navigate}
               />
+              <VenueReports token={token} />
             </>
           ) : (
             <p className={styles.panel} role="status">

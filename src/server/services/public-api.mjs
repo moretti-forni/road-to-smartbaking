@@ -31,7 +31,7 @@ export async function handlePublicApi(db, { method, url, readBody }) {
     case 'POST /api/v1/requests':
       return {
         status: 201,
-        body: await data.submitRequest(db, schema.requestInput.parse(await readBody())),
+        body: await data.submitRequest(db, schema.requestSubmissionInput.parse(await readBody())),
       };
     case 'POST /api/v1/reports': {
       const input = schema.reportInput.parse(await readBody());

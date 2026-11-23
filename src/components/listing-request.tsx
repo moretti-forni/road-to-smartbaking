@@ -10,7 +10,7 @@ type ListingRequestButtonProps = {
 };
 
 export function ListingRequestButton({ variant = 'nav' }: ListingRequestButtonProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [sending, setSending] = useState(false);
@@ -65,6 +65,9 @@ export function ListingRequestButton({ variant = 'nav' }: ListingRequestButtonPr
       const { data } = await publicHttp.post<{ id: string }>('/requests', {
         ...fields,
         website: fields.website || undefined,
+        serviceAccepted: fields.serviceAccepted === 'on',
+        publicationAuthorized: fields.publicationAuthorized === 'on',
+        consentLanguage: i18n.resolvedLanguage?.startsWith('en') ? 'en' : 'it',
       });
       setReceipt(data.id);
       setSubmitted(true);
@@ -212,6 +215,24 @@ export function ListingRequestButton({ variant = 'nav' }: ListingRequestButtonPr
                     <small>{t('socialGuidance')}</small>
                     <textarea name="notes" rows={3} />
                   </label>
+
+                  <div className="listing-consents">
+                    <p>{t('listingPrivacyAcknowledgement')}</p>
+                    <label className="listing-consent">
+                      <input type="checkbox" name="serviceAccepted" required />
+                      <span>
+                        <strong>{t('listingServiceConsentTitle')}</strong>
+                        <span>{t('listingServiceConsentBody')}</span>
+                      </span>
+                    </label>
+                    <label className="listing-consent">
+                      <input type="checkbox" name="publicationAuthorized" required />
+                      <span>
+                        <strong>{t('listingPublicationConsentTitle')}</strong>
+                        <span>{t('listingPublicationConsentBody')}</span>
+                      </span>
+                    </label>
+                  </div>
 
                   <div className="listing-form-footer">
                     <p>{t(usesPublicApi ? 'listingLiveNote' : 'listingPreviewNote')}</p>

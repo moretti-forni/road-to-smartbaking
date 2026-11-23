@@ -1,3 +1,4 @@
+import { consentRecord } from '../../features/catalog/registration-consent.mjs';
 const publicShop = `slug, name, category, address, city, country, latitude, longitude,
   description_it AS "descriptionIt", description_en AS "descriptionEn", oven_model AS oven,
   website_url AS website, image_url AS "imageUrl", image_alt_it AS "imageAltIt",
@@ -76,7 +77,11 @@ export function submitRequest(db, request) {
     (business_name, category, address, city, country, oven_model, website_url,
       contact_name, contact_email, notes)
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id, status`,
-    requestValues(request),
+    requestValues({
+      ...request,
+      notes:
+        (request.notes ?? '') + consentRecord(request.consentLanguage, new Date().toISOString()),
+    }),
   );
 }
 
