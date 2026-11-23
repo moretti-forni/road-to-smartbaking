@@ -1,6 +1,8 @@
+import { privacyNoticeUrl } from './legal-documents.mjs';
 export const registrationConsentVersion = '2026-11-23';
 export const registrationConsent = {
   it: {
+    listingPrivacyDocument: 'Leggi l’informativa (PDF)',
     listingPrivacyAcknowledgement:
       "Con l'invio della richiesta dichiaro di aver preso visione dell'informativa sul trattamento dei dati personali RoadToSmartBaking",
     listingServiceConsentTitle: 'Adesione al servizio',
@@ -11,6 +13,7 @@ export const registrationConsent = {
       'Autorizzo Moretti Forni S.p.A. a pubblicare le informazioni e i materiali confermati nell’anteprima della scheda, comprese le fotografie, nell’ambito di RoadToSmartBaking, secondo le condizioni di adesione. Dichiaro di disporre dei diritti e delle autorizzazioni necessari sui materiali forniti.',
   },
   en: {
+    listingPrivacyDocument: 'Read the privacy notice (PDF)',
     listingPrivacyAcknowledgement:
       'By submitting this request, I declare that I have read the RoadToSmartBaking privacy notice on the processing of personal data.',
     listingServiceConsentTitle: 'Service membership',
@@ -23,5 +26,5 @@ export const registrationConsent = {
 };
 export function consentRecord(language, acceptedAt) {
   const copy = registrationConsent[language];
-  return `\n\n[RoadToSmartBaking · ${registrationConsentVersion} · ${language} · ${acceptedAt}]\n${copy.listingPrivacyAcknowledgement}\n✓ ${copy.listingServiceConsentTitle}: ${copy.listingServiceConsentBody}\n✓ ${copy.listingPublicationConsentTitle}: ${copy.listingPublicationConsentBody}`;
+  return `\n\n[RoadToSmartBaking · ${registrationConsentVersion} · ${language} · ${acceptedAt}]\n${copy.listingPrivacyAcknowledgement}\n${privacyNoticeUrl(language)}\n✓ ${copy.listingServiceConsentTitle}: ${copy.listingServiceConsentBody}\n✓ ${copy.listingPublicationConsentTitle}: ${copy.listingPublicationConsentBody}`;
 }

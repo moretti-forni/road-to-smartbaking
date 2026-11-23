@@ -61,3 +61,9 @@ The currently deployed private-data mode explicitly blocks Studio authentication
 ## Browser upload origins
 
 The media stack's `AllowedOrigin` parameter accepts a comma-separated list. The shared bucket permits POST uploads from `https://roadtosmartbaking.com`, `https://www.roadtosmartbaking.com`, and `https://dev.d39rjisb2mzg1i.amplifyapp.com`. Keep these exact origins aligned with each Amplify branch's `RTSM_APP_ORIGIN`. CORS permits browser access; staff session authorization and signed S3 upload policies are still required.
+
+## Registration privacy PDFs
+
+Source documents are archived under `assets/t&s/`, outside `public`. `src/features/catalog/legal-documents.mjs` maps Italian and English to immutable, content-hashed keys under `media/legal/`. Registration links open the matching privacy notice through CloudFront in a new tab; submission notes record that document URL alongside the declarations.
+
+Run `AWS_PROFILE=Moretti node --env-file=.env.local scripts/upload-legal-documents.mjs` to review the plan, then add `--apply` to upload and verify SHA-256 checksums. The script refuses source files that differ from the manifest. A revised document needs a new manifest hash/key; do not overwrite a published version. PDFs are served inline as `application/pdf` and remain excluded from the webapp's public assets. These two PDFs are privacy notices, rather than separate membership terms.

@@ -2745,3 +2745,12 @@ hr {
   background: #eee9e1;
   color: var(--ink);
 }
+
+.listing-consents a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.listing-consents a:hover {
+  color: var(--white);
+}

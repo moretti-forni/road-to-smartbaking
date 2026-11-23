@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { privacyNoticeUrl } from '../features/catalog/legal-documents.mjs';
 import { Check, Plus, Send, Store, X } from 'lucide-react';
 import { publicHttp, usesPublicApi } from '../services/http';
 import { useTranslation } from 'react-i18next';
@@ -217,7 +218,19 @@ export function ListingRequestButton({ variant = 'nav' }: ListingRequestButtonPr
                   </label>
 
                   <div className="listing-consents">
-                    <p>{t('listingPrivacyAcknowledgement')}</p>
+                    <p>
+                      {t('listingPrivacyAcknowledgement')}{' '}
+                      <a
+                        href={privacyNoticeUrl(
+                          i18n.resolvedLanguage?.startsWith('en') ? 'en' : 'it',
+                        )}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        type="application/pdf"
+                      >
+                        {t('listingPrivacyDocument')}
+                      </a>
+                    </p>
                     <label className="listing-consent">
                       <input type="checkbox" name="serviceAccepted" required />
                       <span>
