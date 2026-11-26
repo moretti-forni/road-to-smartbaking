@@ -45,14 +45,18 @@
     "DataLogGroup": {
       "Type": "AWS::Logs::LogGroup",
       "Properties": {
-        "LogGroupName": "/aws/lambda/road-to-smartbaking-data-dev",
+        "LogGroupName": {
+          "Fn::Sub": "/aws/lambda/road-to-smartbaking-data-${DeploymentEnvironment}"
+        },
         "RetentionInDays": 14
       }
     },
     "DataRole": {
       "Type": "AWS::IAM::Role",
       "Properties": {
-        "RoleName": "rtsm-private-data-dev",
+        "RoleName": {
+          "Fn::Sub": "rtsm-private-data-${DeploymentEnvironment}"
+        },
         "AssumeRolePolicyDocument": {
           "Version": "2012-10-17",
           "Statement": [
@@ -77,7 +81,9 @@
                 {
                   "Effect": "Allow",
                   "Action": "secretsmanager:GetSecretValue",
-                  "Resource": "arn:aws:secretsmanager:eu-west-1:701749480077:secret:/road-to-smartbaking/dev/database-CtScQr"
+                  "Resource": {
+                    "Ref": "RuntimeSecretArn"
+                  }
                 }
               ]
             }
@@ -89,7 +95,9 @@
       "Type": "AWS::Lambda::Function",
       "DependsOn": ["DataLogGroup", "DatabaseIngress"],
       "Properties": {
-        "FunctionName": "road-to-smartbaking-data-dev",
+        "FunctionName": {
+          "Fn::Sub": "road-to-smartbaking-data-${DeploymentEnvironment}"
+        },
         "Runtime": "nodejs22.x",
         "Handler": "index.handler",
         "Role": {
@@ -108,22 +116,42 @@
         },
         "Environment": {
           "Variables": {
-            "RTSM_RUNTIME_SECRET_ARN": "arn:aws:secretsmanager:eu-west-1:701749480077:secret:/road-to-smartbaking/dev/database-CtScQr",
+            "RTSM_RUNTIME_SECRET_ARN": {
+              "Ref": "RuntimeSecretArn"
+            },
             "RTSM_AWS_REGION": "eu-west-1",
             "RTSM_DB_SCHEMA": "road_to_smartbaking",
             "NODE_ENV": "production",
-            "RTSM_AUTH_MODE": "managed"
+            "RTSM_AUTH_MODE": "managed",
+            "RTSM_DEPLOY_ENV": {
+              "Ref": "DeploymentEnvironment"
+            }
           }
         },
         "Code": {
-          "ZipFile": "exports.handler=async()=>({status:503,body:{error:'Data function deployment pending'}});"
+          "Fn::If": [
+            "HasCode",
+            {
+              "S3Bucket": {
+                "Ref": "CodeBucket"
+              },
+              "S3Key": {
+                "Ref": "CodeKey"
+              }
+            },
+            {
+              "ZipFile": "exports.handler=async()=>({status:503,body:{error:'Data function deployment pending'}});"
+            }
+          ]
         }
       }
     },
     "AmplifyComputeRole": {
       "Type": "AWS::IAM::Role",
       "Properties": {
-        "RoleName": "rtsm-amplify-ssr-main",
+        "RoleName": {
+          "Fn::If": ["IsDev", "rtsm-amplify-ssr-main", "rtsm-amplify-ssr-prod"]
+        },
         "AssumeRolePolicyDocument": {
           "Version": "2012-10-17",
           "Statement": [
@@ -211,7 +239,8 @@
             }
           }
         ]
-      }
+      },
+      "Condition": "IsDev"
     }
   },
   "Outputs": {
@@ -228,7 +257,113 @@
     "ServiceRoleArn": {
       "Value": {
         "Fn::GetAtt": ["AmplifyServiceRole", "Arn"]
+      },
+      "Condition": "IsDev"
+    },
+    "DataSecurityGroupId": {
+      "Value": {
+        "Ref": "DataSecurityGroup"
       }
+    }
+  },
+  "Parameters": {
+    "DeploymentEnvironment": {
+      "Type": "String",
+      "Default": "dev",
+      "AllowedValues": ["dev", "prod"]
+    },
+    "RuntimeSecretArn": {
+      "Type": "String",
+      "Default": "arn:aws:secretsmanager:eu-west-1:701749480077:secret:/road-to-smartbaking/dev/database-CtScQr"
+    },
+    "CodeBucket": {
+      "Type": "String",
+      "Default": ""
+    },
+    "CodeKey": {
+      "Type": "String",
+      "Default": ""
+    }
+  },
+  "Rules": {
+    "ProductionInputs": {
+      "RuleCondition": {
+        "Fn::Equals": [
+          {
+            "Ref": "DeploymentEnvironment"
+          },
+          "prod"
+        ]
+      },
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Equals": [
+                  {
+                    "Ref": "RuntimeSecretArn"
+                  },
+                  "arn:aws:secretsmanager:eu-west-1:701749480077:secret:/road-to-smartbaking/dev/database-CtScQr"
+                ]
+              }
+            ]
+          },
+          "AssertDescription": "Use a dedicated production runtime secret."
+        },
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Equals": [
+                  {
+                    "Ref": "CodeBucket"
+                  },
+                  ""
+                ]
+              }
+            ]
+          },
+          "AssertDescription": "CodeBucket is required for production."
+        },
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Equals": [
+                  {
+                    "Ref": "CodeKey"
+                  },
+                  ""
+                ]
+              }
+            ]
+          },
+          "AssertDescription": "CodeKey is required for production."
+        }
+      ]
+    }
+  },
+  "Conditions": {
+    "IsDev": {
+      "Fn::Equals": [
+        {
+          "Ref": "DeploymentEnvironment"
+        },
+        "dev"
+      ]
+    },
+    "HasCode": {
+      "Fn::Not": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "CodeBucket"
+            },
+            ""
+          ]
+        }
+      ]
     }
   }
 }

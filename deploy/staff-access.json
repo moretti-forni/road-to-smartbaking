@@ -21,6 +21,11 @@
     "AmplifyComputeRoleName": {
       "Type": "String",
       "Default": "rtsm-amplify-ssr-main"
+    },
+    "DeploymentEnvironment": {
+      "Type": "String",
+      "Default": "dev",
+      "AllowedValues": ["dev", "prod"]
     }
   },
   "Resources": {
@@ -99,8 +104,20 @@
             },
             "RTSM_DB_SCHEMA": "road_to_smartbaking",
             "RTSM_AUTH_MODE": "password",
-            "NODE_ENV": "production"
+            "NODE_ENV": "production",
+            "RTSM_DEPLOY_ENV": {
+              "Ref": "DeploymentEnvironment"
+            }
           }
+        },
+        "FunctionName": {
+          "Fn::If": [
+            "IsProd",
+            "road-to-smartbaking-staff-prod",
+            {
+              "Ref": "AWS::NoValue"
+            }
+          ]
         }
       }
     },
@@ -142,6 +159,41 @@
       "Value": {
         "Fn::GetAtt": ["StaffFunction", "Arn"]
       }
+    }
+  },
+  "Conditions": {
+    "IsProd": {
+      "Fn::Equals": [
+        {
+          "Ref": "DeploymentEnvironment"
+        },
+        "prod"
+      ]
+    }
+  },
+  "Rules": {
+    "ProductionComputeRole": {
+      "RuleCondition": {
+        "Fn::Equals": [
+          {
+            "Ref": "DeploymentEnvironment"
+          },
+          "prod"
+        ]
+      },
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Equals": [
+              {
+                "Ref": "AmplifyComputeRoleName"
+              },
+              "rtsm-amplify-ssr-prod"
+            ]
+          },
+          "AssertDescription": "Production staff invoke permissions belong to the production compute role."
+        }
+      ]
     }
   }
 }
