@@ -19,6 +19,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang={language} data-scroll-behavior="smooth">
       <body>
+        {process.env.RTSM_DEPLOY_ENV === 'dev' && <div className="environment-banner">DEV</div>}
         <Suspense>{children}</Suspense>
       </body>
     </html>

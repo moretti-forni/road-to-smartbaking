@@ -40,6 +40,15 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
+.environment-banner {
+  padding: 0.25rem 1rem;
+  background: var(--graphite);
+  color: var(--white);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
 button,
 input,
 select {
@@ -2744,4 +2753,13 @@ hr {
 .search-clear:hover {
   background: #eee9e1;
   color: var(--ink);
+}
+
+.listing-consents a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.listing-consents a:hover {
+  color: var(--white);
 }

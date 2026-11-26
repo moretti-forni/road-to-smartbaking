@@ -21,6 +21,16 @@ export async function loadRuntimeSecrets() {
         const result = await client.send(new GetSecretValueCommand({ SecretId: arn }));
         if (!result.SecretString) throw new Error('Runtime configuration unavailable');
         const values = secretSchema.parse(JSON.parse(result.SecretString));
+        if (process.env.RTSM_DEPLOY_ENV === 'prod') {
+          const database = new URL(values.DATABASE_URL);
+          if (
+            !['postgres:', 'postgresql:'].includes(database.protocol) ||
+            database.pathname !== '/morettihub' ||
+            database.username !== 'rtsm_app_prod' ||
+            !values.RTSM_DB_SSL_CA
+          )
+            throw new Error('Invalid production database configuration');
+        }
         Object.assign(process.env, values);
       } finally {
         client.destroy();

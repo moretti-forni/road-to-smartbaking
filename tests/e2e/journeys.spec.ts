@@ -425,6 +425,15 @@ test('registration consent checkboxes are required and unchecked in both languag
       .first()
       .click();
     const modal = page.getByRole('dialog');
+    const notice = modal.getByRole('link', {
+      name: locale === 'it' ? 'Leggi l’informativa (PDF)' : 'Read the privacy notice (PDF)',
+    });
+    await expect(notice).toHaveAttribute(
+      'href',
+      new RegExp(`/informativa-roadtosmartbaking-${locale}-[a-f0-9]{12}\\.pdf$`),
+    );
+    await expect(notice).toHaveAttribute('target', '_blank');
+    await expect(notice).toHaveAttribute('rel', 'noopener noreferrer');
     const consents = modal.locator('input[type="checkbox"]');
     await expect(consents).toHaveCount(2);
     for (const checkbox of await consents.all()) {

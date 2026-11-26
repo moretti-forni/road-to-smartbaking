@@ -2,7 +2,9 @@ import { readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { parseArgs } from 'node:util';
 import pg from 'pg';
-const { values } = parseArgs({ options: { apply: { type: 'boolean' } } });
+const { values } = parseArgs({
+  options: { apply: { type: 'boolean' }, 'expected-database': { type: 'string' } },
+});
 const schema = process.env.RTSM_DB_SCHEMA || 'road_to_smartbaking';
 const role = process.env.RTSM_DB_RUNTIME_ROLE;
 const identifier = /^[a-z][a-z0-9_]{0,62}$/;
@@ -28,6 +30,9 @@ if (!process.env.RTSM_MIGRATION_DATABASE_URL)
   throw new Error(
     'RTSM_MIGRATION_DATABASE_URL is required; do not reuse runtime owner credentials',
   );
+const expectedDatabase = values['expected-database'];
+if (role === 'rtsm_app_prod' && expectedDatabase !== 'morettihub')
+  throw new Error('Production setup requires --expected-database morettihub');
 const db = new pg.Client({
   connectionString: process.env.RTSM_MIGRATION_DATABASE_URL,
   ...(process.env.RTSM_DB_SSL_CA
@@ -38,6 +43,13 @@ const db = new pg.Client({
 await db.connect();
 try {
   await db.query('BEGIN');
+  const target = (await db.query('SELECT current_database() AS name')).rows[0].name;
+  if (
+    (expectedDatabase && target !== expectedDatabase) ||
+    (target === 'morettihub' &&
+      (expectedDatabase !== target || role !== 'rtsm_app_prod' || !process.env.RTSM_DB_SSL_CA))
+  )
+    throw new Error('Database target, production runtime role or verified TLS does not match');
   await db.query("SET LOCAL lock_timeout = '5s'");
   await db.query("SET LOCAL statement_timeout = '60s'");
   await db.query('SELECT pg_advisory_xact_lock(hashtext($1))', [`rtsm:setup:${schema}`]);
